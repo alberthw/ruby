@@ -11,7 +11,7 @@
   <header>
     <h1>Ruby</h1>
     <div>
-      A client to develop the RUBY adapter.
+      A client used for the RUBY adapter.
     </div>
   </header>
   <footer>

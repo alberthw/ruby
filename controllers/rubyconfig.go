@@ -17,16 +17,17 @@ type RubyConfigController struct {
 func (c RubyConfigController) Get() {
 	var config models.Rubyconfig
 
-	lines := config.Get()
+	row := config.Get()
 
-	c.Data["json"] = &lines
+	c.Data["json"] = &row
 	c.ServeJSON()
 }
 
-func (c *RubyConfigController) Post() {
+func (c RubyConfigController) Post() {
 	var config models.Rubyconfig
-	config.Serialline = c.GetString("Serialline")
-	config.Serialspeed, _ = c.GetInt64("Serialspeed")
-	config.Insert()
+	config.Id, _ = c.GetInt64("id")
+	config.Serialline = c.GetString("line")
+	config.Serialspeed, _ = c.GetInt64("speed")
+	config.Update()
 	c.Ctx.WriteString(strconv.FormatInt(config.Id, 10))
 }

@@ -14,25 +14,26 @@ type Rubyconfig struct {
 	Updated     time.Time `orm:"auto_now;type(datetime)"`
 }
 
-func (c Rubyconfig) Get() []orm.Params {
+func (c Rubyconfig) Get() Rubyconfig {
 	o := orm.NewOrm()
-	var maps []orm.Params
-	o.QueryTable("rubyconfig").Values(&maps, "Id", "Serialline", "Serialspeed")
-	return maps
+	var result Rubyconfig
+	err := o.QueryTable("rubyconfig").One(&result)
+	if err == orm.ErrNoRows {
+		o.Insert(&result)
+	}
+	return result
 }
 
-func (c *Rubyconfig) Insert() error {
+func (c *Rubyconfig) Update() error {
+	c.Updated = time.Now()
 	o := orm.NewOrm()
 	o.Begin()
-
-	id, err := o.Insert(c)
+	_, err := o.Update(c, "Serialline", "Serialspeed", "Updated")
 	if err != nil {
 		log.Println(err.Error())
 		o.Rollback()
 		return err
 	}
-	c.Id = id
-
 	o.Commit()
-	return nil
+	return err
 }

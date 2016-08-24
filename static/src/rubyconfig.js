@@ -1,8 +1,9 @@
 function loadConfigFromServer(url) {
     var result = {
         id: null,
-        line: "",
-        speed: null
+        name: "",
+        baud: null,
+        connect: false
     };
     $.ajax({
         url: url,
@@ -11,8 +12,9 @@ function loadConfigFromServer(url) {
         async: false,
         success: function (data) {
             result.id = data.Id;
-            result.line = data.Serialline;
-            result.speed = data.Serialspeed;
+            result.name = data.Serialname;
+            result.baud = data.Serialbaud;
+            result.connect = data.Isconnected;
         },
         error: function (xhr, status, err) {
             console.error(this.props.url, status, err.toString());
@@ -39,189 +41,225 @@ function postConfigToServer(url, data) {
     return result;
 }
 
-var ConfigForm = React.createClass({
-    getInitialState: function () {
-       return loadConfigFromServer(this.props.url);
-    },
-    handleSerialLineChange: function (e) {
-        this.setState({
-            line: e.target.value
+var OpenSerial = React.createClass({
+    handleClick: function () {
+        var url = this.props.url;
+        var data = {
+            name: this.props.name,
+            baud: this.props.baud,
+            id: this.props.id,
+            connect: true
+        };
+        $.ajax({
+            url: url,
+            dataType: "json",
+            type: "POST",
+            async: false,
+            data: data,
+            success: function (data) {
+                alert(data);
+                refresh();
+            },
+            error: function (xhr, status, err) {
+                console.error(url, status, err.toString());
+            }
         });
-    },
-    handleSerialSpeedChange: function (e) {
-        this.setState({
-            speed: e.target.value
-        });
-
-    },
-    handleSubmit: function (e) {
-        e.preventDefault();
-        var d = this.state.id;
-        var l = this.state.line.trim();
-        var s = this.state.speed;
-        postConfigToServer(this.props.url, { id: d, line: l, speed: s });
-        this.getInitialState();
+       history.go(0);
     },
     render: function () {
         return (
-            <form className="configForm" onSubmit={this.handleSubmit}>
-                <span>Serial Line: </span><input type="text" value={this.state.line} onChange={this.handleSerialLineChange}/>
-                <span>Serial Speed: </span><input type="text" value={this.state.speed} onChange={this.handleSerialSpeedChange}/>
-                <input type="submit" value="Update" />
-            </form>
+            <input type="button" value="Connect" ref="OpenInput" onClick={this.handleClick}></input>
         )
     }
 });
 
-var ConfigBox = React.createClass({
+var CloseSerial = React.createClass({
+    handleClick: function () {
+        var url = this.props.url;
+        var data = {
+            id: this.props.id,
+            connect: false
+        };
+        $.ajax({
+            url: url,
+            dataType: "json",
+            type: "POST",
+            async: false,
+            data: data,
+            success: function (data) {
+
+                alert(data);
+                //        console.log(data);
+            },
+            error: function (xhr, status, err) {
+                alert(status);
+                console.error(url, status, err.toString());
+            }
+        });
+        history.go(0);
+    },
+    render: function () {
+        return (
+            <input type="button" value="Disconnect" onClick={this.handleClick}></input>
+        )
+    }
+});
+
+var SendCommands = React.createClass({
+    handleClick: function () {
+        var url = this.props.url;
+        var data = {
+            command: this.props.data
+        }
+        $.ajax({
+            url: url,
+            dataType: "json",
+            type: "POST",
+            async: false,
+            data: data,
+            success: function (data) {
+                alert(data);
+                //        console.log(data);
+            },
+            error: function (xhr, status, err) {
+                alert(status);
+                console.error(url, status, err.toString());
+            }
+        });
+    },
+    render: function () {
+        return (
+            <input type="button" value={this.props.data} onClick={this.handleClick}></input>
+        )
+    }
+});
+
+var CommandBox = React.createClass({
+    render: function () {
+        return (
+            <div className="commandBox">
+                <SendCommands url={this.props.url} data="commands"/>
+                <SendCommands url={this.props.url} data="ver.get"/>
+                <SendCommands url={this.props.url} data="service.mode"/>
+                <SendCommands url={this.props.url} data="service.menu"/>
+                <SendCommands url={this.props.url} data="submode.exit"/>
+                <SendCommands url={this.props.url} data="viadc.print"/>
+                <SendCommands url={this.props.url} data="top.on"/>
+                <SendCommands url={this.props.url} data="top.off"/>
+                <SendCommands url={this.props.url} data="led.off"/>
+                <SendCommands url={this.props.url} data="beep.on"/>
+                <SendCommands url={this.props.url} data="beep.off"/>
+                <SendCommands url={this.props.url} data="image.upload"/>
+                <SendCommands url={this.props.url} data="image.update"/>
+            </div>
+        );
+    }
+});
+
+var SerialControl = React.createClass({
+    render: function () {
+        return (
+            <div className="serialControl">
+
+                <CommandBox url="command" />
+
+            </div>
+        )
+    }
+});
+
+var SerialItems = React.createClass({
+    handleChange: function () {
+        this.props.onSerialInput(this.refs.nameInput.value, this.refs.baudInput.value, this.refs.connectInput.value);
+    },
     render: function () {
         return (
             <div>
-                <ConfigForm url="/config" />
+                <span>Serial Name: </span> <input type="text" value={this.props.name} ref="nameInput" onChange={this.handleChange}/>
+                <span>Serial Baud: </span> <input type="text" value={this.props.baud} ref="baudInput" onChange={this.handleChange}/>
+                <span>Connect: </span> <input type="text" value={this.props.connect} ref="connectInput" onChange={this.handleChange} />
             </div>
-        )
+        );
+    }
+})
+
+var SerialLaunch = React.createClass({
+    handleChange:function(){
+
+
+    },
+    render: function () {
+        return (
+            <div>
+                
+            </div>
+        );
 
     }
 });
 
-
-ReactDOM.render(<ConfigBox />, document.getElementById("rubyconfig"));
-
-/*
-
-var configURL = "/config";
-
-var SerialLine = React.createClass({
-    getInitialState:function(){
-        return {
-            value:this.props.data
+var SerialBox = React.createClass({
+    getInitialState: function () {
+        return loadConfigFromServer(this.props.url);
+    },
+    /*
+    handleSerialNameChange: function (e) {
+        this.setState({
+            name: e.target.value
+        });
+    },
+    handleSerialBaudChange: function (e) {
+        this.setState({
+            baud: e.target.value
+        });
+    },
+    handleSConnectChange: function (e) {
+        this.setState({
+            connect: e.target.value
+        });
+    },
+    */
+    handleSerialInput: function (name, baud, connect) {
+        if (name != null) {
+            this.setState({
+                name: name
+            });
+        }
+        if (baud != null) {
+            this.setState({
+                baud: baud
+            });
+        }
+        if (connect != null) {
+            this.setState({
+                connect: connect
+            });
         }
     },
-    dataOnChange:function(e){
-        this.setState({
-            value:e.target.value
-        });
-    },
-    render:function(){
-        return(
-            <input type="text" id="serialline" placeholder="Serial Line" onChange={this.dataOnChange}></input>
-        )
-    }
-});
-
-var SerialSpeed = React.createClass({
-    getInitialState:function(){
-        return {
-            value:this.props.data
-        }
-    },
-    render:function(){
-        return(
-            <input type="text" id="serialspeed" placeholder="Serial Speed"></input>
-        )
-    }
-});
-
-var ConfigForm = React.createClass({
-    render:function(){
-        return(
-            <form>
-            Serial Line:<SerialLine data="test"/>
-            Serial Speed:<SerialSpeed />
-            </form>
-        )
-    }
-});
-
-ReactDOM.render(<ConfigForm />, document.getElementById("rubyconfig"));
-
-
-
-
-
-var ConfigForm = React.createClass({
-    getInitialState:function(){
-        return {
-            serialID : this.props.data.Id,
-            serialLine:this.props.data.Serialline,
-            serialSpeed:this.props.data.Serialspeed
-        }
-    },
-    handleSerialIDChange:function(e){
-        this.setState({
-            value:e.target.value
-        });
-    },
-    handleSerialLineChange:function(e){
-        this.setState({
-            value:e.target.value
-        });
-    },
-    handleSerialSpeedChange:function(e){
-        this.setState({
-            serialSpeed:e.target.value
-        });
-    },
-    handleSubmit:function(e){
+    handleUpdateClick: function (e) {
         e.preventDefault();
-  //      var id = this.state.data.Id;
-        var line = this.state.data.Serialline.trim();
-        var speed = this.state.data.Serialspeed;
-        if (!line || !speed){
-            return ;
-        }
-        this.props.onConfigSubmit({
-            serialLine:line,
-            serialSpeed:speed
-        });
-        this.setState({
-            serialLine:"", 
-            serialSpeed:""
-        });
+        var d = this.state.id;
+        var n = this.state.name.trim();
+        var b = this.state.baud;
+        var c = this.state.connect;
+        postConfigToServer(this.props.url, { id: d, name: n, baud: b, connect: c });
+        this.getInitialState();
     },
-    render : function(){
+    render: function () {
+        var status = this.state.connect.toString();
         return (
-            <form className="configFrom" onSubmit={this.handleSubmit}>
-                <a id="serialID" value={this.props.data.Id || "" } onChange={this.handleSerialIDChange} hidden>{this.props.data.Id}</a>
-                <a>Serial Line:</a><input type="text" id="serialLine" placeholder="Serial Line" value={this.props.data.Serialline || ""} onChange={this.handleSerialLineChange}></input>
-                <a>Serial Speed:</a><input type="text" id="serialSpeed" placeholder="Serial Speed" value={this.props.data.Serialspeed || ""} onChange={this.handleSerialSpeedChange}></input>
-                <input type="submit" value="Update"></input>
-            </form>
-        );
-    },
-});
+            <div>
+                <SerialItems name={this.state.name} baud={this.state.baud} connect={this.state.connect} onSerialInput={this.handleSerialInput} />
+                <input type="button" value="Update" onClick={this.handleUpdateClick}></input>
+                <OpenSerial url="openserial" name={this.state.name} baud={this.state.baud} id={this.state.id} connect={this.state.connect} onSerialInput={this.handleSerialInput} />
+                <CloseSerial url="closeserial" id={this.state.id} connect={this.state.connect} onSerialInput={this.handleSerialInput}/>
 
-var ConfigBox = React.createClass({
-    getInitialState:function(){
-        this.loadConfigFromServer();
-        return {data:[]};
-    },
-    loadConfigFromServer:function(){
-    $.ajax({
-            url:this.props.url,
-            dataType:"json",
-            cache:false,
-            success:function(data){
-                this.setState({data:data});
-            }.bind(this),
-            error:function(xhr, status, err){ 
-                console.error(this.props.url, status, err.toString());
-            }.bind(this)
-        });
-    },
-    handleConfigSubmit:function(data){
-        alert("line:" + data.serialLine + " speed:" + data.serialSpeed);
-    },
-    render : function(){
-        return (
-            <div className="configBox">
-            <h1>Config</h1>
-            <ConfigForm onConfigSubmit={this.handleConfigSubmit} data={this.state.data}></ConfigForm>
+
+                <SerialControl name={this.state.name} baud={this.state.baud} />
             </div>
-        );
+        )
 
     }
 });
 
-ReactDOM.render(<ConfigBox url = {configURL} />, document.getElementById("rubyconfig"));
-*/
+ReactDOM.render(<SerialBox url="/config" />, document.getElementById("rubyconfig"));

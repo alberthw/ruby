@@ -1,14 +1,11 @@
 package controllers
 
 import (
+	"strconv"
+
 	"github.com/alberthw/ruby/models"
 	"github.com/astaxie/beego"
-	"strconv"
 )
-
-type RubyConfig struct {
-	beego.Controller
-}
 
 type RubyConfigController struct {
 	beego.Controller
@@ -26,8 +23,9 @@ func (c RubyConfigController) Get() {
 func (c RubyConfigController) Post() {
 	var config models.Rubyconfig
 	config.Id, _ = c.GetInt64("id")
-	config.Serialline = c.GetString("line")
-	config.Serialspeed, _ = c.GetInt64("speed")
+	config.Serialname = c.GetString("name")
+	config.Serialbaud, _ = c.GetInt64("baud")
+	config.Isconnected, _ = c.GetBool("connect")
 	config.Update()
 	c.Ctx.WriteString(strconv.FormatInt(config.Id, 10))
 }

@@ -14,13 +14,12 @@ type SerialController struct {
 
 func (c *SerialController) Open() {
 	var config models.Rubyconfig
-	config.Id, _ = c.GetInt64("id")
-	config.Serialname = c.GetString("name")
-	config.Serialbaud, _ = c.GetInt64("baud")
-	config.Isconnected, _ = c.GetBool("connect")
-	log.Println("name", config.Serialname)
-	log.Println("baud", config.Serialbaud)
-	log.Println("status", config.Isconnected)
+	config.Id, _ = c.GetInt64("Id")
+	config.Serialname = c.GetString("Serialname")
+	config.Serialbaud, _ = c.GetInt64("Serialbaud")
+	//	log.Println("name", config.Serialname)
+	//	log.Println("baud", config.Serialbaud)
+	//	log.Println("status", config.Isconnected)
 	err := serial.Open(config.Serialname, int(config.Serialbaud))
 	//	log.Println(err.Error())
 	var result string
@@ -29,6 +28,7 @@ func (c *SerialController) Open() {
 		log.Println(result)
 	} else {
 		result = "ok"
+		config.Isconnected = true
 		config.UpdateStatus()
 	}
 	c.Data["json"] = &result
@@ -36,8 +36,7 @@ func (c *SerialController) Open() {
 }
 func (c *SerialController) Close() {
 	var config models.Rubyconfig
-	config.Id, _ = c.GetInt64("id")
-	config.Isconnected, _ = c.GetBool("connect")
+	config.Id, _ = c.GetInt64("Id")
 
 	err := serial.Close()
 	var result string
@@ -46,6 +45,7 @@ func (c *SerialController) Close() {
 		result = err.Error()
 	} else {
 		result = "ok"
+		config.Isconnected = false
 		config.UpdateStatus()
 	}
 	c.Data["json"] = &result

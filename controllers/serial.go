@@ -13,24 +13,12 @@ type SerialController struct {
 }
 
 func (c *SerialController) Open() {
-	var config models.Rubyconfig
-	config.Id, _ = c.GetInt64("Id")
-	config.Serialname = c.GetString("Serialname")
-	config.Serialbaud, _ = c.GetInt64("Serialbaud")
-	//	log.Println("name", config.Serialname)
-	//	log.Println("baud", config.Serialbaud)
-	//	log.Println("status", config.Isconnected)
-	err := serial.Open(config.Serialname, int(config.Serialbaud))
-	//	log.Println(err.Error())
-	var result string
-	if err != nil {
-		result = err.Error()
-		log.Println(result)
-	} else {
-		result = "ok"
-		config.Isconnected = true
-		config.UpdateStatus()
-	}
+	models.GConfig.Id, _ = c.GetInt64("Id")
+	models.GConfig.Serialname = c.GetString("Serialname")
+	models.GConfig.Serialbaud, _ = c.GetInt64("Serialbaud")
+
+	result := "ok"
+
 	c.Data["json"] = &result
 	c.ServeJSON()
 }
@@ -47,6 +35,34 @@ func (c *SerialController) Close() {
 		result = "ok"
 		config.Isconnected = false
 		config.UpdateStatus()
+	}
+	c.Data["json"] = &result
+	c.ServeJSON()
+}
+
+func (c *SerialController) Write() {
+	command := c.GetString("command")
+	err := serial.Writer([]byte(command + "\r"))
+	var result string
+	if err != nil {
+		log.Println(err.Error())
+		result = err.Error()
+	} else {
+		result = "ok"
+	}
+	c.Data["json"] = &result
+	c.ServeJSON()
+
+}
+
+func (c *SerialController) Read() {
+	var result string
+	b, err := serial.Reader()
+	if err != nil {
+		log.Println(err.Error())
+		result = err.Error()
+	} else {
+		result = string(b)
 	}
 	c.Data["json"] = &result
 	c.ServeJSON()

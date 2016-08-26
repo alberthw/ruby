@@ -15,7 +15,7 @@ func init() {
 
 func initSqlite() {
 	beego.Info("sqlite")
-	orm.Debug = true
+	orm.Debug = false
 	orm.RegisterDriver("sqlite3", orm.DRSqlite)
 	orm.RegisterDataBase("default", "sqlite3", "data.db", 30)
 }

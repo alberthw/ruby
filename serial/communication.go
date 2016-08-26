@@ -8,34 +8,41 @@ import (
 )
 
 var (
-	c   *serial.Config
 	s   *serial.Port
 	err error
 )
 
 func Open(name string, baud int) error {
+	log.Println("before open:", s)
+
+	//	Close()
+
 	if s != nil {
 		return nil
 	}
-	if c == nil {
-		c = new(serial.Config)
-		c.Baud = baud
-		c.Name = name
-		c.ReadTimeout = time.Millisecond * 10
-	}
-	s = new(serial.Port)
-	s, err = serial.OpenPort(c)
+
+	var c serial.Config
+	c.Name = name
+	c.Baud = baud
+	c.ReadTimeout = time.Millisecond * 10
+
+	log.Println("before open 1 :", c, s)
+	s, err = serial.OpenPort(&c)
+
+	log.Println("after open:", c, s, err)
 	return err
 }
 
 func Close() error {
+	log.Println("before close", s)
 	if s == nil {
 		return nil
 	}
 	err = s.Close()
-	if err == nil {
-		s = nil
-	}
+	log.Println("after close", s, err)
+
+	s = nil
+
 	return err
 }
 
@@ -51,7 +58,7 @@ func Sender(msg []byte) []byte {
 	if err != nil {
 		log.Fatal(err)
 	}
-	time.Sleep(time.Millisecond * 100)
+	time.Sleep(time.Millisecond * 10)
 	result := make([]byte, 2048)
 	n, err = s.Read(result)
 	if err != nil {
@@ -72,6 +79,10 @@ func Writer(msg []byte) error {
 
 func Reader() ([]byte, error) {
 	result := make([]byte, 2048)
+
+	if s == nil {
+		return []byte(""), nil
+	}
 
 	n, err := s.Read(result)
 	//	log.Println("serial read:", n, err)

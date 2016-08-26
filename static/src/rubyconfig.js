@@ -68,7 +68,7 @@ var SendCommands = React.createClass({
             async: false,
             data: data,
             success: function (data) {
-                alert(data);
+      //          alert(data);
                 //        console.log(data);
             },
             error: function (xhr, status, err) {
@@ -136,30 +136,19 @@ var SerialBox = React.createClass({
         this.setState({
             Isconnected: e.target.value
         });
-    }, 
-    /*  
-    handleSerialInput: function (name, baud, connect) {
-        if (name != null) {
-            this.setState({
-                name: name
-            });
-        }
-        if (baud != null) {
-            this.setState({
-                baud: baud
-            });
-        }
-        if (connect != null) {
-            this.setState({
-                connect: connect
-            });
-        }
+    },     
+    handleSerialInput: function (data) {
+        this.setState({
+            Id : data.Id,
+            Serialname:data.Serialname,
+            Serialbaud:data.Serialbaud,
+            Isconnected:data.Isconnected
+        });        
     },
-    */
     handleUpdateClick: function (e) {
         e.preventDefault();
         postConfigToServer(this.props.url, this.state);
-        this.getInitialState();
+        this.handleSerialInput(this.getInitialState());
     },
     handleConnectClick:function(){
         var data = {
@@ -168,22 +157,29 @@ var SerialBox = React.createClass({
             Serialbaud :this.state.Serialbaud
         };
         var result = serialControl("openserial", this.state);
+        /*
         if (result == true){
             this.setState({
                 Isconnected:true
             });
         }
+        */
+        this.handleSerialInput(this.getInitialState());
+   //     alert(s);
     },
     handleDisconnectClick:function(){
         var data = {
             Id:this.state.Id
         };
         var result = serialControl("closeserial", data);
+        /*
         if (result == true){
             this.setState({
                 Isconnected:false
             });
         }
+        */
+         this.handleSerialInput(this.getInitialState());
     },
     render: function () {
         return (

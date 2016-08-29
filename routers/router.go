@@ -10,6 +10,7 @@ func init() {
 	beego.Router("/config", &controllers.RubyConfigController{})
 
 	beego.Router("/openserial", &controllers.SerialController{}, "POST:Open")
-	beego.Router("/closeserial", &controllers.SerialController{}, "POST:Close")
+	beego.Router("/closeserial", &controllers.SerialController{}, "GET:Close")
+
 	beego.Router("/command", &controllers.SerialController{}, "POST:Write")
 }

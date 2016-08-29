@@ -22,10 +22,8 @@ func (c *SerialController) Open() {
 	c.Data["json"] = &result
 	c.ServeJSON()
 }
-func (c *SerialController) Close() {
-	var config models.Rubyconfig
-	config.Id, _ = c.GetInt64("Id")
 
+func (c *SerialController) Close() {
 	err := serial.Close()
 	var result string
 	if err != nil {
@@ -33,8 +31,6 @@ func (c *SerialController) Close() {
 		result = err.Error()
 	} else {
 		result = "ok"
-		config.Isconnected = false
-		config.UpdateStatus()
 	}
 	c.Data["json"] = &result
 	c.ServeJSON()

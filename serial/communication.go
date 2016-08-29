@@ -8,16 +8,15 @@ import (
 )
 
 var (
-	s   *serial.Port
-	err error
+	GSerial *serial.Port
 )
 
 func Open(name string, baud int) error {
-	log.Println("before open:", s)
+	log.Println("before open:", GSerial)
 
 	//	Close()
 
-	if s != nil {
+	if GSerial != nil {
 		return nil
 	}
 
@@ -26,22 +25,23 @@ func Open(name string, baud int) error {
 	c.Baud = baud
 	c.ReadTimeout = time.Millisecond * 10
 
-	log.Println("before open 1 :", c, s)
-	s, err = serial.OpenPort(&c)
+	log.Println("before open 1 :", c, GSerial)
+	var err error
+	GSerial, err = serial.OpenPort(&c)
 
-	log.Println("after open:", c, s, err)
+	log.Println("after open:", c, GSerial, err)
 	return err
 }
 
 func Close() error {
-	log.Println("before close", s)
-	if s == nil {
+	log.Println("before close", GSerial)
+	if GSerial == nil {
 		return nil
 	}
-	err = s.Close()
-	log.Println("after close", s, err)
+	err := GSerial.Close()
+	log.Println("after close", GSerial, err)
 
-	s = nil
+	GSerial = nil
 
 	return err
 }
@@ -54,13 +54,13 @@ func Sender(msg []byte) []byte {
 
 	//	defer s.Close()
 	var n int
-	n, err := s.Write(msg)
+	n, err := GSerial.Write(msg)
 	if err != nil {
 		log.Fatal(err)
 	}
 	time.Sleep(time.Millisecond * 10)
 	result := make([]byte, 2048)
-	n, err = s.Read(result)
+	n, err = GSerial.Read(result)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,7 +69,7 @@ func Sender(msg []byte) []byte {
 }
 
 func Writer(msg []byte) error {
-	_, err := s.Write(msg)
+	_, err := GSerial.Write(msg)
 	//	log.Println("serial write:", n, err)
 	if err != nil {
 		log.Println(err.Error())
@@ -80,11 +80,11 @@ func Writer(msg []byte) error {
 func Reader() ([]byte, error) {
 	result := make([]byte, 2048)
 
-	if s == nil {
+	if GSerial == nil {
 		return []byte(""), nil
 	}
 
-	n, err := s.Read(result)
+	n, err := GSerial.Read(result)
 	//	log.Println("serial read:", n, err)
 	if err != nil {
 		log.Println(err.Error())

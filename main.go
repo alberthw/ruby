@@ -24,17 +24,15 @@ func open() {
 
 		models.GConfig = models.GConfig.Get()
 		log.Println(models.GConfig.Serialname, models.GConfig.Serialbaud, models.GConfig.Isconnected)
-		var err error
-		var connected bool
-		err = serial.Open(models.GConfig.Serialname, int(models.GConfig.Serialbaud))
+		connected := false
+		err := serial.Open(models.GConfig.Serialname, int(models.GConfig.Serialbaud))
 		if err == nil {
 			connected = true
 		}
 		models.GConfig.Isconnected = connected
 		models.GConfig.UpdateStatus()
-		time.Sleep(time.Millisecond * 10000)
+		time.Sleep(time.Millisecond * 1000)
 	}
-
 }
 
 func read() {

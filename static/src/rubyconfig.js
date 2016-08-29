@@ -1,28 +1,10 @@
-function loadConfigFromServer(url) {
-    var result = null;
-    $.ajax({
-        url: url,
-        dataType: "json",
-        cache: false,
-        async: false,
-        success: function (data) {
-            result = data;
-        },
-        error: function (xhr, status, err) {
-            console.error(this.props.url, status, err.toString());
-        }
-    });
-    return result;
-}
-
-function postConfigToServer(url, data) {
+function closeSerial() {
     var result = false;
+    var url = "closeserial";
     $.ajax({
         url: url,
         dataType: "json",
-        type: "POST",
         async: false,
-        data: data,
         success: function (data) {
             result = true;
         },
@@ -33,7 +15,7 @@ function postConfigToServer(url, data) {
     return result;
 }
 
-function serialControl(url, data){
+function serialControl(url, data) {
     var result = false;
     $.ajax({
         url: url,
@@ -42,7 +24,7 @@ function serialControl(url, data){
         async: false,
         data: data,
         success: function (data) {
- //               alert(data);
+            //               alert(data);
             result = true;
         },
         error: function (xhr, status, err) {
@@ -54,7 +36,7 @@ function serialControl(url, data){
 
 var SendCommands = React.createClass({
     handleClick: function () {
-        if (this.props.Isconnected == false){
+        if (this.props.Isconnected == false) {
             return;
         }
         var url = this.props.url;
@@ -68,7 +50,7 @@ var SendCommands = React.createClass({
             async: false,
             data: data,
             success: function (data) {
-      //          alert(data);
+                //          alert(data);
                 //        console.log(data);
             },
             error: function (xhr, status, err) {
@@ -120,8 +102,67 @@ var SerialControl = React.createClass({
 
 var SerialBox = React.createClass({
     getInitialState: function () {
-        return loadConfigFromServer(this.props.url);
-    },    
+        return {
+            Serialname: "",
+            Serialbaud:"",
+            Isconnected:false
+        };
+    },
+    componentDidMount: function () {
+        this.loadConfigFromServer();
+        setInterval(this.loadStatusFromServer, this.props.pollInterval);
+    },
+    loadConfigFromServer: function () {
+        $.ajax({
+            url: this.props.url,
+            dataType: "json",
+            cache: false,
+            async: false,
+            success: function (data) {
+                this.setState({
+                    Serialname: data.Serialname,
+                    Serialbaud:data.Serialbaud,
+                    Isconnected:data.Isconnected,
+                    Id:data.Id
+                })
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(this.props.url, status, err.toString());
+            }.bind(this)
+        });
+    },
+    loadStatusFromServer: function () {
+        $.ajax({
+            url: this.props.url,
+            dataType: "json",
+            cache: false,
+            async: false,
+            success: function (data) {
+                this.setState({
+                    Isconnected: data.Isconnected
+                });
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(this.props.url, status, err.toString());
+            }.bind(this)
+        });
+    },
+    postConfigToServer(data) {
+        $.ajax({
+            url: this.props.url,
+            dataType: "json",
+            type: "POST",
+            async: false,
+            data: data,
+            success: function (data) {
+          //      result = true;
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(url, status, err.toString());
+            }.bind(this)
+        });
+
+    },
     handleSerialNameChange: function (e) {
         this.setState({
             Serialname : e.target.value
@@ -136,67 +177,28 @@ var SerialBox = React.createClass({
         this.setState({
             Isconnected: e.target.value
         });
-    },     
-    handleSerialInput: function (data) {
-        this.setState({
-            Id : data.Id,
-            Serialname:data.Serialname,
-            Serialbaud:data.Serialbaud,
-            Isconnected:data.Isconnected
-        });        
     },
     handleUpdateClick: function (e) {
-        e.preventDefault();
-        postConfigToServer(this.props.url, this.state);
-        this.handleSerialInput(this.getInitialState());
-    },
-    handleConnectClick:function(){
-        var data = {
-            Id:this.state.Id,
-            Serialname:this.state.Serialname.trim(),
-            Serialbaud :this.state.Serialbaud
-        };
-        var result = serialControl("openserial", this.state);
-        /*
-        if (result == true){
-            this.setState({
-                Isconnected:true
-            });
-        }
-        */
-        this.handleSerialInput(this.getInitialState());
-   //     alert(s);
-    },
-    handleDisconnectClick:function(){
-        var data = {
-            Id:this.state.Id
-        };
-        var result = serialControl("closeserial", data);
-        /*
-        if (result == true){
-            this.setState({
-                Isconnected:false
-            });
-        }
-        */
-         this.handleSerialInput(this.getInitialState());
+        this.postConfigToServer(this.state);
+        closeSerial();
     },
     render: function () {
         return (
             <div>
-                <span>Serial Name: </span> <input type="text" value={this.state.Serialname} ref="nameInput" onChange={this.handleSerialNameChange}/>
-                <span>Serial Baud: </span> <input type="text" value={this.state.Serialbaud} ref="baudInput" onChange={this.handleSerialBaudChange}/>
-                <span>Connect: </span> <input type="text" value={this.state.Isconnected} ref="connectInput" onChange={this.handleConnectChange} readOnly/> 
+                <span>Serial Name: </span> <input type="text" value={this.state.Serialname} onChange={this.handleSerialNameChange}/>
+                <span>Serial Baud: </span> <input type="text" value={this.state.Serialbaud} onChange={this.handleSerialBaudChange}/>
+                <span>Connect: </span> <input type="text" value={this.state.Isconnected} onChange={this.handleConnectChange} readOnly/>
 
                 <input type="button" value="Update" onClick={this.handleUpdateClick}></input>
-                <input type="button" value="Connect" onClick={this.handleConnectClick}></input>
-                <input type="button" value="Disconnect"  onClick={this.handleDisconnectClick}></input>
 
                 <SerialControl Isconnected={this.state.Isconnected} />
+                
+
             </div>
         )
 
     }
 });
 
-ReactDOM.render(<SerialBox url="/config" />, document.getElementById("rubyconfig"));
+ReactDOM.render(<SerialBox url="/config" pollInterval={1000}/>, document.getElementById("rubyconfig"));
+

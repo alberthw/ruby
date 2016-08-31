@@ -67,8 +67,8 @@ func (c *SerialController) Read() {
 func (c *SerialController) Send() {
 	command := c.GetString("command")
 	result := serial.Sender([]byte(command + "\r"))
-
 	s := string(result)
+	log.Println(s)
 
 	c.Data["json"] = &s
 	c.ServeJSON()

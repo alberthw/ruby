@@ -34,6 +34,31 @@ function serialControl(url, data) {
     return result;
 }
 
+function insertRequest(content) {
+    var url = "/request";
+    var result = false;
+    var data = {
+        Content: content
+    };
+    $.ajax({
+        url: url,
+        dataType: "json",
+        type: "POST",
+        async: false,
+        data: data,
+        success: function (data) {
+            //               alert(data);
+            result = true;
+        },
+        error: function (xhr, status, err) {
+            console.error(url, status, err.toString());
+        }
+    });
+    return result;
+
+
+}
+
 var SendCommands = React.createClass({
     handleClick: function () {
         if (this.props.Isconnected == false) {
@@ -49,9 +74,11 @@ var SendCommands = React.createClass({
             type: "POST",
             async: false,
             data: data,
-            success: function (data) {
+            success: function (result) {
+         //       alert(data.command);
                 //          alert(data);
                 //        console.log(data);
+                insertRequest(data.command);
             },
             error: function (xhr, status, err) {
                 alert(status);
@@ -104,8 +131,8 @@ var SerialBox = React.createClass({
     getInitialState: function () {
         return {
             Serialname: "",
-            Serialbaud:"",
-            Isconnected:false
+            Serialbaud: "",
+            Isconnected: false
         };
     },
     componentDidMount: function () {
@@ -121,9 +148,9 @@ var SerialBox = React.createClass({
             success: function (data) {
                 this.setState({
                     Serialname: data.Serialname,
-                    Serialbaud:data.Serialbaud,
-                    Isconnected:data.Isconnected,
-                    Id:data.Id
+                    Serialbaud: data.Serialbaud,
+                    Isconnected: data.Isconnected,
+                    Id: data.Id
                 })
             }.bind(this),
             error: function (xhr, status, err) {
@@ -155,7 +182,7 @@ var SerialBox = React.createClass({
             async: false,
             data: data,
             success: function (data) {
-          //      result = true;
+                //      result = true;
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(url, status, err.toString());
@@ -165,7 +192,7 @@ var SerialBox = React.createClass({
     },
     handleSerialNameChange: function (e) {
         this.setState({
-            Serialname : e.target.value
+            Serialname: e.target.value
         });
     },
     handleSerialBaudChange: function (e) {
@@ -192,7 +219,7 @@ var SerialBox = React.createClass({
                 <input type="button" value="Update" onClick={this.handleUpdateClick}></input>
 
                 <SerialControl Isconnected={this.state.Isconnected} />
-                
+
 
             </div>
         )
@@ -200,5 +227,5 @@ var SerialBox = React.createClass({
     }
 });
 
-ReactDOM.render(<SerialBox url="/config" pollInterval={1000}/>, document.getElementById("rubyconfig"));
+ReactDOM.render(<SerialBox url="/config" pollInterval={60000}/>, document.getElementById("rubyconfig"));
 

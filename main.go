@@ -12,7 +12,7 @@ import (
 
 func main() {
 	go open()
-	go read()
+	//	go read()
 
 	beego.Run()
 
@@ -20,10 +20,10 @@ func main() {
 
 func open() {
 	for {
-		log.Println("open serial")
+		//		log.Println("open serial")
 
 		models.GConfig = models.GConfig.Get()
-		log.Println(models.GConfig.Serialname, models.GConfig.Serialbaud, models.GConfig.Isconnected)
+		//		log.Println(models.GConfig.Serialname, models.GConfig.Serialbaud, models.GConfig.Isconnected)
 		connected := false
 		err := serial.Open(models.GConfig.Serialname, int(models.GConfig.Serialbaud))
 		if err == nil {
@@ -43,9 +43,13 @@ func read() {
 			beego.BeeLogger.Error(err.Error())
 		}
 		if len(b) > 0 {
+			var res models.Response
+			res.Requestid = 1
+			res.Content = string(b)
+			res.Insert()
 			log.Println("output:", string(b))
 		}
 
-		time.Sleep(time.Millisecond * 10)
+		time.Sleep(time.Millisecond * 100)
 	}
 }

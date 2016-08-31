@@ -12,7 +12,7 @@ var (
 )
 
 func Open(name string, baud int) error {
-	log.Println("before open:", GSerial)
+	//	log.Println("before open:", GSerial)
 
 	//	Close()
 
@@ -25,21 +25,21 @@ func Open(name string, baud int) error {
 	c.Baud = baud
 	c.ReadTimeout = time.Millisecond * 10
 
-	log.Println("before open 1 :", c, GSerial)
+	//	log.Println("before open 1 :", c, GSerial)
 	var err error
 	GSerial, err = serial.OpenPort(&c)
 
-	log.Println("after open:", c, GSerial, err)
+	//	log.Println("after open:", c, GSerial, err)
 	return err
 }
 
 func Close() error {
-	log.Println("before close", GSerial)
+	//	log.Println("before close", GSerial)
 	if GSerial == nil {
 		return nil
 	}
 	err := GSerial.Close()
-	log.Println("after close", GSerial, err)
+	//	log.Println("after close", GSerial, err)
 
 	GSerial = nil
 

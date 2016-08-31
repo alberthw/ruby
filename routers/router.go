@@ -12,5 +12,9 @@ func init() {
 	beego.Router("/openserial", &controllers.SerialController{}, "POST:Open")
 	beego.Router("/closeserial", &controllers.SerialController{}, "GET:Close")
 
-	beego.Router("/command", &controllers.SerialController{}, "POST:Write")
+	beego.Router("/command", &controllers.SerialController{}, "POST:Send")
+
+	beego.Router("/request", &controllers.RequestController{})
+
+	beego.Router("/response", &controllers.ResponseController{})
 }

@@ -8,7 +8,7 @@ import (
 
 func init() {
 	initSqlite()
-	orm.RegisterModel(new(Rubyconfig))
+	orm.RegisterModel(new(Rubyconfig), new(Request), new(Response))
 	createTables()
 
 }

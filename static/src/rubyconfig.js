@@ -100,16 +100,19 @@ var CommandBox = React.createClass({
                 <SendCommands Isconnected={this.props.Isconnected} url={this.props.url} data="commands"/>
                 <SendCommands Isconnected={this.props.Isconnected} url={this.props.url} data="ver.get"/>
                 <SendCommands Isconnected={this.props.Isconnected} url={this.props.url} data="service.mode"/>
-                <SendCommands Isconnected={this.props.Isconnected} url={this.props.url} data="service.menu"/>
-                <SendCommands Isconnected={this.props.Isconnected} url={this.props.url} data="submode.exit"/>
-                <SendCommands Isconnected={this.props.Isconnected} url={this.props.url} data="viadc.print"/>
-                <SendCommands Isconnected={this.props.Isconnected} url={this.props.url} data="top.on"/>
-                <SendCommands Isconnected={this.props.Isconnected} url={this.props.url} data="top.off"/>
-                <SendCommands Isconnected={this.props.Isconnected} url={this.props.url} data="led.off"/>
-                <SendCommands Isconnected={this.props.Isconnected} url={this.props.url} data="beep.on"/>
-                <SendCommands Isconnected={this.props.Isconnected} url={this.props.url} data="beep.off"/>
-                <SendCommands Isconnected={this.props.Isconnected} url={this.props.url} data="image.upload"/>
                 <SendCommands Isconnected={this.props.Isconnected} url={this.props.url} data="image.update"/>
+                <SendCommands Isconnected={this.props.Isconnected} url={this.props.url} data="2"/>
+                <SendCommands Isconnected={this.props.Isconnected} url={this.props.url} data="4"/>
+            </div>
+        );
+    }
+});
+
+var inputarea = React.createClass({
+    render : function(){
+        return (
+            <div>
+            <textarea></textarea>
             </div>
         );
     }

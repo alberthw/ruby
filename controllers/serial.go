@@ -38,7 +38,7 @@ func (c *SerialController) Close() {
 
 func (c *SerialController) Write() {
 	command := c.GetString("command")
-	err := serial.Writer([]byte(command + "\r"))
+	err := serial.Writer([]byte(command + "\r\n"))
 	var result string
 	if err != nil {
 		log.Println(err.Error())
@@ -66,7 +66,7 @@ func (c *SerialController) Read() {
 
 func (c *SerialController) Send() {
 	command := c.GetString("command")
-	result := serial.Sender([]byte(command + "\r"))
+	result := serial.Sender([]byte(command + "\r\n"))
 	s := string(result)
 	log.Println(s)
 

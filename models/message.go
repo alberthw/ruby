@@ -65,7 +65,7 @@ func (m *Message) GetOneRequest() error {
 
 func (m *Message) GetOneResponse() error {
 	o := orm.NewOrm()
-	err := o.QueryTable("message").Filter("messagetype", RESPONSE).Filter("status", NONE).OrderBy("id").Limit(1).One(m)
+	err := o.QueryTable("message").Filter("messagetype", RESPONSE).Filter("status", NONE).OrderBy("-id").Limit(1).One(m)
 
 	return err
 }

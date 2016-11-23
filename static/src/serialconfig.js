@@ -21,12 +21,19 @@ class SerialConfig extends React.Component {
         this.handleSerialNameChange = this.handleSerialNameChange.bind(this);
         this.handleStatusChange = this.handleStatusChange.bind(this);
         this.handleConnectClick = this.handleConnectClick.bind(this);
-        this.handleDeviceNameChange = this.handleDeviceNameChange.bind(this);
+        this.handleDeviceIDChange = this.handleDeviceIDChange.bind(this);
+        this.handleProtocolVersionChange = this.handleProtocolVersionChange.bind(this);
+        this.handleSessionKeyChange = this.handleSessionKeyChange.bind(this);
+        this.handleSequenceChange = this.handleSequenceChange.bind(this);
+
 
         this.state = {
             Serialname: "",
             Isconnected: false,
-            Devicename: "",
+            Deviceid: "",
+            Protocolver: "",
+            Sessionkey: "",
+            Sequence: "",
             Id: 0
         };
     }
@@ -37,15 +44,33 @@ class SerialConfig extends React.Component {
         });
     }
 
-    handleDeviceNameChange(e) {
-        this.setState({
-            Devicename: e.target.value
-        });
-    }
-
     handleStatusChange(e) {
         this.setState({
             Isconnected: e.target.value
+        });
+    }
+
+    handleDeviceIDChange(e) {
+        this.setState({
+            Deviceid: e.target.value
+        });
+    }
+
+    handleProtocolVersionChange(e) {
+        this.setState({
+            Protocolver: e.target.value
+        });
+    }
+
+    handleSessionKeyChange(e) {
+        this.setState({
+            Sessionkey: e.target.value
+        });
+    }
+
+    handleSequenceChange(e) {
+        this.setState({
+            Sequence: e.target.value
         });
     }
 
@@ -106,7 +131,10 @@ class SerialConfig extends React.Component {
                 console.log(data);
                 this.setState({
                     Isconnected: data.Isconnected,
-                    Devicename: data.Devicename,
+                    Deviceid: data.Deviceid,
+                    Protocolver : data.Protocolver,
+                    Sessionkey : data.Sessionkey,
+                    Sequence : data.Sequence,
                     Id: data.Id
                 })
             }.bind(this),
@@ -120,18 +148,29 @@ class SerialConfig extends React.Component {
     render() {
         const serialName = this.state.Serialname;
         const isConnected = this.state.Isconnected;
-        const deviceName = this.state.Devicename;
+        const deviceID = this.state.Deviceid;
+        const protocolVer = this.state.Protocolver;
+        const sessionKey = this.state.Sessionkey;
+        const sequence = this.state.Sequence;
         return (
             <div>
                 <a>Serial Name:</a>
                 <input type="text" placeholder="com1" value={serialName} onChange={this.handleSerialNameChange}></input>
                 <a>Status:</a>
                 <input type="text" value={isConnected} onChange={this.handleStatusChange} readOnly></input>
-
                 <input type="button" value="Connect" onClick={this.handleConnectClick}></input>
                 <br />
-                <a>Device Name:</a>
-                <input type="text" value={deviceName} onChange={this.handleDeviceNameChange} readOnly></input>
+               
+                <a>Device ID:</a>
+                <input type="text" value={deviceID} onChange={this.handleDeviceIDChange} readOnly></input>
+                <a>Protocol Version:</a>
+                <input type="text" value={protocolVer} onChange={this.handleProtocolVersionChange} readOnly></input>
+                <a>Session Key:</a>
+                <input type="text" value={sessionKey} onChange={this.handleSessionKeyChange} readOnly></input>
+                <a>Sequence:</a>
+                <input type="text" value={sequence} onChange={this.handleSequenceChange} readOnly></input>
+
+
             </div>
         );
 

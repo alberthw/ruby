@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+
 	"github.com/alberthw/ruby/models"
 	"github.com/astaxie/beego"
 )
@@ -26,6 +28,17 @@ func (c RequestController) Post() {
 	if err != nil {
 		result = err.Error()
 	}
+	c.Data["json"] = &result
+	c.ServeJSON()
+}
+
+func (c RequestController) Generate() {
+	var req models.Message
+	t, _ := c.GetInt64("type")
+	req.Messagetype = models.MessageType(t)
+
+	result := fmt.Sprintf("ok, get the request : %d", t)
+
 	c.Data["json"] = &result
 	c.ServeJSON()
 }

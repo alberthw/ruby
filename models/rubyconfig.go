@@ -43,6 +43,7 @@ type Rubyconfig struct {
 func (c *Rubyconfig) init() {
 	c.Serialbaud = 115200
 	c.Sequence = "0"
+	c.Sessionkey = "FF"
 }
 
 func (c Rubyconfig) Get() Rubyconfig {

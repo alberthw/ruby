@@ -14,7 +14,10 @@ func init() {
 
 	beego.Router("/command", &controllers.SerialController{}, "POST:Send")
 
+	beego.Router("/generate", &controllers.RequestController{}, "POST:Generate")
+
 	beego.Router("/request", &controllers.RequestController{})
 
 	beego.Router("/response", &controllers.ResponseController{})
+
 }

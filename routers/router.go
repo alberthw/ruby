@@ -7,7 +7,10 @@ import (
 
 func init() {
 	beego.Router("/", &controllers.MainController{})
+	beego.Router("/test", &controllers.MainController{}, "GET:Test")
+
 	beego.Router("/config", &controllers.RubyConfigController{})
+	beego.Router("/remoteserver", &controllers.RemoteServerController{})
 
 	beego.Router("/openserial", &controllers.SerialController{}, "POST:Open")
 	beego.Router("/closeserial", &controllers.SerialController{}, "GET:Close")

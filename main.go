@@ -32,12 +32,11 @@ func IncreaseOneSequence() {
 }
 
 func main() {
-	go open()
-	go generate(200)
-	go writer(100)
-	go reader(100)
 
-	//	go read()
+	//	go open()
+	//	go generate(200)
+	//	go writer(100)
+	//	go reader(100)
 
 	beego.Run()
 
@@ -52,7 +51,7 @@ func generate(t time.Duration) {
 
 			k.Sequence = byte(config.Sequence[0])
 
-			log.Printf("session key : %X, sequence : %X\n", k.SessionKey, k.Sequence)
+			//			log.Printf("session key : %X, sequence : %X\n", k.SessionKey, k.Sequence)
 
 			var m models.Message
 			m.Messagetype = models.REQUEST
@@ -103,18 +102,61 @@ func writer(t time.Duration) {
 	}
 }
 
+type TransferStatus int
+
+const (
+	IDLE = iota
+	START
+	TRANSFERING
+	END
+)
+
+type Input struct {
+	Content []byte
+	Status  TransferStatus
+}
+
+func (input *Input) Receive(b []byte) {
+	if len(b) == 0 {
+		return
+	}
+	if b[0] == ebdprotocol.ACK {
+		input.Status = START
+	}
+	return
+}
+
+var buf chan []byte
+
 func reader(t time.Duration) {
+	var f ebdprotocol.Frame
+	var buf []byte
 	for {
-		var m models.Message
 		b, _ := serial.Reader()
-		if len(b) > 0 {
-			m.Messagetype = models.RESPONSE
-			m.Info = hex.EncodeToString(b)
-			m.Status = models.NONE
-			log.Printf("Received : %X", b)
-			log.Printf("Received message : %s", m.Info)
-			m.InsertMessage()
+		if len(b) == 0 {
+			continue
 		}
+		log.Printf("received : 0x%X\n", b)
+		_, err := f.Parse(buf)
+		if err != nil {
+			buf = append(buf, b...)
+			log.Println(err.Error())
+			log.Printf("buffer : 0x%X\n", buf)
+			//		continue
+		}
+		buf = []byte{}
+		/*
+			var m models.Message
+			b, _ := serial.Reader()
+			if len(b) > 0 {
+				m.Messagetype = models.RESPONSE
+				m.Info = hex.EncodeToString(b)
+				m.Status = models.NONE
+				//			log.Printf("Received : %X", b)
+				//			log.Printf("Received message : %s", m.Info)
+				m.InsertMessage()
+			}
+		*/
 		time.Sleep(time.Millisecond * t)
 	}
 }
@@ -135,24 +177,5 @@ func open() {
 		models.GConfig.Isconnected = connected
 		models.GConfig.UpdateStatus()
 		time.Sleep(time.Millisecond * 1000)
-	}
-}
-
-func read() {
-	for {
-		//	log.Println("read serial")
-		b, err := serial.Reader()
-		if err != nil {
-			beego.BeeLogger.Error(err.Error())
-		}
-		if len(b) > 0 {
-			var res models.Response
-			res.Requestid = 1
-			res.Content = string(b)
-			res.Insert()
-			log.Println("output:", string(b))
-		}
-
-		time.Sleep(time.Millisecond * 100)
 	}
 }

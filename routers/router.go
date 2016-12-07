@@ -7,10 +7,14 @@ import (
 
 func init() {
 	beego.Router("/", &controllers.MainController{})
-	beego.Router("/test", &controllers.MainController{}, "GET:Test")
 
 	beego.Router("/config", &controllers.RubyConfigController{})
+
+	beego.Router("/test", &controllers.RemoteServerController{}, "GET:Test")
 	beego.Router("/remoteserver", &controllers.RemoteServerController{})
+
+	beego.Router("/getfilerepo", &controllers.FileRepoController{}, "GET:GetFiles")
+	beego.Router("/downloadfile", &controllers.FileRepoController{}, "POST:DownloadFile")
 
 	beego.Router("/openserial", &controllers.SerialController{}, "POST:Open")
 	beego.Router("/closeserial", &controllers.SerialController{}, "GET:Close")

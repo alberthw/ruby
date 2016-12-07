@@ -3,7 +3,7 @@ function TestRemoteServerConnection(url) {
     $.ajax({
         url: url,
         dataType: "json",
-        //       cache: false,
+        cache: false,
         async: false,
         success: function (data) {
             if (data == "ok") {
@@ -18,18 +18,14 @@ function TestRemoteServerConnection(url) {
 }
 
 function GetRemoteServer() {
-    var result = {
-        Id: 0,
-        Remoteserver: ""
-    };
+    var result = null;
     $.ajax({
         url: "/remoteserver",
         dataType: "json",
         //       cache: false,
         async: false,
         success: function (data) {
-            result.Id = data.Id;
-            result.Remoteserver = data.Remoteserver;
+            result = data;
         },
         error: function (xhr, status, err) {
             console.error(url, status, err.toString());
@@ -38,7 +34,7 @@ function GetRemoteServer() {
     return result;
 }
 
-function UpdateRemoteServer(ip, id) {
+function UpdateRemoteServer(id, ip,folder, status) {
     var result = false;
     $.ajax({
         url: "/remoteserver",
@@ -46,13 +42,14 @@ function UpdateRemoteServer(ip, id) {
         type: "POST",
         async: false,
         data: {
-            Id: id,
-            Remoteserver: ip
+            Id : id,
+            Remoteserver : ip,
+            Contentfolder : folder,
+            Isconnected : status
         },
         success: function (data) {
             console.log(data);
             result = true;
-
         },
         error: function (xhr, status, err) {
             console.error(url, status, err.toString());
@@ -60,8 +57,6 @@ function UpdateRemoteServer(ip, id) {
     });
 
     return result;
-
-
 }
 
 class RemoteFileServer extends React.Component {
@@ -73,8 +68,9 @@ class RemoteFileServer extends React.Component {
 
         this.state = {
             Id: result.Id,
-            remoteServer: result.Remoteserver,
-            isConnected: false
+            Remoteserver: result.Remoteserver,
+            Contentfolder:"UserContent",
+            Isconnected: result.Isconnected
         };
 
         this.handleRemoteServerIpChange = this
@@ -83,6 +79,9 @@ class RemoteFileServer extends React.Component {
         this.handleIsConnectedChange = this
             .handleIsConnectedChange
             .bind(this);
+        this.handleContentFolderChange = this
+            .handleContentFolderChange
+            .bind(this);
         this.handleCheckClick = this
             .handleCheckClick
             .bind(this);
@@ -90,31 +89,35 @@ class RemoteFileServer extends React.Component {
     }
 
     handleRemoteServerIpChange(e) {
+        this.setState({ Remoteserver: e.target.value });
+    }
 
-        this.setState({ remoteServer: e.target.value });
+    handleContentFolderChange(e) {
+        this.setState({ Contentfolder: e.target.value });
     }
 
     handleIsConnectedChange(e) {
-        this.setState({ isConnected: e.target.value });
+        this.setState({ Isconnected: e.target.value });
     }
 
     handleCheckClick(e) {
-        const remoteServer = this.state.remoteServer;
-        const id = this.state.Id;
-        var url = "http://" + this.state.remoteServer + "/test";
+        var url = "http://" + this.state.Remoteserver + "/test";
+        var isConnected = TestRemoteServerConnection(url);
         this.setState({
-            isConnected: TestRemoteServerConnection(url)
+            Isconnected: isConnected
         });
-        UpdateRemoteServer(remoteServer, id);
+        UpdateRemoteServer(this.state.Id, this.state.Remoteserver,this.state.Contentfolder, isConnected);
     }
 
     render() {
-        const remoteServer = this.state.remoteServer;
-        const isConnected = this.state.isConnected;
+        const remoteServer = this.state.Remoteserver;
+        const isConnected = this.state.Isconnected;
+        const contentFolder = this.state.Contentfolder;
         return (
             <div>
                 <a>Remote File Server : </a>
                 <input type="text" value={remoteServer} onChange={this.handleRemoteServerIpChange}></input>
+                <input type="text" value={contentFolder} onChange={this.handleContentFolderChange} hidden></input>
                 <a>Connected : </a>
                 <input type="text" value={isConnected} onChange={this.handleIsConnectedChange} readOnly></input>
                 <input type="button" value="Check" onClick={this.handleCheckClick}></input>

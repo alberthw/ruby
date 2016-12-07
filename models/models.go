@@ -11,7 +11,7 @@ import (
 func init() {
 	//	initSqlite()
 	initPostgresql()
-	orm.RegisterModel(new(Rubyconfig), new(Message), new(RemoteServer))
+	orm.RegisterModel(new(Rubyconfig), new(Message), new(Remoteserver), new(Filerepo))
 	createTables()
 }
 

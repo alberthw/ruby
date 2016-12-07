@@ -11,6 +11,7 @@ import (
 	_ "github.com/alberthw/ruby/routers"
 	"github.com/alberthw/ruby/serial"
 	"github.com/astaxie/beego"
+	"github.com/fsnotify/fsnotify"
 )
 
 var bSoftDelete = true
@@ -31,13 +32,46 @@ func IncreaseOneSequence() {
 	config.UpdateSequence()
 }
 
+func watchReleaseFolder() {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer watcher.Close()
+
+	done := make(chan bool)
+	go func() {
+		for {
+			select {
+			case event := <-watcher.Events:
+				log.Println("event:", event)
+				if event.Op&fsnotify.Write == fsnotify.Write {
+					log.Println("modified file:", event.Name)
+				}
+			case err := <-watcher.Errors:
+				log.Println("error:", err)
+			}
+		}
+	}()
+
+	err = watcher.Add("./static/release")
+	if err != nil {
+		log.Fatal("err2 : ", err)
+	}
+
+	<-done
+
+}
+
 func main() {
+
+	beego.SetStaticPath("/release", "release")
 
 	//	go open()
 	//	go generate(200)
 	//	go writer(100)
 	//	go reader(100)
-
+	go watchReleaseFolder()
 	beego.Run()
 
 }

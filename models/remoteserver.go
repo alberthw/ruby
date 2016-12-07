@@ -7,30 +7,31 @@ import (
 	"github.com/astaxie/beego/orm"
 )
 
-type RemoteServer struct {
-	Id           int64 `orm:"pk;auto"`
-	Remoteserver string
-	Isconnected  bool
-	Created      time.Time `orm:"auto_now_add;type(datetime)"`
-	Updated      time.Time `orm:"auto_now;type(datetime)"`
+type Remoteserver struct {
+	Id            int64 `orm:"pk;auto"`
+	Remoteserver  string
+	Contentfolder string
+	Isconnected   bool
+	Created       time.Time `orm:"auto_now_add;type(datetime)"`
+	Updated       time.Time `orm:"auto_now;type(datetime)"`
 }
 
-func (c RemoteServer) Get() RemoteServer {
+func (c Remoteserver) Get() Remoteserver {
 	o := orm.NewOrm()
-	var result RemoteServer
+	var result Remoteserver
 
-	err := o.QueryTable("remoteServer").One(&result)
+	err := o.QueryTable("remoteserver").One(&result)
 	if err == orm.ErrNoRows {
 		o.Insert(&result)
 	}
 	return result
 }
 
-func (c *RemoteServer) Update() error {
+func (c *Remoteserver) Update() error {
 	c.Updated = time.Now()
 	o := orm.NewOrm()
 	o.Begin()
-	_, err := o.Update(c, "Remoteserver", "Isconnected", "Updated")
+	_, err := o.Update(c, "Remoteserver", "Contentfolder", "Isconnected", "Updated")
 	if err != nil {
 		log.Println(err.Error())
 		o.Rollback()

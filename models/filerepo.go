@@ -138,6 +138,26 @@ func getBuildNumberFromFileName(filename string) (uint64, error) {
 
 }
 
+func (c *Filerepo) GetFileInfo() error {
+	c.Filepath = strings.Replace(c.Filepath, "\\", "/", -1)
+	fi, err := os.Stat(c.Filepath)
+	if err != nil {
+		return err
+	}
+	filename := filepath.Base(c.Filepath)
+	buildNumber, err := getBuildNumberFromFileName(filename)
+	if err != nil {
+		return err
+	}
+	c.Filename = filename
+	c.Created = fi.ModTime()
+	c.Buildnumber = buildNumber
+	c.checkFileType()
+	c.getCRC()
+	c.Checksum = caculateChecksum(c.Filepath)
+	return nil
+}
+
 func getReleaseFilesInfo(folder string) []Filerepo {
 	var result []Filerepo
 	filepath.Walk(folder, func(path string, info os.FileInfo, err error) error {
@@ -146,18 +166,9 @@ func getReleaseFilesInfo(folder string) []Filerepo {
 		}
 		//		log.Println("file infor", info, " , path:", path)
 		if !info.IsDir() {
-			buildNumber, err := getBuildNumberFromFileName(info.Name())
-			if err != nil {
-				return nil
-			}
 			var fr Filerepo
-			fr.Filepath = strings.Replace(path, "\\", "/", -1)
-			fr.Filename = info.Name()
-			fr.Created = info.ModTime()
-			fr.Buildnumber = buildNumber
-			fr.checkFileType()
-			fr.getCRC()
-			fr.Checksum = caculateChecksum(fr.Filepath)
+			fr.Filepath = path
+			fr.GetFileInfo()
 
 			//		log.Println(fr)
 			result = append(result, fr)
@@ -254,5 +265,15 @@ func (c *Filerepo) Update() error {
 		return err
 	}
 	o.Commit()
+	return err
+}
+
+func (c *Filerepo) DeleteByFilename(filename string) error {
+	o := orm.NewOrm()
+	err := o.QueryTable("Filerepo").Filter("Filename", filename).One(c)
+	if err == orm.ErrNoRows {
+		return err
+	}
+	_, err = o.Delete(c)
 	return err
 }

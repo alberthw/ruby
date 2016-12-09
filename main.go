@@ -94,6 +94,8 @@ func syncReleaseFolder(source, dst string) {
 			filename := filepath.Base(f)
 			if !searchStrFromArray(filename, srcfiles) {
 				os.Remove(f)
+				var fr models.Filerepo
+				fr.DeleteByFilename(filename)
 			}
 		}
 		for _, f := range srcfiles {
@@ -101,6 +103,10 @@ func syncReleaseFolder(source, dst string) {
 			localfile := dst + "/" + filename
 			if _, err := os.Stat(localfile); os.IsNotExist(err) {
 				copyFile(f, localfile)
+				var fr models.Filerepo
+				fr.Filepath = localfile
+				fr.GetFileInfo()
+				fr.CreateOrUpdate()
 			}
 		}
 		runtime.Gosched()
@@ -116,7 +122,8 @@ func main() {
 	//	go writer(100)
 	//	go reader(100)
 
-	go syncReleaseFolder(remoteFileRepoFolder, "./static/release")
+	pwd, _ := os.Getwd()
+	go syncReleaseFolder(remoteFileRepoFolder, pwd+"/static/release")
 	beego.Run()
 
 }

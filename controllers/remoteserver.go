@@ -12,6 +12,9 @@ type RemoteServerController struct {
 }
 
 func (c RemoteServerController) Get() {
+	c.Ctx.ResponseWriter.Header().Add("Access-Control-Allow-Origin", "*")
+	c.Ctx.ResponseWriter.Header().Add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+
 	var config models.Remoteserver
 	row := config.Get()
 	c.Data["json"] = &row

@@ -1,17 +1,21 @@
 package main
 
 import (
+	"encoding/hex"
+	"io"
 	"log"
+	"os"
+	"runtime"
+	"strings"
 	"time"
 
-	"encoding/hex"
+	"path/filepath"
 
 	"github.com/alberthw/ruby/ebdprotocol"
 	"github.com/alberthw/ruby/models"
 	_ "github.com/alberthw/ruby/routers"
 	"github.com/alberthw/ruby/serial"
 	"github.com/astaxie/beego"
-	"github.com/fsnotify/fsnotify"
 )
 
 var bSoftDelete = true
@@ -32,35 +36,75 @@ func IncreaseOneSequence() {
 	config.UpdateSequence()
 }
 
-func watchReleaseFolder() {
-	watcher, err := fsnotify.NewWatcher()
+func copyFile(src, dst string) error {
+	log.Printf("copy from %s to %s\n", src, dst)
+	in, err := os.Open(src)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	defer watcher.Close()
-
-	done := make(chan bool)
-	go func() {
-		for {
-			select {
-			case event := <-watcher.Events:
-				log.Println("event:", event)
-				if event.Op&fsnotify.Write == fsnotify.Write {
-					log.Println("modified file:", event.Name)
-				}
-			case err := <-watcher.Errors:
-				log.Println("error:", err)
-			}
+	defer in.Close()
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		cerr := out.Close()
+		if err == nil {
+			err = cerr
 		}
 	}()
-
-	err = watcher.Add("./static/release")
-	if err != nil {
-		log.Fatal("err2 : ", err)
+	if _, err = io.Copy(out, in); err != nil {
+		return err
 	}
+	err = out.Sync()
+	return err
+}
 
-	<-done
+const remoteFileRepoFolder = "C:/tools/Jenkins/userContent/Release"
 
+func getFilesInFolder(folder string) []string {
+	var result []string
+	//	log.Println(folder)
+	filepath.Walk(folder, func(path string, info os.FileInfo, err error) error {
+		//	log.Println("path:", path, ",info:", info)
+		if info == nil {
+			return nil
+		}
+		if !info.IsDir() {
+			result = append(result, path)
+		}
+		return nil
+	})
+	return result
+}
+
+func searchStrFromArray(s string, arr []string) bool {
+	c := strings.Join(arr, ",")
+	return strings.Contains(c, s)
+}
+
+func syncReleaseFolder(source, dst string) {
+	if _, err := os.Stat(source); os.IsNotExist(err) {
+		return
+	}
+	for {
+		srcfiles := getFilesInFolder(source)
+		dstfiles := getFilesInFolder(dst)
+		for _, f := range dstfiles {
+			filename := filepath.Base(f)
+			if !searchStrFromArray(filename, srcfiles) {
+				os.Remove(f)
+			}
+		}
+		for _, f := range srcfiles {
+			filename := filepath.Base(f)
+			localfile := dst + "/" + filename
+			if _, err := os.Stat(localfile); os.IsNotExist(err) {
+				copyFile(f, localfile)
+			}
+		}
+		runtime.Gosched()
+	}
 }
 
 func main() {
@@ -71,7 +115,8 @@ func main() {
 	//	go generate(200)
 	//	go writer(100)
 	//	go reader(100)
-	go watchReleaseFolder()
+
+	go syncReleaseFolder(remoteFileRepoFolder, "./static/release")
 	beego.Run()
 
 }

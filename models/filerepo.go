@@ -141,13 +141,17 @@ func getBuildNumberFromFileName(filename string) (uint64, error) {
 func getReleaseFilesInfo(folder string) []Filerepo {
 	var result []Filerepo
 	filepath.Walk(folder, func(path string, info os.FileInfo, err error) error {
+		if info == nil {
+			return nil
+		}
+		//		log.Println("file infor", info, " , path:", path)
 		if !info.IsDir() {
 			buildNumber, err := getBuildNumberFromFileName(info.Name())
 			if err != nil {
 				return nil
 			}
 			var fr Filerepo
-			fr.Filepath = path
+			fr.Filepath = strings.Replace(path, "\\", "/", -1)
 			fr.Filename = info.Name()
 			fr.Created = info.ModTime()
 			fr.Buildnumber = buildNumber
@@ -155,7 +159,7 @@ func getReleaseFilesInfo(folder string) []Filerepo {
 			fr.getCRC()
 			fr.Checksum = caculateChecksum(fr.Filepath)
 
-			//			log.Println(fr)
+			//		log.Println(fr)
 			result = append(result, fr)
 		}
 		return nil
@@ -163,12 +167,40 @@ func getReleaseFilesInfo(folder string) []Filerepo {
 	return result
 }
 
-func SyncReleaseFilesInfo() {
+func clearFileRepo() error {
+	o := orm.NewOrm()
+	_, err := o.Raw("delete from filerepo").Exec()
+	if err != nil {
+		log.Println("clearFileRepo():", err.Error())
+	}
+	return err
+}
 
+func (c *Filerepo) checkDownloadStatus() {
+	var setting Rubyconfig
+	setting = setting.Get()
+	localFullPath := setting.Localrepo + "/" + c.Filename
+	if _, err := os.Stat(localFullPath); os.IsNotExist(err) {
+		c.Isdownloaded = false
+		return
+	}
+	checkSum := caculateChecksum(localFullPath)
+	if checkSum == c.Checksum {
+		c.Isdownloaded = true
+		return
+	}
+	c.Isdownloaded = false
+}
+
+func SyncReleaseFilesInfo() {
+	clearFileRepo()
 	files := getReleaseFilesInfo("./static/release")
 	for _, file := range files {
+		file.checkDownloadStatus()
 		file.CreateOrUpdate()
 	}
+
+	//check local file status
 }
 
 func (c Filerepo) Insert() error {

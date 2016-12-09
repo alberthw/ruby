@@ -36,6 +36,7 @@ type Rubyconfig struct {
 	Messagetimeout uint32
 	Maxretrycount  uint32
 	Devicename     string
+	Localrepo      string
 	Created        time.Time `orm:"auto_now_add;type(datetime)"`
 	Updated        time.Time `orm:"auto_now;type(datetime)"`
 }
@@ -44,6 +45,7 @@ func (c *Rubyconfig) init() {
 	c.Serialbaud = 115200
 	c.Sequence = "0"
 	c.Sessionkey = "FF"
+	c.Localrepo = "c:/tmp"
 }
 
 func (c Rubyconfig) Get() Rubyconfig {

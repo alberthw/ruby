@@ -6,17 +6,17 @@ function getReleaseFiles() {
         dataType: "json",
         cache: false,
         async: false,
-        success: function(data) {
+        success: function (data) {
             result = data;
         },
-        error: function(xhr, status, err) {
+        error: function (xhr, status, err) {
             console.error(url, status, err.toString());
         }
     });
     return result;
 }
 
-function downloadReleaseFile(filepath){
+function downloadReleaseFile(filepath) {
     var url = "/downloadfile";
     var result = null;
     $.ajax({
@@ -25,34 +25,34 @@ function downloadReleaseFile(filepath){
         cache: false,
         async: false,
         type: "POST",
-        data:{
-            filepath : filepath
+        data: {
+            filepath: filepath
         },
-        success: function(data) {
+        success: function (data) {
             result = data;
         },
-        error: function(xhr, status, err) {
+        error: function (xhr, status, err) {
             console.error(url, status, err.toString());
         }
     });
     return result;
 }
 
-class DownloadFile extends React.Component{
-    constructor(props){
+class DownloadFile extends React.Component {
+    constructor(props) {
         super(props);
         this.handleDownloadButtonClick = this.handleDownloadButtonClick.bind(this);
     }
 
-    handleDownloadButtonClick(e){        
-       var result =  downloadReleaseFile(this.props.file.Filepath);
-       alert(result);
+    handleDownloadButtonClick(e) {
+        var result = downloadReleaseFile(this.props.file.Filepath);
+        //      alert(result);
     }
 
-    render(){
+    render() {
         return (
             <input type="button" value="Download" onClick={this.handleDownloadButtonClick}></input>
-        );        
+        );
     }
 }
 
@@ -106,16 +106,16 @@ class FileTable extends React.Component {
                     cell={props => (
                         <Cell {...props}>
                             {rows[props.rowIndex].Isdownloaded.toString()}
-                            
+
                         </Cell>
                     )}
                     width={200}
                     />
-                    <Column
+                <Column
                     header={<Cell></Cell>}
                     cell={props => (
                         <Cell {...props}>
-                            <DownloadFile file={rows[props.rowIndex]}/>
+                            <DownloadFile file={rows[props.rowIndex]} />
                         </Cell>
                     )}
                     width={100}
@@ -135,6 +135,17 @@ class FileRepo extends React.Component {
         this.state = {
             data: getReleaseFiles()
         };
+    }
+
+    componentDidMount() {
+        this.timerID = setInterval(
+            () => this.handleSyncButtonClick(),
+            2000
+        );
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.timerID);
     }
 
     handleSyncButtonClick(e) {

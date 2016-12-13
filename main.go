@@ -115,6 +115,8 @@ func syncReleaseFolder(source, dst string) {
 
 func main() {
 
+	beego.BConfig.Listen.HTTPPort = 8089
+
 	//	beego.SetStaticPath("/release", "release")
 
 	//	go open()

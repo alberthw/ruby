@@ -10,8 +10,8 @@ func init() {
 
 	beego.Router("/config", &controllers.RubyConfigController{})
 
-	beego.Router("/test", &controllers.RemoteServerController{}, "GET:Test")
 	beego.Router("/remoteserver", &controllers.RemoteServerController{})
+	beego.Router("/testremoteserver", &controllers.RemoteServerController{}, "GET:Test")
 
 	beego.Router("/getfilerepo", &controllers.FileRepoController{}, "GET:GetFiles")
 	beego.Router("/downloadfile", &controllers.FileRepoController{}, "POST:DownloadFile")

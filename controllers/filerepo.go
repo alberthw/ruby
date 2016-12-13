@@ -3,11 +3,9 @@ package controllers
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 
 	"path/filepath"
 
@@ -31,20 +29,14 @@ func (c FileRepoController) Post() {
 	c.Ctx.WriteString(strconv.FormatInt(0, 10))
 }
 
-func downloadFromUrl(url string) {
-	tokens := strings.Split(url, "/")
-	fileName := tokens[len(tokens)-1]
+func downloadFromUrl(url string, local string) {
 
-	var setting models.Rubyconfig
-	setting = setting.Get()
-
-	fullpath := setting.Localrepo + "/" + fileName
-	fmt.Println("Downloading", url, "to", fullpath)
+	fmt.Println("Downloading", url, "to", local)
 
 	// TODO: check file existence first with io.IsExist
-	output, err := os.Create(fullpath)
+	output, err := os.Create(local)
 	if err != nil {
-		fmt.Println("Error while creating", fullpath, "-", err)
+		fmt.Println("Error while creating", local, "-", err)
 		return
 	}
 	defer output.Close()
@@ -67,15 +59,23 @@ func downloadFromUrl(url string) {
 
 func (c FileRepoController) DownloadFile() {
 	fp := c.GetString("filepath")
+	id, _ := c.GetInt64("id")
 
 	var remote models.Remoteserver
 	remote = remote.Get()
-	log.Println(remote)
 	fullURL := "http://" + remote.Remoteserver + "/" + fp
 
-	downloadFromUrl(fullURL)
+	var setting models.Rubyconfig
+	setting = setting.Get()
 
+	fullpath := setting.Localrepo + "/" + filepath.Base(fp)
+
+	downloadFromUrl(fullURL, fullpath)
 	result := filepath.Base(fp) + " is downloaded."
+	var f models.Filerepo
+	f.Id = id
+	f.Filepath = fullpath
+	f.GetFileInfo()
 	c.Data["json"] = &result
 	c.ServeJSON()
 }

@@ -122,8 +122,8 @@ func main() {
 	//	go writer(100)
 	//	go reader(100)
 
-	pwd, _ := os.Getwd()
-	go syncReleaseFolder(remoteFileRepoFolder, pwd+"/static/release")
+	//	pwd, _ := os.Getwd()
+	//	go syncReleaseFolder(remoteFileRepoFolder, pwd+"/static/release")
 	beego.Run()
 
 }

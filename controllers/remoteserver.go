@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"log"
+	"net/http"
 	"strconv"
 
 	"github.com/alberthw/ruby/models"
@@ -12,9 +14,6 @@ type RemoteServerController struct {
 }
 
 func (c RemoteServerController) Get() {
-	c.Ctx.ResponseWriter.Header().Add("Access-Control-Allow-Origin", "*")
-	c.Ctx.ResponseWriter.Header().Add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
-
 	var config models.Remoteserver
 	row := config.Get()
 	c.Data["json"] = &row
@@ -25,14 +24,23 @@ func (c RemoteServerController) Post() {
 	var config models.Remoteserver
 	config.Id, _ = c.GetInt64("Id")
 	config.Remoteserver = c.GetString("Remoteserver")
-	config.Contentfolder = c.GetString("Contentfolder")
 	config.Isconnected, _ = c.GetBool("Isconnected")
 	config.Update()
 	c.Ctx.WriteString(strconv.FormatInt(config.Id, 10))
 }
 
 func (c RemoteServerController) Test() {
-	result := "ok"
+	var config models.Remoteserver
+	config = config.Get()
+	url := "http://" + config.Remoteserver + "/userContent/Release/"
+	resp, err := http.Get(url)
+	var result string
+	if err != nil {
+		log.Println("RemoteServerController::Test(): ", err.Error())
+		result = "failed"
+	} else {
+		result = strconv.Itoa(resp.StatusCode)
+	}
 	c.Data["json"] = &result
 	c.ServeJSON()
 }

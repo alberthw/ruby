@@ -7,6 +7,7 @@ function getReleaseFiles() {
         cache: false,
         async: false,
         success: function (data) {
+            
             result = data;
         },
         error: function (xhr, status, err) {
@@ -16,7 +17,8 @@ function getReleaseFiles() {
     return result;
 }
 
-function downloadReleaseFile(filepath) {
+function downloadReleaseFile(fileinfo) {
+    console.log("file id :", fileinfo.Id, ", download file : ", fileinfo.Remotepath);
     var url = "/downloadfile";
     var result = null;
     $.ajax({
@@ -26,7 +28,8 @@ function downloadReleaseFile(filepath) {
         async: false,
         type: "POST",
         data: {
-            filepath: filepath
+            id:fileinfo.Id,
+            filepath: fileinfo.Remotepath
         },
         success: function (data) {
             result = data;
@@ -45,7 +48,7 @@ class DownloadFile extends React.Component {
     }
 
     handleDownloadButtonClick(e) {
-        var result = downloadReleaseFile(this.props.file.Filepath);
+        var result = downloadReleaseFile(this.props.file);
         //      alert(result);
     }
 
@@ -90,7 +93,16 @@ class FileTable extends React.Component {
                             {rows[props.rowIndex].Crc}
                         </Cell>
                     )}
-                    width={200}
+                    width={100}
+                    />
+                    <Column
+                    header={<Cell>File Size(KB)</Cell>}
+                    cell={props => (
+                        <Cell {...props}>
+                            {rows[props.rowIndex].Filesize}
+                        </Cell>
+                    )}
+                    width={100}
                     />
                 <Column
                     header={<Cell>Build Number</Cell>}
@@ -153,7 +165,7 @@ class FileRepo extends React.Component {
         this.setState({
             data: data
         });
-        console.log(data);
+ //       console.log(data);
     }
 
     render() {

@@ -91,3 +91,13 @@ func TestFindCRC(t *testing.T) {
 	}
 
 }
+
+func TestGetFileInfoFromRemoteRepo(t *testing.T) {
+	fl, err := getFileInfoFromRemoteRepo()
+	if err != nil {
+		t.Errorf("getFileInfoFromRemoteRepo():%s", err.Error())
+	}
+	for _, f := range fl {
+		t.Errorf("%v", f)
+	}
+}

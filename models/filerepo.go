@@ -15,6 +15,7 @@ import (
 
 	"bufio"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/astaxie/beego/orm"
 )
 
@@ -34,10 +35,64 @@ type Filerepo struct {
 	Buildnumber  uint64
 	Checksum     string
 	Filepath     string
+	Remotepath   string
 	Filetype     FileType
+	Filesize     string
 	Isdownloaded bool
 	Created      time.Time `orm:"auto_now_add;type(datetime)"`
 	Updated      time.Time `orm:"auto_now;type(datetime)"`
+}
+
+func getRemoteFileRepositoryURL() (string, error) {
+	var remoteServer Remoteserver
+	remoteServer = remoteServer.Get()
+	if len(remoteServer.Remoteserver) == 0 {
+		return "", errors.New("invalid remote server URL")
+	}
+	if !remoteServer.Isconnected {
+		err := fmt.Sprintf("conncect to repository failed , %s", remoteServer.Remoteserver)
+		return "", errors.New(err)
+	}
+	repoURL := "http://" + remoteServer.Remoteserver + "/userContent/Release/"
+
+	return repoURL, nil
+
+}
+
+func getFileInfoFromRemoteRepo() ([]Filerepo, error) {
+
+	repoURL, err := getRemoteFileRepositoryURL()
+	if err != nil {
+		return nil, err
+	}
+
+	doc, err := goquery.NewDocument(repoURL)
+	if err != nil {
+		e := fmt.Sprintf("parse the file repository failed, %s", err.Error())
+		return nil, errors.New(e)
+	}
+	var result []Filerepo
+	doc.Find("tr").Each(func(i int, s *goquery.Selection) {
+		node := s.Find("a")
+		if node.Length() != 2 {
+			return
+		}
+		filename := node.First().Text()
+		var f Filerepo
+		f.Filename = filename
+		f.getBuildNumber()
+		if f.Buildnumber == 0 {
+			return
+		}
+		filesize := s.Find("td.fileSize").Text()
+		if len(filesize) > 4 {
+			f.Filesize = filesize[:len(filesize)-3]
+		}
+		f.Remotepath = "/userContent/Release/" + f.Filename
+		f.checkFileType()
+		result = append(result, f)
+	})
+	return result, nil
 }
 
 func caculateChecksum(filename string) string {
@@ -48,6 +103,13 @@ func caculateChecksum(filename string) string {
 	}
 	result := fmt.Sprintf("%X", md5.Sum(data))
 	return result
+}
+
+func (f *Filerepo) getCheckSum() {
+	if len(f.Filename) == 0 {
+		return
+	}
+	f.Checksum = caculateChecksum(f.Filepath)
 }
 
 func (f *Filerepo) checkFileType() {
@@ -73,9 +135,10 @@ func (f *Filerepo) checkFileType() {
 func findCRCLine(filename string, address string) string {
 	f, err := os.Open(filename)
 	if err != nil {
-		log.Println("checkCRC() : ", err.Error())
+		//		log.Println("checkCRC() : ", err.Error())
 		return ""
 	}
+	defer f.Close()
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		if strings.Contains(scanner.Text(), address) {
@@ -123,6 +186,17 @@ func (f *Filerepo) getCRC() {
 	//	log.Println("CRC:", f.Crc)
 }
 
+func (f *Filerepo) getBuildNumber() {
+	if len(f.Filename) < 12 {
+		err := errors.New("invalid file name")
+		log.Println("(f *Filerepo)getBuildNumber()", err.Error())
+		return
+	}
+	bnStr := f.Filename[len(f.Filename)-12 : len(f.Filename)-4]
+	f.Buildnumber, _ = strconv.ParseUint(bnStr, 10, 64)
+}
+
+/*
 func getBuildNumberFromFileName(filename string) (uint64, error) {
 	if len(filename) < 12 {
 		err := errors.New("invalid file name")
@@ -135,26 +209,22 @@ func getBuildNumberFromFileName(filename string) (uint64, error) {
 		return 0, err
 	}
 	return result, nil
-
 }
+*/
 
 func (c *Filerepo) GetFileInfo() error {
 	c.Filepath = strings.Replace(c.Filepath, "\\", "/", -1)
-	fi, err := os.Stat(c.Filepath)
-	if err != nil {
-		return err
-	}
 	filename := filepath.Base(c.Filepath)
-	buildNumber, err := getBuildNumberFromFileName(filename)
-	if err != nil {
-		return err
-	}
 	c.Filename = filename
-	c.Created = fi.ModTime()
-	c.Buildnumber = buildNumber
+	//	c.getBuildNumber()
+	//	c.Created = fi.ModTime()
 	c.checkFileType()
 	c.getCRC()
-	c.Checksum = caculateChecksum(c.Filepath)
+	//	c.getCheckSum()
+
+	c.UpdateCRC()
+	//	c.UpdateChecksum()
+	//	c.UpdateFileSize()
 	return nil
 }
 
@@ -178,7 +248,7 @@ func getReleaseFilesInfo(folder string) []Filerepo {
 	return result
 }
 
-func clearFileRepo() error {
+/*func clearFileRepo() error {
 	o := orm.NewOrm()
 	_, err := o.Raw("delete from filerepo").Exec()
 	if err != nil {
@@ -186,28 +256,42 @@ func clearFileRepo() error {
 	}
 	return err
 }
-
+*/
 func (c *Filerepo) checkDownloadStatus() {
-	var setting Rubyconfig
-	setting = setting.Get()
-	localFullPath := setting.Localrepo + "/" + c.Filename
-	if _, err := os.Stat(localFullPath); os.IsNotExist(err) {
+	fi, err := os.Stat(c.Filepath)
+	if os.IsNotExist(err) {
 		c.Isdownloaded = false
 		return
 	}
-	checkSum := caculateChecksum(localFullPath)
-	if checkSum == c.Checksum {
+	/*
+		checkSum := caculateChecksum(localFullPath)
+		if checkSum == c.Checksum {
+			c.Isdownloaded = true
+			return
+		}
+	*/
+	localFileSize := fmt.Sprintf("%.2f", float64(fi.Size())/1024)
+	if localFileSize == c.Filesize {
 		c.Isdownloaded = true
 		return
 	}
 	c.Isdownloaded = false
 }
 
+func (c *Filerepo) checkLocalFileStatus() {
+	var setting Rubyconfig
+	setting = setting.Get()
+	c.Filepath = setting.Localrepo + "/" + c.Filename
+	c.GetFileInfo()
+	c.checkDownloadStatus()
+}
+
 func SyncReleaseFilesInfo() {
-	clearFileRepo()
-	files := getReleaseFilesInfo("./static/release")
+	//	clearFileRepo()
+	//	files := getReleaseFilesInfo("./static/release")
+	files, _ := getFileInfoFromRemoteRepo()
 	for _, file := range files {
-		file.checkDownloadStatus()
+		file.checkLocalFileStatus()
 		file.CreateOrUpdate()
 	}
 
@@ -223,14 +307,14 @@ func GetALLReleaseFiles() []Filerepo {
 	o := orm.NewOrm()
 	var lists []Filerepo
 
-	o.QueryTable("Filerepo").GroupBy("Filetype", "Id").OrderBy("Filetype", "Buildnumber").All(&lists, "Id", "Filename", "Crc", "Buildnumber", "Filepath", "Filetype", "Isdownloaded")
+	o.QueryTable("Filerepo").GroupBy("Filetype", "Id").OrderBy("Filetype", "Buildnumber").All(&lists, "Id", "Filename", "Crc", "Buildnumber", "Filepath", "Filetype", "Isdownloaded", "Remotepath", "Filesize")
 	return lists
 }
 
 func (c *Filerepo) CreateOrUpdate() error {
 	o := orm.NewOrm()
 	var tmp Filerepo
-	err := o.QueryTable("Filerepo").Filter("Checksum", c.Checksum).One(&tmp)
+	err := o.QueryTable("Filerepo").Filter("Filename", c.Filename).One(&tmp)
 	if err == orm.ErrNoRows {
 		return c.Insert()
 	}
@@ -251,14 +335,55 @@ func (c *Filerepo) UpdateDownloadStatus() error {
 	}
 	o.Commit()
 	return err
+}
 
+func (c *Filerepo) UpdateCRC() error {
+	c.Updated = time.Now()
+	o := orm.NewOrm()
+	o.Begin()
+	_, err := o.Update(c, "Crc")
+	if err != nil {
+		log.Println(err.Error())
+		o.Rollback()
+		return err
+	}
+	o.Commit()
+	return err
+}
+
+func (c *Filerepo) UpdateChecksum() error {
+	c.Updated = time.Now()
+	o := orm.NewOrm()
+	o.Begin()
+	_, err := o.Update(c, "Checksum")
+	if err != nil {
+		log.Println(err.Error())
+		o.Rollback()
+		return err
+	}
+	o.Commit()
+	return err
+}
+
+func (c *Filerepo) UpdateFileSize() error {
+	c.Updated = time.Now()
+	o := orm.NewOrm()
+	o.Begin()
+	_, err := o.Update(c, "Filesize")
+	if err != nil {
+		log.Println(err.Error())
+		o.Rollback()
+		return err
+	}
+	o.Commit()
+	return err
 }
 
 func (c *Filerepo) Update() error {
 	c.Updated = time.Now()
 	o := orm.NewOrm()
 	o.Begin()
-	_, err := o.Update(c, "Filename", "Crc", "Buildnumber", "Checksum", "Filepath", "Updated", "Filetype", "Isdownloaded")
+	_, err := o.Update(c, "Filename", "Crc", "Buildnumber", "Filepath", "Updated", "Filetype", "Isdownloaded")
 	if err != nil {
 		log.Println(err.Error())
 		o.Rollback()

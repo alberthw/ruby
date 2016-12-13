@@ -6,9 +6,10 @@ function TestRemoteServerConnection(url) {
         cache: false,
         async: false,
         success: function (data) {
-            if (data == "ok") {
+            console.log(data);
+            if(data == "200"){
                 result = true;
-            }
+            }            
         },
         error: function (xhr, status, err) {
             console.error(url, status, err.toString());
@@ -34,7 +35,7 @@ function GetRemoteServer() {
     return result;
 }
 
-function UpdateRemoteServer(id, ip,folder, status) {
+function UpdateRemoteServer(id, ip, status) {
     var result = false;
     $.ajax({
         url: "/remoteserver",
@@ -44,11 +45,10 @@ function UpdateRemoteServer(id, ip,folder, status) {
         data: {
             Id : id,
             Remoteserver : ip,
-            Contentfolder : folder,
             Isconnected : status
         },
         success: function (data) {
-            console.log(data);
+  //          console.log(data);
             result = true;
         },
         error: function (xhr, status, err) {
@@ -79,9 +79,6 @@ class RemoteFileServer extends React.Component {
         this.handleIsConnectedChange = this
             .handleIsConnectedChange
             .bind(this);
-        this.handleContentFolderChange = this
-            .handleContentFolderChange
-            .bind(this);
         this.handleCheckClick = this
             .handleCheckClick
             .bind(this);
@@ -92,32 +89,27 @@ class RemoteFileServer extends React.Component {
         this.setState({ Remoteserver: e.target.value });
     }
 
-    handleContentFolderChange(e) {
-        this.setState({ Contentfolder: e.target.value });
-    }
-
     handleIsConnectedChange(e) {
         this.setState({ Isconnected: e.target.value });
     }
 
     handleCheckClick(e) {
-        var url = "http://" + this.state.Remoteserver + "/test";
+        var url = "/testremoteserver";
         var isConnected = TestRemoteServerConnection(url);
+        console.log("server connection :", isConnected);
         this.setState({
             Isconnected: isConnected
         });
-        UpdateRemoteServer(this.state.Id, this.state.Remoteserver,this.state.Contentfolder, isConnected);
+        UpdateRemoteServer(this.state.Id, this.state.Remoteserver, isConnected);
     }
 
     render() {
         const remoteServer = this.state.Remoteserver;
         const isConnected = this.state.Isconnected;
-        const contentFolder = this.state.Contentfolder;
         return (
             <div>
                 <a>Remote File Server : </a>
                 <input type="text" value={remoteServer} onChange={this.handleRemoteServerIpChange}></input>
-                <input type="text" value={contentFolder} onChange={this.handleContentFolderChange} hidden></input>
                 <a>Connected : </a>
                 <input type="text" value={isConnected} onChange={this.handleIsConnectedChange} readOnly></input>
                 <input type="button" value="Check" onClick={this.handleCheckClick}></input>

@@ -8,12 +8,11 @@ import (
 )
 
 type Remoteserver struct {
-	Id            int64 `orm:"pk;auto"`
-	Remoteserver  string
-	Contentfolder string
-	Isconnected   bool
-	Created       time.Time `orm:"auto_now_add;type(datetime)"`
-	Updated       time.Time `orm:"auto_now;type(datetime)"`
+	Id           int64 `orm:"pk;auto"`
+	Remoteserver string
+	Isconnected  bool
+	Created      time.Time `orm:"auto_now_add;type(datetime)"`
+	Updated      time.Time `orm:"auto_now;type(datetime)"`
 }
 
 func (c Remoteserver) Get() Remoteserver {
@@ -31,7 +30,7 @@ func (c *Remoteserver) Update() error {
 	c.Updated = time.Now()
 	o := orm.NewOrm()
 	o.Begin()
-	_, err := o.Update(c, "Remoteserver", "Contentfolder", "Isconnected", "Updated")
+	_, err := o.Update(c, "Remoteserver", "Isconnected", "Updated")
 	if err != nil {
 		log.Println(err.Error())
 		o.Rollback()

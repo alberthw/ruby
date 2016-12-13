@@ -68,6 +68,10 @@ func (c FileRepoController) DownloadFile() {
 	var setting models.Rubyconfig
 	setting = setting.Get()
 
+	if _, err := os.Stat(setting.Localrepo); os.IsNotExist(err) {
+		os.Mkdir(setting.Localrepo, os.ModePerm)
+	}
+
 	fullpath := setting.Localrepo + "/" + filepath.Base(fp)
 
 	downloadFromUrl(fullURL, fullpath)

@@ -115,7 +115,7 @@ func syncReleaseFolder(source, dst string) {
 
 func main() {
 
-	beego.SetStaticPath("/release", "release")
+	//	beego.SetStaticPath("/release", "release")
 
 	//	go open()
 	//	go generate(200)

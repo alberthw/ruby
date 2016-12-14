@@ -2,14 +2,8 @@ package main
 
 import (
 	"encoding/hex"
-	"io"
 	"log"
-	"os"
-	"runtime"
-	"strings"
 	"time"
-
-	"path/filepath"
 
 	"github.com/alberthw/ruby/ebdprotocol"
 	"github.com/alberthw/ruby/models"
@@ -18,7 +12,7 @@ import (
 	"github.com/astaxie/beego"
 )
 
-var bSoftDelete = true
+var bSoftDelete = false
 
 func IncreaseSeq(seq byte) byte {
 	if seq == 0x39 {
@@ -36,6 +30,7 @@ func IncreaseOneSequence() {
 	config.UpdateSequence()
 }
 
+/*
 func copyFile(src, dst string) error {
 	log.Printf("copy from %s to %s\n", src, dst)
 	in, err := os.Open(src)
@@ -112,6 +107,7 @@ func syncReleaseFolder(source, dst string) {
 		runtime.Gosched()
 	}
 }
+*/
 
 func main() {
 
@@ -119,10 +115,10 @@ func main() {
 
 	//	beego.SetStaticPath("/release", "release")
 
-	//	go open()
-	//	go generate(200)
-	//	go writer(100)
-	//	go reader(100)
+	go open()
+	go generate(200)
+	go writer(100)
+	go reader(100)
 
 	//	pwd, _ := os.Getwd()
 	//	go syncReleaseFolder(remoteFileRepoFolder, pwd+"/static/release")
@@ -175,7 +171,7 @@ func writer(t time.Duration) {
 				log.Println(err.Error())
 				continue
 			}
-			//			log.Printf("Send:%X", b)
+			log.Printf("Send:%X", b)
 			IncreaseOneSequence()
 
 			if bSoftDelete {
@@ -257,10 +253,10 @@ func open() {
 		connected := false
 		err := serial.Open(models.GConfig.Serialname, int(models.GConfig.Serialbaud))
 
-		if err == nil {
-			connected = true
-		} else {
+		if err != nil {
 			log.Println(err.Error())
+		} else {
+			connected = true
 		}
 		models.GConfig.Isconnected = connected
 		models.GConfig.UpdateStatus()

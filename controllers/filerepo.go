@@ -59,7 +59,7 @@ func downloadFromUrl(url string, local string) {
 
 func (c FileRepoController) DownloadFile() {
 	fp := c.GetString("filepath")
-	id, _ := c.GetInt64("id")
+	//	id, _ := c.GetInt64("id")
 
 	var remote models.Remoteserver
 	remote = remote.Get()
@@ -76,10 +76,12 @@ func (c FileRepoController) DownloadFile() {
 
 	downloadFromUrl(fullURL, fullpath)
 	result := filepath.Base(fp) + " is downloaded."
-	var f models.Filerepo
-	f.Id = id
-	f.Filepath = fullpath
-	f.GetFileInfo()
+	/*
+		var f models.Filerepo
+		f.Id = id
+		f.Filepath = fullpath
+		f.GetFileInfo()
+	*/
 	c.Data["json"] = &result
 	c.ServeJSON()
 }

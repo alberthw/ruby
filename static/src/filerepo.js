@@ -1,5 +1,5 @@
 function getReleaseFiles() {
-    var result = null;
+    var result = [];
     var url = "/getfilerepo";
     $.ajax({
         url: url,

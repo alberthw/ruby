@@ -11,7 +11,7 @@ var (
 	GConfig Rubyconfig
 )
 
-type DeviceID int64
+type DeviceID uint32
 
 const (
 	ForceTraid        DeviceID = 0x00
@@ -45,6 +45,8 @@ func (c *Rubyconfig) init() {
 	c.Serialbaud = 115200
 	c.Sequence = "0"
 	c.Sessionkey = "FF"
+	c.Deviceid = ServiceApps
+	c.Protocolver = "10001"
 	c.Localrepo = "c:/tmp"
 }
 

@@ -3,8 +3,11 @@ package ebdprotocol
 import (
 	_ "encoding/hex"
 	"errors"
+	"log"
 	_ "reflect"
 	"strconv"
+
+	"github.com/alberthw/ruby/util"
 )
 
 type MessageEncoding int
@@ -55,6 +58,14 @@ var MessageList []MessageTable = []MessageTable{
 	MessageTable{"GetSensorResponse", 0x3E, Encoded, 8},
 	MessageTable{"GetCriticalData", 0x37, Encoded, 64},
 	MessageTable{"GetActivationHistogram", 0x2B, Encoded, 0},
+	MessageTable{"FlashUpgradeHostAppRequest", 0xA0, Encoded, 0},
+	MessageTable{"FlashUpgradeHostAppResponse", 0xA1, Encoded, 8},
+	MessageTable{"FlashUpgradeHostAppDataUpload", 0xA2, ASCII, 0},
+	MessageTable{"FlashUpgradeHostAppDataUploadDone", 0xA3, Encoded, 8},
+	MessageTable{"FlashUpgradeHostBootLoaderRequest", 0xBE, Encoded, 0},
+	MessageTable{"FlashUpgradeHostBootLoaderResponse", 0xBF, Encoded, 8},
+	MessageTable{"FlashUpgradeHostBootLoaderDataUpload", 0xC0, ASCII, 0},
+	MessageTable{"FlashUpgradeHostBootLoaderDataUploadDone", 0xC1, Encoded, 8},
 }
 
 func FindMessageTable(id int) *MessageTable {
@@ -89,23 +100,23 @@ func MessageParse(input []byte) MessageTable {
 	if input[0] == ACK {
 		input = input[2:]
 	}
-	/*
-		messageid := string(input[4:6])
-		msgid, _ := strconv.ParseInt(messageid, 16, 32)
 
-			msg := FindMessageTable(int(msgid))
+	messageid := string(input[4:6])
+	msgid, _ := strconv.ParseInt(messageid, 16, 32)
 
-				var msglen int
-				if msg.Encoding == Encoded {
-					msglen = util.UnEncodeLength(msg.Length)
-				} else {
-					msglen = msg.Length
-				}
+	msg := FindMessageTable(int(msgid))
 
-					log.Println(len(input)-13, msglen/2)
+	var msglen int
+	if msg.Encoding == Encoded {
+		msglen = util.UnEncodeLength(msg.Length)
+	} else {
+		msglen = msg.Length
+	}
 
-					log.Println("Message", msg, msgid)
-	*/
+	log.Println(len(input)-13, msglen/2)
+
+	log.Println("Message", msg, msgid)
+
 	return result
 
 }

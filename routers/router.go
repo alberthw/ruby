@@ -27,4 +27,6 @@ func init() {
 
 	beego.Router("/response", &controllers.ResponseController{})
 
+	beego.Router("/opensession", &controllers.RequestController{}, "GET:OpenSession")
+
 }

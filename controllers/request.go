@@ -1,8 +1,12 @@
 package controllers
 
 import (
+	"encoding/hex"
 	"fmt"
 
+	"strconv"
+
+	"github.com/alberthw/ruby/ebdprotocol"
 	"github.com/alberthw/ruby/models"
 	"github.com/astaxie/beego"
 )
@@ -41,6 +45,32 @@ func (c RequestController) Generate() {
 
 	c.Data["json"] = &result
 	c.ServeJSON()
+}
+
+func (c RequestController) OpenSession() {
+	var req ebdprotocol.RequestSession
+	var setting models.Rubyconfig
+	setting = setting.Get()
+	req.NoAck = true
+	pVer, _ := strconv.ParseUint(setting.Protocolver, 10, 32)
+
+	req.SessionKey = []byte(setting.Sessionkey)
+	req.Sequence = byte(setting.Sequence[0])
+
+	req.DeviceID = uint32(setting.Deviceid)
+	req.ProtocolVersion = uint32(pVer)
+
+	var m models.Message
+	m.Messagetype = models.REQUEST
+	m.Info = hex.EncodeToString(req.Message())
+	m.Status = models.NONE
+
+	m.InsertMessage()
+
+	result := m.Info
+	c.Data["json"] = &result
+	c.ServeJSON()
+
 }
 
 func (c RequestController) UpdateStatus() {

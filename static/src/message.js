@@ -50,14 +50,12 @@ class Message extends React.Component {
     }
 
     handleSessionRequestClick(e) {
-        const data = this.state;
-        var url = "/generate";
+        var url = "/opensession";
         $.ajax({
             url: url,
             dataType: "json",
-            type: "POST",
+            type: "GET",
             async: false,
-            data: {type:2},
             success: function (data) {
                 console.log(data);
                 this.setState({
@@ -95,7 +93,7 @@ class Message extends React.Component {
 
             <div>
                 <div>
-                    <input type="button" value="SessionRequest" onClick={this.handleSessionRequestClick}></input>
+                    <input type="button" value="Open Session" onClick={this.handleSessionRequestClick}></input>
                 </div>
                 <div>
                     <h2>Request Message:</h2>

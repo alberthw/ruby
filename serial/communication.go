@@ -1,6 +1,7 @@
 package serial
 
 import (
+	"errors"
 	"log"
 	"time"
 
@@ -58,7 +59,7 @@ func Sender(msg []byte) []byte {
 	if err != nil {
 		log.Fatal(err)
 	}
-	time.Sleep(time.Millisecond * 10)
+	time.Sleep(time.Millisecond * 1000)
 	result := make([]byte, 2048)
 	n, err = GSerial.Read(result)
 	if err != nil {
@@ -69,6 +70,10 @@ func Sender(msg []byte) []byte {
 }
 
 func Writer(msg []byte) error {
+	if GSerial == nil {
+		err := "Serial port is closed."
+		return errors.New(err)
+	}
 	_, err := GSerial.Write(msg)
 	//	log.Println("serial write:", n, err)
 	if err != nil {

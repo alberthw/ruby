@@ -148,7 +148,7 @@ class SerialConfig extends React.Component {
     render() {
         const serialName = this.state.Serialname;
         const isConnected = this.state.Isconnected;
-        const deviceID = this.state.Deviceid;
+        const deviceID = this.state.Deviceid.toString(16);
         const protocolVer = this.state.Protocolver;
         const sessionKey = this.state.Sessionkey;
         const sequence = this.state.Sequence;

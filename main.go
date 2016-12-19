@@ -5,6 +5,8 @@ import (
 	"log"
 	"time"
 
+	"sync"
+
 	"github.com/alberthw/ruby/ebdprotocol"
 	"github.com/alberthw/ruby/models"
 	_ "github.com/alberthw/ruby/routers"
@@ -28,6 +30,178 @@ func IncreaseOneSequence() {
 	config.Sequence = string(IncreaseSeq(byte(config.Sequence[0])))
 	//	log.Printf("Sequence : %s", s.Sequence)
 	config.UpdateSequence()
+}
+
+func main() {
+
+	beego.BConfig.Listen.HTTPPort = 8089
+
+	//	beego.SetStaticPath("/release", "release")
+
+	go open()
+	go keepAlive(200)
+	go writer(100)
+	go reader(100)
+
+	go checkBuffer(100)
+	go parseBuffer(100)
+
+	beego.Run()
+
+	//	pwd, _ := os.Getwd()
+	//	go syncReleaseFolder(remoteFileRepoFolder, pwd+"/static/release")
+
+}
+
+func keepAlive(t time.Duration) {
+	for {
+		config := models.GConfig.Get()
+		if config.Isconnected {
+			var k ebdprotocol.KeepAlive
+			k.NoAck = true
+			k.SessionKey = []byte(config.Sessionkey)
+
+			k.Sequence = byte(config.Sequence[0])
+
+			//			log.Printf("session key : %X, sequence : %X\n", k.SessionKey, k.Sequence)
+			/*
+				var m models.Message
+				m.Messagetype = models.REQUEST
+				m.Info = hex.EncodeToString(k.Message())
+				m.Status = models.NONE
+				m.InsertMessage()
+			*/
+			if serial.GSerial != nil {
+				err := serial.Writer(k.Message())
+				if err != nil {
+					log.Println(err.Error())
+					continue
+				}
+			}
+		}
+		time.Sleep(time.Millisecond * time.Duration(t))
+	}
+}
+
+func writer(t time.Duration) {
+	// get one request
+	for {
+		config := models.GConfig.Get()
+		//		time.Sleep(time.Millisecond * time.Duration(s.Writeinterval))
+		time.Sleep(time.Millisecond * time.Duration(t))
+		if config.Isconnected {
+			var m models.Message
+			err := m.GetOneRequest()
+			if err != nil {
+				//				log.Println("writer:", err.Error())
+				continue
+			}
+
+			//			log.Printf("get one request :%v", m)
+
+			b, _ := hex.DecodeString(m.Info)
+			err = serial.Writer(b)
+			if err != nil {
+				log.Println(err.Error())
+				continue
+			}
+			log.Printf("Send:%X", b)
+			IncreaseOneSequence()
+
+			if bSoftDelete {
+				m.Status = models.DELETED
+				m.UpdateStatus()
+			} else {
+				m.DeleteMessage()
+				//		log.Println("the request is deleted.")
+			}
+		}
+
+	}
+}
+
+type Buffer struct {
+	content []byte
+	locker  sync.Mutex
+}
+
+func (b Buffer) ReadAll() []byte {
+	b.locker.Lock()
+	defer b.locker.Unlock()
+	return b.content
+}
+func (b *Buffer) Add(s []byte) {
+	b.locker.Lock()
+	defer b.locker.Unlock()
+	b.content = append(b.content, s...)
+}
+
+func (b *Buffer) Parse() []byte {
+	b.locker.Lock()
+	defer b.locker.Unlock()
+	if len(b.content) < 2 {
+		return nil
+	}
+	if b.content[0] == ebdprotocol.ACK {
+
+		result := b.content[:2]
+		b.content = b.content[2:]
+		return result
+	}
+	return nil
+}
+
+func checkBuffer(t time.Duration) {
+	for {
+		log.Printf("received : 0x%X\n", gBuffer.ReadAll())
+		time.Sleep(time.Millisecond * t)
+	}
+
+}
+func parseBuffer(t time.Duration) {
+	for {
+		result := gBuffer.Parse()
+		if len(result) == 0 {
+			continue
+		}
+		log.Printf("parsed : 0x%X\n", result)
+		time.Sleep(time.Millisecond * t)
+	}
+
+}
+
+var gBuffer Buffer
+
+func reader(t time.Duration) {
+	for {
+		b, _ := serial.Reader()
+		if len(b) == 0 {
+			continue
+		}
+		log.Printf("received : 0x%X\n", b)
+		gBuffer.Add(b)
+
+		time.Sleep(time.Millisecond * t)
+	}
+}
+
+func open() {
+	for {
+		models.GConfig = models.GConfig.Get()
+		//		log.Printf("serial name : %s, serial baud : %d, connection status : %v", models.GConfig.Serialname, models.GConfig.Serialbaud, models.GConfig.Isconnected)
+
+		connected := false
+		err := serial.Open(models.GConfig.Serialname, int(models.GConfig.Serialbaud))
+
+		if err != nil {
+			log.Println(err.Error())
+		} else {
+			connected = true
+		}
+		models.GConfig.Isconnected = connected
+		models.GConfig.UpdateStatus()
+		time.Sleep(time.Millisecond * 1000)
+	}
 }
 
 /*
@@ -108,158 +282,3 @@ func syncReleaseFolder(source, dst string) {
 	}
 }
 */
-
-func main() {
-
-	beego.BConfig.Listen.HTTPPort = 8089
-
-	//	beego.SetStaticPath("/release", "release")
-
-	go open()
-	go generate(200)
-	go writer(100)
-	go reader(100)
-
-	//	pwd, _ := os.Getwd()
-	//	go syncReleaseFolder(remoteFileRepoFolder, pwd+"/static/release")
-	beego.Run()
-
-}
-
-func generate(t time.Duration) {
-	for {
-		config := models.GConfig.Get()
-		if config.Isconnected {
-			var k ebdprotocol.KeepAlive
-			k.SessionKey = []byte(config.Sessionkey)
-
-			k.Sequence = byte(config.Sequence[0])
-
-			//			log.Printf("session key : %X, sequence : %X\n", k.SessionKey, k.Sequence)
-
-			var m models.Message
-			m.Messagetype = models.REQUEST
-			m.Info = hex.EncodeToString(k.Message())
-			m.Status = models.NONE
-
-			m.InsertMessage()
-
-		}
-		time.Sleep(time.Millisecond * time.Duration(t))
-	}
-}
-
-func writer(t time.Duration) {
-	// get one request
-	for {
-		config := models.GConfig.Get()
-		//		time.Sleep(time.Millisecond * time.Duration(s.Writeinterval))
-		time.Sleep(time.Millisecond * time.Duration(t))
-		if config.Isconnected {
-			var m models.Message
-			err := m.GetOneRequest()
-			if err != nil {
-				//				log.Println("writer:", err.Error())
-				continue
-			}
-
-			//			log.Printf("get one request :%v", m)
-
-			b, _ := hex.DecodeString(m.Info)
-			err = serial.Writer(b)
-			if err != nil {
-				log.Println(err.Error())
-				continue
-			}
-			log.Printf("Send:%X", b)
-			IncreaseOneSequence()
-
-			if bSoftDelete {
-				m.Status = models.DELETED
-				m.UpdateStatus()
-			} else {
-				m.DeleteMessage()
-				//		log.Println("the request is deleted.")
-			}
-		}
-
-	}
-}
-
-type TransferStatus int
-
-const (
-	IDLE = iota
-	START
-	TRANSFERING
-	END
-)
-
-type Input struct {
-	Content []byte
-	Status  TransferStatus
-}
-
-func (input *Input) Receive(b []byte) {
-	if len(b) == 0 {
-		return
-	}
-	if b[0] == ebdprotocol.ACK {
-		input.Status = START
-	}
-	return
-}
-
-var buf chan []byte
-
-func reader(t time.Duration) {
-	var f ebdprotocol.Frame
-	var buf []byte
-	for {
-		b, _ := serial.Reader()
-		if len(b) == 0 {
-			continue
-		}
-		log.Printf("received : 0x%X\n", b)
-		_, err := f.Parse(buf)
-		if err != nil {
-			buf = append(buf, b...)
-			log.Println(err.Error())
-			log.Printf("buffer : 0x%X\n", buf)
-			//		continue
-		}
-		buf = []byte{}
-		/*
-			var m models.Message
-			b, _ := serial.Reader()
-			if len(b) > 0 {
-				m.Messagetype = models.RESPONSE
-				m.Info = hex.EncodeToString(b)
-				m.Status = models.NONE
-				//			log.Printf("Received : %X", b)
-				//			log.Printf("Received message : %s", m.Info)
-				m.InsertMessage()
-			}
-		*/
-		time.Sleep(time.Millisecond * t)
-	}
-}
-
-func open() {
-	for {
-		models.GConfig = models.GConfig.Get()
-		//		log.Printf("serial name : %s, serial baud : %d, connection status : %v", models.GConfig.Serialname, models.GConfig.Serialbaud, models.GConfig.Isconnected)
-
-		connected := false
-		err := serial.Open(models.GConfig.Serialname, int(models.GConfig.Serialbaud))
-
-		if err != nil {
-			log.Println(err.Error())
-		} else {
-			connected = true
-		}
-		models.GConfig.Isconnected = connected
-		models.GConfig.UpdateStatus()
-		time.Sleep(time.Millisecond * 1000)
-	}
-}

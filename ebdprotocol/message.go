@@ -62,10 +62,18 @@ var MessageList []MessageTable = []MessageTable{
 	MessageTable{"FlashUpgradeHostAppResponse", 0xA1, Encoded, 8},
 	MessageTable{"FlashUpgradeHostAppDataUpload", 0xA2, ASCII, 0},
 	MessageTable{"FlashUpgradeHostAppDataUploadDone", 0xA3, Encoded, 8},
+	MessageTable{"FlashUpgradeHostAppInitiateBurn", 0xA4, Encoded, 0},
+	MessageTable{"FlashUpgradeHostAppBurnDone", 0xBD, Encoded, 8},
 	MessageTable{"FlashUpgradeHostBootLoaderRequest", 0xBE, Encoded, 0},
 	MessageTable{"FlashUpgradeHostBootLoaderResponse", 0xBF, Encoded, 8},
 	MessageTable{"FlashUpgradeHostBootLoaderDataUpload", 0xC0, ASCII, 0},
 	MessageTable{"FlashUpgradeHostBootLoaderDataUploadDone", 0xC1, Encoded, 8},
+	MessageTable{"FlashUpgradeHostBootLoaderInitiateBurn", 0xC2, Encoded, 8},
+	MessageTable{"FlashUpgradeHostBootLoaderBurnDone", 0xC3, Encoded, 8},
+	MessageTable{"GetMongooseCommandLockRequest", 0xD4, Encoded, 0},
+	MessageTable{"SetMongooseCommandLockRequest", 0xD2, Encoded, 8},
+	MessageTable{"GetMongooseCommandLockResponse", 0xD5, Encoded, 8},
+	MessageTable{"SetMongooseCommandLockResponse", 0xD3, Encoded, 8},
 }
 
 func FindMessageTable(id int) *MessageTable {

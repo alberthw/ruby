@@ -24,7 +24,7 @@ func Open(name string, baud int) error {
 	var c serial.Config
 	c.Name = name
 	c.Baud = baud
-	c.ReadTimeout = time.Millisecond * 10
+	//	c.ReadTimeout = time.Millisecond * 10
 
 	//	log.Println("before open 1 :", c, GSerial)
 	var err error

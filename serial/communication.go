@@ -24,7 +24,7 @@ func Open(name string, baud int) error {
 	var c serial.Config
 	c.Name = name
 	c.Baud = baud
-	//	c.ReadTimeout = time.Millisecond * 10
+	//	c.ReadTimeout = time.Millisecond * 1000
 
 	//	log.Println("before open 1 :", c, GSerial)
 	var err error
@@ -40,6 +40,9 @@ func Close() error {
 		return nil
 	}
 	err := GSerial.Close()
+
+	// waiting for the port to shutdown
+	time.Sleep(time.Millisecond * 1500)
 	//	log.Println("after close", GSerial, err)
 
 	GSerial = nil
@@ -51,7 +54,7 @@ func Sender(msg []byte) []byte {
 
 	//	s, _ := serial.OpenPort(c)
 
-	log.Printf("SEND: %X", msg)
+	//	log.Printf("SEND: %X", msg)
 
 	//	defer s.Close()
 	var n int
@@ -59,7 +62,7 @@ func Sender(msg []byte) []byte {
 	if err != nil {
 		log.Fatal(err)
 	}
-	time.Sleep(time.Millisecond * 1000)
+	time.Sleep(time.Millisecond * 500)
 	result := make([]byte, 2048)
 	n, err = GSerial.Read(result)
 	if err != nil {

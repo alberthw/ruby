@@ -304,11 +304,27 @@ func (c Filerepo) Insert() error {
 	return err
 }
 func GetALLReleaseFiles() []Filerepo {
-	o := orm.NewOrm()
-	var lists []Filerepo
 
-	o.QueryTable("Filerepo").GroupBy("Filetype", "Id").OrderBy("Filetype", "Buildnumber").All(&lists, "Id", "Filename", "Crc", "Buildnumber", "Filepath", "Filetype", "Isdownloaded", "Remotepath", "Filesize")
+	var lists []Filerepo
+	// o := orm.NewOrm()
+	//	o.QueryTable("Filerepo").GroupBy("Filetype", "Id").OrderBy("Filetype", "Buildnumber").All(&lists, "Id", "Filename", "Crc", "Buildnumber", "Filepath", "Filetype", "Isdownloaded", "Remotepath", "Filesize")
+	host := getReleaseFilesByType(FILETYPE_APP, 5)
+	lists = append(lists, host...)
+
+	boot := getReleaseFilesByType(FILETYPE_BOOT, 5)
+	lists = append(lists, boot...)
+
+	dsp := getReleaseFilesByType(FILETYPE_DSP, 5)
+	lists = append(lists, dsp...)
+
 	return lists
+}
+
+func getReleaseFilesByType(t FileType, limit int64) []Filerepo {
+	o := orm.NewOrm()
+	var result []Filerepo
+	o.QueryTable("Filerepo").Filter("Filetype", t).OrderBy("Buildnumber").Limit(limit).All(&result, "Id", "Filename", "Crc", "Buildnumber", "Filepath", "Filetype", "Isdownloaded", "Remotepath", "Filesize")
+	return result
 }
 
 func (c *Filerepo) CreateOrUpdate() error {

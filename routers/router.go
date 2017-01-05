@@ -19,14 +19,19 @@ func init() {
 	beego.Router("/openserial", &controllers.SerialController{}, "POST:Open")
 	beego.Router("/closeserial", &controllers.SerialController{}, "GET:Close")
 
-	beego.Router("/command", &controllers.SerialController{}, "POST:Send")
+	beego.Router("/command", &controllers.SerialController{}, "POST:Post")
 
-	beego.Router("/generate", &controllers.RequestController{}, "POST:Generate")
+	/*
+		beego.Router("/generate", &controllers.RequestController{}, "POST:Generate")
 
-	beego.Router("/request", &controllers.RequestController{})
+		beego.Router("/request", &controllers.RequestController{})
 
-	beego.Router("/response", &controllers.ResponseController{})
+		beego.Router("/response", &controllers.ResponseController{})
 
-	beego.Router("/opensession", &controllers.RequestController{}, "GET:OpenSession")
+		beego.Router("/opensession", &controllers.RequestController{}, "GET:OpenSession")
+
+	*/
+
+	beego.Router("/getreceivecommands", &controllers.CommandController{}, "POST:GetReceiveCommands")
 
 }

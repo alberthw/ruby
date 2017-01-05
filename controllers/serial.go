@@ -36,9 +36,9 @@ func (c *SerialController) Close() {
 	c.ServeJSON()
 }
 
-func (c *SerialController) Write() {
+func (c *SerialController) Post() {
 	command := c.GetString("command")
-	err := serial.Writer([]byte(command + "\r\n"))
+	err := serial.Writer([]byte(command + "\n"))
 	var result string
 	if err != nil {
 		log.Println(err.Error())
@@ -46,12 +46,15 @@ func (c *SerialController) Write() {
 	} else {
 		result = "ok"
 	}
+	var com models.Command
+	com.Commandtype = models.SEND
+	com.Info = command
+	com.InsertCommand()
 	c.Data["json"] = &result
 	c.ServeJSON()
-
 }
 
-func (c *SerialController) Read() {
+func (c *SerialController) Get() {
 	var result string
 	b, err := serial.Reader()
 	if err != nil {

@@ -7,7 +7,7 @@ function getReleaseFiles() {
         cache: false,
         async: false,
         success: function (data) {
-            
+
             result = data;
         },
         error: function (xhr, status, err) {
@@ -28,7 +28,7 @@ function downloadReleaseFile(fileinfo) {
         async: false,
         type: "POST",
         data: {
-            id:fileinfo.Id,
+            id: fileinfo.Id,
             filepath: fileinfo.Remotepath
         },
         success: function (data) {
@@ -73,10 +73,10 @@ class FileTable extends React.Component {
         return (
             <Table
                 rowsCount={rows.length}
-                rowHeight={50}
+                rowHeight={35}
                 headerHeight={50}
                 width={1000}
-                height={1000}>
+                height={600}>
                 <Column
                     header={<Cell>File Name</Cell>}
                     cell={props => (
@@ -95,7 +95,7 @@ class FileTable extends React.Component {
                     )}
                     width={100}
                     />
-                    <Column
+                <Column
                     header={<Cell>File Size(KB)</Cell>}
                     cell={props => (
                         <Cell {...props}>
@@ -165,14 +165,17 @@ class FileRepo extends React.Component {
         this.setState({
             data: data
         });
- //       console.log(data);
+        //       console.log(data);
     }
 
     render() {
         return (
             <div>
-                <a>Release Files:</a>
-                <input type="button" value="Sync" onClick={this.handleSyncButtonClick} />
+                <div hidden>
+                    <a>Release Files:</a>
+                    <input type="button" value="Sync" onClick={this.handleSyncButtonClick} />
+                </div>
+
                 <FileTable files={this.state.data}></FileTable>
             </div>
         );

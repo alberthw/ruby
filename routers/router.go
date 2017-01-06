@@ -15,6 +15,7 @@ func init() {
 
 	beego.Router("/getfilerepo", &controllers.FileRepoController{}, "GET:GetFiles")
 	beego.Router("/downloadfile", &controllers.FileRepoController{}, "POST:DownloadFile")
+	beego.Router("/burnhostimage", &controllers.FileRepoController{}, "POST:BurnHostImage")
 
 	beego.Router("/openserial", &controllers.SerialController{}, "POST:Open")
 	beego.Router("/closeserial", &controllers.SerialController{}, "GET:Close")

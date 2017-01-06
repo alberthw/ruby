@@ -17,30 +17,6 @@ function getReleaseFiles() {
     return result;
 }
 
-function downloadReleaseFile(fileinfo) {
-    console.log("file id :", fileinfo.Id, ", download file : ", fileinfo.Remotepath);
-    var url = "/downloadfile";
-    var result = null;
-    $.ajax({
-        url: url,
-        dataType: "json",
-        cache: false,
-        async: false,
-        type: "POST",
-        data: {
-            id: fileinfo.Id,
-            filepath: fileinfo.Remotepath
-        },
-        success: function (data) {
-            result = data;
-        },
-        error: function (xhr, status, err) {
-            console.error(url, status, err.toString());
-        }
-    });
-    return result;
-}
-
 class DownloadFile extends React.Component {
     constructor(props) {
         super(props);
@@ -48,13 +24,81 @@ class DownloadFile extends React.Component {
     }
 
     handleDownloadButtonClick(e) {
-        var result = downloadReleaseFile(this.props.file);
+        var result = this.downloadReleaseFile(this.props.file);
         //      alert(result);
+    }
+
+    downloadReleaseFile(fileinfo) {
+        console.log("file id :", fileinfo.Id, ", download file : ", fileinfo.Remotepath);
+        var url = "/downloadfile";
+        var result = null;
+        $.ajax({
+            url: url,
+            dataType: "json",
+            cache: false,
+            async: false,
+            type: "POST",
+            data: {
+                id: fileinfo.Id,
+                filepath: fileinfo.Remotepath
+            },
+            success: function (data) {
+                result = data;
+            },
+            error: function (xhr, status, err) {
+                console.error(url, status, err.toString());
+            }
+        });
+        return result;
     }
 
     render() {
         return (
             <input type="button" value="Download" onClick={this.handleDownloadButtonClick}></input>
+        );
+    }
+}
+
+class BurnImage extends React.Component {
+    constructor(props) {
+        super(props);
+        this.handleBurnImageButtonClick = this.handleBurnImageButtonClick.bind(this);
+    }
+
+    burnImage(file) {
+        var url ="/burnhostimage"; 
+        $.ajax({
+            url: url,
+            dataType: "json",
+            cache: false,
+            async: false,
+            type: "POST",
+            data: {
+                filetype: file.Filetype,
+                filepath: file.Filepath
+            },
+            success: function (data) {
+                alert(data);
+            },
+            error: function (xhr, status, err) {
+                console.error(url, status, err.toString());
+            }
+        });
+    }
+
+    handleBurnImageButtonClick(e) {
+        var f = this.props.file;
+        if (f.Isdownloaded != true){
+            alert("download the hex image first.")
+            return;
+        }
+
+        this.burnImage(f);
+    }
+
+    render() {
+        return (
+            <input type="button" value="Burn" onClick={this.handleBurnImageButtonClick}></input>
         );
     }
 }
@@ -76,7 +120,8 @@ class FileTable extends React.Component {
                 rowHeight={35}
                 headerHeight={50}
                 width={1000}
-                height={600}>
+                height={600}
+                {...this.props}>
                 <Column
                     header={<Cell>File Name</Cell>}
                     cell={props => (
@@ -111,7 +156,7 @@ class FileTable extends React.Component {
                             {rows[props.rowIndex].Buildnumber}
                         </Cell>
                     )}
-                    width={200}
+                    width={150}
                     />
                 <Column
                     header={<Cell>Download Status</Cell>}
@@ -121,13 +166,22 @@ class FileTable extends React.Component {
 
                         </Cell>
                     )}
-                    width={200}
+                    width={150}
                     />
                 <Column
                     header={<Cell></Cell>}
                     cell={props => (
                         <Cell {...props}>
                             <DownloadFile file={rows[props.rowIndex]} />
+                        </Cell>
+                    )}
+                    width={100}
+                    />
+                <Column
+                    header={<Cell></Cell>}
+                    cell={props => (
+                        <Cell {...props}>
+                            <BurnImage file={rows[props.rowIndex]} />
                         </Cell>
                     )}
                     width={100}
@@ -152,7 +206,7 @@ class FileRepo extends React.Component {
     componentDidMount() {
         this.timerID = setInterval(
             () => this.handleSyncButtonClick(),
-            2000
+            5000
         );
     }
 

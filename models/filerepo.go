@@ -323,7 +323,7 @@ func GetALLReleaseFiles() []Filerepo {
 func getReleaseFilesByType(t FileType, limit int64) []Filerepo {
 	o := orm.NewOrm()
 	var result []Filerepo
-	o.QueryTable("Filerepo").Filter("Filetype", t).OrderBy("Buildnumber").Limit(limit).All(&result, "Id", "Filename", "Crc", "Buildnumber", "Filepath", "Filetype", "Isdownloaded", "Remotepath", "Filesize")
+	o.QueryTable("Filerepo").Filter("Filetype", t).OrderBy("-id").Limit(limit).All(&result, "Id", "Filename", "Crc", "Buildnumber", "Filepath", "Filetype", "Isdownloaded", "Remotepath", "Filesize")
 	return result
 }
 

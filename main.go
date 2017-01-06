@@ -42,7 +42,10 @@ func reader(t time.Duration) {
 }
 
 func open() {
+	index := 0
+	var waitTime time.Duration = 1000
 	for {
+
 		models.GConfig = models.GConfig.Get()
 		//		log.Printf("serial name : %s, serial baud : %d, connection status : %v", models.GConfig.Serialname, models.GConfig.Serialbaud, models.GConfig.Isconnected)
 
@@ -51,12 +54,19 @@ func open() {
 
 		if err != nil {
 			log.Println(err.Error())
+			index++
 		} else {
 			connected = true
+			index = 0
+			waitTime = 1000
 		}
+
 		models.GConfig.Isconnected = connected
 		models.GConfig.UpdateStatus()
-		time.Sleep(time.Millisecond * 1000)
+		if index > 10 {
+			waitTime = 100000
+		}
+		time.Sleep(time.Millisecond * waitTime)
 	}
 }
 

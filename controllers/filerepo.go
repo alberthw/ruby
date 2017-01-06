@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/alberthw/ruby/models"
+	"github.com/alberthw/ruby/mongoose"
 	"github.com/astaxie/beego"
 )
 
@@ -84,4 +85,17 @@ func (c FileRepoController) DownloadFile() {
 	*/
 	c.Data["json"] = &result
 	c.ServeJSON()
+}
+
+func (c FileRepoController) BurnHostImage() {
+	fp := c.GetString("filepath")
+	t, _ := c.GetInt64("filetype")
+	err := mongoose.BurnHostImage(fp, models.FileType(t))
+	result := "ok"
+	if err != nil {
+		result = err.Error()
+	}
+	c.Data["json"] = &result
+	c.ServeJSON()
+
 }

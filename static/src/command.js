@@ -44,7 +44,7 @@ class SerialCommand extends React.Component {
     }
 
     componentDidMount() {
-        this.timer = setInterval(() => { this.getSerialOutput() }, 2000);
+        this.timer = setInterval(() => { this.getSerialOutput() }, 5000);
     }
 
     componentWillUnmount() {

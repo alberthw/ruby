@@ -306,7 +306,7 @@ func (c Filerepo) Insert() error {
 func GetALLReleaseFiles() []Filerepo {
 	var lists []Filerepo
 	o := orm.NewOrm()
-	o.QueryTable("Filerepo").GroupBy("Filetype", "Id").OrderBy("Filetype", "Buildnumber").All(&lists, "Id", "Filename", "Crc", "Buildnumber", "Filepath", "Filetype", "Isdownloaded", "Remotepath", "Filesize")
+	o.QueryTable("Filerepo").GroupBy("Filetype", "Id").OrderBy("Filetype", "-id").All(&lists, "Id", "Filename", "Crc", "Buildnumber", "Filepath", "Filetype", "Isdownloaded", "Remotepath", "Filesize")
 	/*
 		host := getReleaseFilesByType(FILETYPE_APP, 5)
 		lists = append(lists, host...)
@@ -330,7 +330,7 @@ func GetReleaseFilesWithFilter(date string) []Filerepo {
 	f := date[:2] + date[3:5]
 	//	fmt.Println("filter : ", f)
 	o := orm.NewOrm()
-	o.QueryTable("Filerepo").Filter("Filename__icontains", f).GroupBy("Filetype", "Id").OrderBy("Filetype", "Buildnumber").All(&lists, "Id", "Filename", "Crc", "Buildnumber", "Filepath", "Filetype", "Isdownloaded", "Remotepath", "Filesize")
+	o.QueryTable("Filerepo").Filter("Filename__icontains", f).GroupBy("Filetype", "Id").OrderBy("Filetype", "-id").All(&lists, "Id", "Filename", "Crc", "Buildnumber", "Filepath", "Filetype", "Isdownloaded", "Remotepath", "Filesize")
 
 	return lists
 }

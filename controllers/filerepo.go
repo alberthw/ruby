@@ -21,7 +21,16 @@ type FileRepoController struct {
 func (c FileRepoController) GetFiles() {
 	models.SyncReleaseFilesInfo()
 
-	rows := models.GetALLReleaseFiles()
+	dt := c.GetString("date")
+
+	//	fmt.Printf("f : |%s|\n", dt)
+
+	var rows []models.Filerepo
+	if len(dt) == 0 {
+		rows = models.GetALLReleaseFiles()
+	} else {
+		rows = models.GetReleaseFilesWithFilter(dt)
+	}
 	c.Data["json"] = &rows
 	c.ServeJSON()
 }

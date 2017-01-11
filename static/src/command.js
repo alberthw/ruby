@@ -83,6 +83,7 @@ class SerialCommand extends React.Component {
     }
 
     handleOutputChange(e) {
+        document.getElementById("taOutput").scrollTop = document.getElementById("taOutput").scrollHeight;
         this.setState({
             output: e.target.value
         });

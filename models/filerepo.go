@@ -304,18 +304,33 @@ func (c Filerepo) Insert() error {
 	return err
 }
 func GetALLReleaseFiles() []Filerepo {
-
 	var lists []Filerepo
-	// o := orm.NewOrm()
-	//	o.QueryTable("Filerepo").GroupBy("Filetype", "Id").OrderBy("Filetype", "Buildnumber").All(&lists, "Id", "Filename", "Crc", "Buildnumber", "Filepath", "Filetype", "Isdownloaded", "Remotepath", "Filesize")
-	host := getReleaseFilesByType(FILETYPE_APP, 5)
-	lists = append(lists, host...)
+	o := orm.NewOrm()
+	o.QueryTable("Filerepo").GroupBy("Filetype", "Id").OrderBy("Filetype", "Buildnumber").All(&lists, "Id", "Filename", "Crc", "Buildnumber", "Filepath", "Filetype", "Isdownloaded", "Remotepath", "Filesize")
+	/*
+		host := getReleaseFilesByType(FILETYPE_APP, 5)
+		lists = append(lists, host...)
 
-	boot := getReleaseFilesByType(FILETYPE_BOOT, 5)
-	lists = append(lists, boot...)
+		boot := getReleaseFilesByType(FILETYPE_BOOT, 5)
+		lists = append(lists, boot...)
 
-	dsp := getReleaseFilesByType(FILETYPE_DSP, 5)
-	lists = append(lists, dsp...)
+		dsp := getReleaseFilesByType(FILETYPE_DSP, 5)
+		lists = append(lists, dsp...)
+	*/
+	return lists
+}
+
+func GetReleaseFilesWithFilter(date string) []Filerepo {
+	var lists []Filerepo
+
+	//	fmt.Println("filter : ", date)
+	if len(date) != 10 { //   dd/mm/yyyy
+		return lists
+	}
+	f := date[:2] + date[3:5]
+	//	fmt.Println("filter : ", f)
+	o := orm.NewOrm()
+	o.QueryTable("Filerepo").Filter("Filename__icontains", f).GroupBy("Filetype", "Id").OrderBy("Filetype", "Buildnumber").All(&lists, "Id", "Filename", "Crc", "Buildnumber", "Filepath", "Filetype", "Isdownloaded", "Remotepath", "Filesize")
 
 	return lists
 }

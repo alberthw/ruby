@@ -1,22 +1,3 @@
-function getReleaseFiles() {
-    var result = [];
-    var url = "/getfilerepo";
-    $.ajax({
-        url: url,
-        dataType: "json",
-        cache: false,
-        async: false,
-        success: function (data) {
-
-            result = data;
-        },
-        error: function (xhr, status, err) {
-            console.error(url, status, err.toString());
-        }
-    });
-    return result;
-}
-
 class DownloadFile extends React.Component {
     constructor(props) {
         super(props);
@@ -66,7 +47,7 @@ class BurnImage extends React.Component {
     }
 
     burnImage(file) {
-        var url ="/burnhostimage"; 
+        var url = "/burnhostimage";
         $.ajax({
             url: url,
             dataType: "json",
@@ -88,7 +69,7 @@ class BurnImage extends React.Component {
 
     handleBurnImageButtonClick(e) {
         var f = this.props.file;
-        if (f.Isdownloaded != true){
+        if (f.Isdownloaded != true) {
             alert("download the hex image first.")
             return;
         }
@@ -111,9 +92,13 @@ class FileTable extends React.Component {
         const rows = this.props.files;
 
         const {Table, Column, Cell} = FixedDataTable;
-        //        var Column = FixedDataTable.Column;
-        //        var Table = FixedDataTable.Table;
-        //        var Cell = FixedDataTable.Cell;
+
+        const TextCell = ({rowIndex, col, ...props}) => (
+            <Cell {...props}>
+                {rows[rowIndex][col].toString()}
+            </Cell>
+        );
+
         return (
             <Table
                 rowsCount={rows.length}
@@ -124,48 +109,28 @@ class FileTable extends React.Component {
                 {...this.props}>
                 <Column
                     header={<Cell>File Name</Cell>}
-                    cell={props => (
-                        <Cell {...props}>
-                            {rows[props.rowIndex].Filename}
-                        </Cell>
-                    )}
+                    cell={<TextCell col="Filename" />}
+
                     width={300}
                     />
                 <Column
                     header={<Cell>CRC</Cell>}
-                    cell={props => (
-                        <Cell {...props}>
-                            {rows[props.rowIndex].Crc}
-                        </Cell>
-                    )}
+                    cell={<TextCell col="Crc" />}
                     width={100}
                     />
                 <Column
                     header={<Cell>File Size(KB)</Cell>}
-                    cell={props => (
-                        <Cell {...props}>
-                            {rows[props.rowIndex].Filesize}
-                        </Cell>
-                    )}
+                    cell={<TextCell col="Filesize" />}
                     width={100}
                     />
                 <Column
                     header={<Cell>Build Number</Cell>}
-                    cell={props => (
-                        <Cell {...props}>
-                            {rows[props.rowIndex].Buildnumber}
-                        </Cell>
-                    )}
+                    cell={<TextCell col="Buildnumber" />}
                     width={150}
                     />
                 <Column
                     header={<Cell>Download Status</Cell>}
-                    cell={props => (
-                        <Cell {...props}>
-                            {rows[props.rowIndex].Isdownloaded.toString()}
-
-                        </Cell>
-                    )}
+                    cell={<TextCell col="Isdownloaded" />}
                     width={150}
                     />
                 <Column
@@ -191,22 +156,66 @@ class FileTable extends React.Component {
     }
 }
 
+class TableFilter extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.handleSearchDateClick = this.handleSearchDateClick.bind(this);
+        this.handleDateChange = this.handleDateChange.bind(this);
+    }
+
+    handleSearchDateClick(e) {
+        this.props.onSearch($("#datepicker").val());
+    }
+
+    handleDateChange(e) {
+        console.log("date 1 :" + e.target.value);
+        console.log("date 2 : " + $("#datepicker").val());
+        this.props.onChange($("#datepicker").val());
+    }
+
+    componentDidMount() {
+        var props = this.props;
+        $("#datepicker").datepicker({
+            onSelect: function (text) {
+                props.onChange(text);
+            }
+        });
+    }
+
+    render() {
+        return (
+            <div>
+                <a>Filter:</a>
+                <input type="text" id="datepicker" placeholder="MM/DD/YYYY" onChange={this.handleDateChange}></input>
+                <input type="button" value="Search" onClick={this.handleSearchDateClick} ></input>
+            </div>
+        );
+    }
+}
+
 
 class FileRepo extends React.Component {
     constructor(props) {
         super(props);
 
         this.handleSyncButtonClick = this.handleSyncButtonClick.bind(this);
+        this.handleFilterChange = this.handleFilterChange.bind(this);
+        this.handleFilterSearch = this.handleFilterSearch.bind(this);
 
         this.state = {
-            data: getReleaseFiles()
+            filter: {
+                date: ""
+            },
+            data: this.getReleaseFiles(null),
+
         };
     }
 
     componentDidMount() {
         this.timerID = setInterval(
-            () => this.handleSyncButtonClick(),
-            5000
+            () => this.handleSyncButtonClick(this.state.filter),
+            60000
         );
     }
 
@@ -215,11 +224,51 @@ class FileRepo extends React.Component {
     }
 
     handleSyncButtonClick(e) {
-        var data = getReleaseFiles();
+        var data = this.getReleaseFiles(this.state.filter);
         this.setState({
             data: data
         });
         //       console.log(data);
+    }
+
+    handleFilterSearch(e) {
+        this.handleSyncButtonClick();
+    }
+
+    handleFilterChange(e) {
+        this.setState({
+            filter: {
+                date: e,
+            }
+        });
+        this.handleSyncButtonClick();
+    }
+
+    getReleaseFiles(filter) {
+        console.log("filter", filter);
+        var result = [];
+        var url = "/getfilerepo";
+        var dt = "";
+        if (filter != null) {
+            dt = filter.date;
+        }
+        $.ajax({
+            url: url,
+            dataType: "json",
+            cache: false,
+            async: false,
+            data: {
+                "date": dt,
+            },
+            success: function (data) {
+
+                result = data;
+            },
+            error: function (xhr, status, err) {
+                console.error(url, status, err.toString());
+            }
+        });
+        return result;
     }
 
     render() {
@@ -229,6 +278,7 @@ class FileRepo extends React.Component {
                     <a>Release Files:</a>
                     <input type="button" value="Sync" onClick={this.handleSyncButtonClick} />
                 </div>
+                <TableFilter onChange={this.handleFilterChange} onSearch={this.handleFilterSearch}></TableFilter>
 
                 <FileTable files={this.state.data}></FileTable>
             </div>

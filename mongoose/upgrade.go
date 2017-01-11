@@ -60,10 +60,20 @@ func sendUploadImage(filepath string) error {
 		log.Println(err.Error())
 		return err
 	}
+	curPos := 0
+	pervPos := 0
 	for i, v := range lines {
-		log.Printf(" |%d| ", 100*i/len(lines))
+		curPos = 100 * i / len(lines)
+		if i == 0 {
+			log.Printf(" |%d| ", curPos)
+		}
+		if curPos != pervPos {
+			log.Printf(" |%d| ", curPos)
+		}
 		sendMongooseCommand(v)
+		pervPos = curPos
 		time.Sleep(time.Millisecond * 1)
+
 	}
 	return nil
 }

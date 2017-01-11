@@ -32,7 +32,7 @@ func reader(t time.Duration) {
 		if len(b) == 0 {
 			continue
 		}
-		log.Printf("received : 0x%X\n", b)
+		log.Printf("received : %s\n", b)
 		var c models.Command
 		c.Commandtype = models.RECEIVE
 		c.Info = string(b)

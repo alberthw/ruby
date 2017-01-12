@@ -44,7 +44,7 @@ class SerialCommand extends React.Component {
     }
 
     componentDidMount() {
-        this.timer = setInterval(() => { this.getSerialOutput() }, 5000);
+        this.timer = setInterval(() => { this.getSerialOutput() }, 500);
     }
 
     componentWillUnmount() {
@@ -55,7 +55,7 @@ class SerialCommand extends React.Component {
     getSerialOutput() {
 
         document.getElementById("taOutput").scrollTop = document.getElementById("taOutput").scrollHeight;
- //       $("#taOutput").scrollTop = $("#taOutput").scrollHeight;
+        //       $("#taOutput").scrollTop = $("#taOutput").scrollHeight;
         $.ajax({
             url: "/getreceivecommands",
             dataType: "json",
@@ -94,10 +94,11 @@ class SerialCommand extends React.Component {
 
         return (
             <div>
+                <a>Command:</a>
                 <input type="text" value={this.state.input} onChange={this.handleInputChange}></input>
                 <input type="button" value="Send" onClick={this.handleSendButtonClick}></input>
                 <br />
-                <textarea id="taOutput" cols="100" rows="20" value={this.state.output} onChange={this.handleOutputChange} readOnly></textarea>
+                <textarea id="taOutput" cols="100" rows="30" value={this.state.output} onChange={this.handleOutputChange} readOnly></textarea>
             </div>
         );
 

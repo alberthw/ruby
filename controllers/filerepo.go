@@ -19,8 +19,6 @@ type FileRepoController struct {
 }
 
 func (c FileRepoController) GetFiles() {
-	models.SyncReleaseFilesInfo()
-
 	dt := c.GetString("date")
 
 	//	fmt.Printf("f : |%s|\n", dt)

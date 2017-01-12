@@ -17,6 +17,7 @@ func main() {
 	//	beego.SetStaticPath("/release", "release")
 
 	go open()
+	go syncReleaseFileRepository(6000)
 	go reader(100)
 
 	beego.Run()
@@ -37,6 +38,13 @@ func reader(t time.Duration) {
 		c.Commandtype = models.RECEIVE
 		c.Info = string(b)
 		c.InsertCommand()
+		time.Sleep(time.Millisecond * t)
+	}
+}
+
+func syncReleaseFileRepository(t time.Duration) {
+	for {
+		models.SyncReleaseFilesInfo()
 		time.Sleep(time.Millisecond * t)
 	}
 }
@@ -63,7 +71,7 @@ func open() {
 
 		models.GConfig.Isconnected = connected
 		models.GConfig.UpdateStatus()
-		if index > 10 {
+		if index > 100 {
 			waitTime = 100000
 		}
 		time.Sleep(time.Millisecond * waitTime)

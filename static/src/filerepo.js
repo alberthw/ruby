@@ -215,7 +215,7 @@ class FileRepo extends React.Component {
     componentDidMount() {
         this.timerID = setInterval(
             () => this.handleSyncButtonClick(this.state.filter),
-            60000
+            5000
         );
     }
 

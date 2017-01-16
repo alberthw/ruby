@@ -18,10 +18,10 @@ function TestRemoteServerConnection(url) {
     return result;
 }
 
-function GetRemoteServer() {
+function GetRepositorySetting() {
     var result = null;
     $.ajax({
-        url: "/remoteserver",
+        url: "/reposetting",
         dataType: "json",
         //       cache: false,
         async: false,
@@ -35,10 +35,10 @@ function GetRemoteServer() {
     return result;
 }
 
-function UpdateRemoteServer(id, ip, status) {
+function UpdateRepositorySetting(id, ip, status) {
     var result = false;
     $.ajax({
-        url: "/remoteserver",
+        url: "/reposetting",
         dataType: "json",
         type: "POST",
         async: false,
@@ -59,17 +59,16 @@ function UpdateRemoteServer(id, ip, status) {
     return result;
 }
 
-class RemoteFileServer extends React.Component {
+class RepositorySetting extends React.Component {
 
     constructor(props) {
         super(props);
 
-        var result = GetRemoteServer();
+        var result = GetRepositorySetting();
 
         this.state = {
             Id: result.Id,
             Remoteserver: result.Remoteserver,
-            Contentfolder:"UserContent",
             Isconnected: result.Isconnected
         };
 
@@ -94,29 +93,32 @@ class RemoteFileServer extends React.Component {
     }
 
     handleCheckClick(e) {
+        UpdateRepositorySetting(this.state.Id, this.state.Remoteserver, isConnected);
         var url = "/testremoteserver";
         var isConnected = TestRemoteServerConnection(url);
         console.log("server connection :", isConnected);
         this.setState({
             Isconnected: isConnected
         });
-        UpdateRemoteServer(this.state.Id, this.state.Remoteserver, isConnected);
+        UpdateRepositorySetting(this.state.Id, this.state.Remoteserver, isConnected);
     }
 
     render() {
         const remoteServer = this.state.Remoteserver;
         const isConnected = this.state.Isconnected;
         return (
-            <div>
-                <a>Remote File Server : </a>
-                <input type="text" value={remoteServer} onChange={this.handleRemoteServerIpChange}></input>
-                <a>Connected : </a>
-                <input type="text" value={isConnected} onChange={this.handleIsConnectedChange} readOnly></input>
-                <input type="button" value="Check" onClick={this.handleCheckClick}></input>
+            <div className="input-group">
+                <span className="input-group-addon">Remote File Server:</span>
+                <input type="text" className="form-control" value={remoteServer} onChange={this.handleRemoteServerIpChange}></input>
+                <span className="input-group-addon">Connected:</span>
+                <input type="text" className="form-control"  value={isConnected} onChange={this.handleIsConnectedChange} readOnly></input>
+                <span className="input-group-btn">
+                    <button type="button" className="btn btn-default" onClick={this.handleCheckClick}>Check</button>
+                </span>
             </div>
         );
     }
 
 }
 
-ReactDOM.render(<RemoteFileServer />, document.getElementById("remoteserver"));
+ReactDOM.render(<RepositorySetting />, document.getElementById("reposetting"));

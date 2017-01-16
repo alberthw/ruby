@@ -12,9 +12,7 @@ type RubyConfigController struct {
 }
 
 func (c RubyConfigController) Get() {
-	var config models.Rubyconfig
-
-	row := config.Get()
+	row := models.GetRubyconfig()
 
 	c.Data["json"] = &row
 	c.ServeJSON()
@@ -26,6 +24,6 @@ func (c RubyConfigController) Post() {
 	config.Serialname = c.GetString("Serialname")
 	config.Serialbaud, _ = c.GetInt64("Serialbaud")
 	//	config.Isconnected, _ = c.GetBool("connect")
-	config.Update()
+	config.UpdateSerialName()
 	c.Ctx.WriteString(strconv.FormatInt(config.Id, 10))
 }

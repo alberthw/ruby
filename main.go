@@ -12,9 +12,7 @@ import (
 
 func main() {
 
-	beego.BConfig.Listen.HTTPPort = 8089
-
-	//	beego.SetStaticPath("/release", "release")
+	beego.SetStaticPath("/repository", "repository")
 
 	go open()
 	go syncReleaseFileRepository(6000)
@@ -54,7 +52,7 @@ func open() {
 	var waitTime time.Duration = 1000
 	for {
 
-		models.GConfig = models.GConfig.Get()
+		models.GConfig = models.GetRubyconfig()
 		//		log.Printf("serial name : %s, serial baud : %d, connection status : %v", models.GConfig.Serialname, models.GConfig.Serialbaud, models.GConfig.Isconnected)
 
 		connected := false
@@ -70,7 +68,7 @@ func open() {
 		}
 
 		models.GConfig.Isconnected = connected
-		models.GConfig.UpdateStatus()
+		models.GConfig.UpdateSerialConnectionStatus()
 		if index > 100 {
 			waitTime = 100000
 		}

@@ -169,8 +169,6 @@ class TableFilter extends React.Component {
     }
 
     handleDateChange(e) {
-        console.log("date 1 :" + e.target.value);
-        console.log("date 2 : " + $("#datepicker").val());
         this.props.onChange($("#datepicker").val());
     }
 
@@ -185,13 +183,19 @@ class TableFilter extends React.Component {
 
     render() {
         return (
-            <div>
-                <a>Filter:</a>
-                <input type="text" id="datepicker" placeholder="MM/DD/YYYY" onChange={this.handleDateChange}></input>
-                <input type="button" value="Search" onClick={this.handleSearchDateClick} ></input>
+            <div className="input-group col-md-4">
+                <span className="input-group-addon">Filter:</span>
+                <input type="text" className="form-control" id="datepicker" placeholder="MM/DD/YYYY" onChange={this.handleDateChange}></input>
+                <span className="input-group-btn">
+                    <button type="button" className="btn btn-default" onClick={this.handleSearchDateClick}>Search</button>
+                </span>
             </div>
         );
     }
+}
+
+class FileUpload extends React.Component{
+    
 }
 
 
@@ -199,7 +203,6 @@ class FileRepo extends React.Component {
     constructor(props) {
         super(props);
 
-        this.handleSyncButtonClick = this.handleSyncButtonClick.bind(this);
         this.handleFilterChange = this.handleFilterChange.bind(this);
         this.handleFilterSearch = this.handleFilterSearch.bind(this);
 
@@ -214,7 +217,7 @@ class FileRepo extends React.Component {
 
     componentDidMount() {
         this.timerID = setInterval(
-            () => this.handleSyncButtonClick(this.state.filter),
+            () => this.syncData(this.state.filter),
             5000
         );
     }
@@ -223,7 +226,7 @@ class FileRepo extends React.Component {
         clearInterval(this.timerID);
     }
 
-    handleSyncButtonClick(e) {
+    syncData(e) {
         var data = this.getReleaseFiles(this.state.filter);
         this.setState({
             data: data
@@ -232,7 +235,7 @@ class FileRepo extends React.Component {
     }
 
     handleFilterSearch(e) {
-        this.handleSyncButtonClick();
+        this.syncData();
     }
 
     handleFilterChange(e) {
@@ -241,7 +244,7 @@ class FileRepo extends React.Component {
                 date: e,
             }
         });
-        this.handleSyncButtonClick();
+        this.syncData();
     }
 
     getReleaseFiles(filter) {
@@ -274,12 +277,7 @@ class FileRepo extends React.Component {
     render() {
         return (
             <div>
-                <div hidden>
-                    <a>Release Files:</a>
-                    <input type="button" value="Sync" onClick={this.handleSyncButtonClick} />
-                </div>
                 <TableFilter onChange={this.handleFilterChange} onSearch={this.handleFilterSearch}></TableFilter>
-
                 <FileTable files={this.state.data}></FileTable>
             </div>
         );

@@ -10,8 +10,8 @@ func init() {
 
 	beego.Router("/config", &controllers.RubyConfigController{})
 
-	beego.Router("/remoteserver", &controllers.RemoteServerController{})
-	beego.Router("/testremoteserver", &controllers.RemoteServerController{}, "GET:Test")
+	beego.Router("/reposetting", &controllers.RepoSettingController{})
+	beego.Router("/testremoteserver", &controllers.RepoSettingController{}, "GET:Test")
 
 	beego.Router("/getfilerepo", &controllers.FileRepoController{}, "GET:GetFiles")
 	beego.Router("/downloadfile", &controllers.FileRepoController{}, "POST:DownloadFile")
@@ -19,19 +19,7 @@ func init() {
 
 	beego.Router("/openserial", &controllers.SerialController{}, "POST:Open")
 	beego.Router("/closeserial", &controllers.SerialController{}, "GET:Close")
-
 	beego.Router("/command", &controllers.SerialController{}, "POST:Post")
-
-	/*
-		beego.Router("/generate", &controllers.RequestController{}, "POST:Generate")
-
-		beego.Router("/request", &controllers.RequestController{})
-
-		beego.Router("/response", &controllers.ResponseController{})
-
-		beego.Router("/opensession", &controllers.RequestController{}, "GET:OpenSession")
-
-	*/
 
 	beego.Router("/getreceivecommands", &controllers.CommandController{}, "POST:GetReceiveCommands")
 

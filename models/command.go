@@ -41,13 +41,13 @@ func (c *Command) InsertCommand() {
 func GetSendCommands(limit int64) ([]Command, error) {
 	o := orm.NewOrm()
 	var result []Command
-	_, err := o.QueryTable("command").Filter("Commandtype", SEND).OrderBy("id").Limit(limit).All(&result, "Info")
+	_, err := o.Raw("select id,info from (select id,info from command where commandtype = ? order by id DESC limit ?) t order by id ASC", SEND, limit).QueryRows(&result)
 	return result, err
 }
 
 func GetReceiveCommands(limit int64) ([]Command, error) {
 	o := orm.NewOrm()
 	var result []Command
-	_, err := o.QueryTable("command").Filter("Commandtype", RECEIVE).OrderBy("id").Limit(limit).All(&result, "Info")
+	_, err := o.Raw("select id,info from (select id,info from command where commandtype = ? order by id DESC limit ?) t order by id ASC", RECEIVE, limit).QueryRows(&result)
 	return result, err
 }

@@ -11,46 +11,21 @@ var (
 	GConfig Rubyconfig
 )
 
-type DeviceID uint32
-
-const (
-	ForceTraid        DeviceID = 0x00
-	ValleylabExchange DeviceID = 0x01
-	PatriotGenerator  DeviceID = 0x02
-	IntegratedOR      DeviceID = 0x3D
-	ServiceApps       DeviceID = 0xD8
-)
-
 type Rubyconfig struct {
-	Id             int64  `orm:"pk;auto"`
-	Serialname     string `orm:"unique"`
-	Serialbaud     int64  `orm:"default(115200)"`
-	Isconnected    bool
-	Deviceid       DeviceID
-	Protocolver    string
-	Sessionkey     string
-	Sequence       string `orm:"default(0)"`
-	Writeinterval  int
-	Sessionstatus  uint32
-	Sessiontimeout uint32
-	Messagetimeout uint32
-	Maxretrycount  uint32
-	Devicename     string
-	Localrepo      string
-	Created        time.Time `orm:"auto_now_add;type(datetime)"`
-	Updated        time.Time `orm:"auto_now;type(datetime)"`
+	Id          int64  `orm:"pk;auto"`
+	Serialname  string `orm:"unique"`
+	Serialbaud  int64  `orm:"default(115200)"`
+	Isconnected bool
+	Devicename  string
+	Created     time.Time `orm:"auto_now_add;type(datetime)"`
+	Updated     time.Time `orm:"auto_now;type(datetime)"`
 }
 
 func (c *Rubyconfig) init() {
 	c.Serialbaud = 115200
-	c.Sequence = "0"
-	c.Sessionkey = "FF"
-	c.Deviceid = ServiceApps
-	c.Protocolver = "10001"
-	c.Localrepo = "c:/tmp"
 }
 
-func (c Rubyconfig) Get() Rubyconfig {
+func GetRubyconfig() Rubyconfig {
 	o := orm.NewOrm()
 	var result Rubyconfig
 
@@ -59,14 +34,10 @@ func (c Rubyconfig) Get() Rubyconfig {
 		result.init()
 		o.Insert(&result)
 	}
-	if len(result.Sequence) == 0 {
-		result.Sequence = "0"
-	}
-	result.Serialbaud = 115200
 	return result
 }
 
-func (c *Rubyconfig) Update() error {
+func (c *Rubyconfig) UpdateSerialName() error {
 	c.Updated = time.Now()
 	o := orm.NewOrm()
 	o.Begin()
@@ -80,25 +51,11 @@ func (c *Rubyconfig) Update() error {
 	return err
 }
 
-func (c *Rubyconfig) UpdateStatus() error {
+func (c *Rubyconfig) UpdateSerialConnectionStatus() error {
 	c.Updated = time.Now()
 	o := orm.NewOrm()
 	o.Begin()
 	_, err := o.Update(c, "Isconnected", "Updated")
-	if err != nil {
-		log.Println(err.Error())
-		o.Rollback()
-		return err
-	}
-	o.Commit()
-	return err
-}
-
-func (c *Rubyconfig) UpdateSequence() error {
-	c.Updated = time.Now()
-	o := orm.NewOrm()
-	o.Begin()
-	_, err := o.Update(c, "Sequence", "Updated")
 	if err != nil {
 		log.Println(err.Error())
 		o.Rollback()

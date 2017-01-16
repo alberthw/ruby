@@ -94,14 +94,18 @@ class SerialCommand extends React.Component {
 
         return (
             <div>
-                <a>Command:</a>
-                <input type="text" value={this.state.input} onChange={this.handleInputChange}></input>
-                <input type="button" value="Send" onClick={this.handleSendButtonClick}></input>
-                <br />
-                <textarea id="taOutput" cols="100" rows="30" value={this.state.output} onChange={this.handleOutputChange} readOnly></textarea>
+                <div className="input-group  col-md-4">
+                    <span className="input-group-addon">Command:</span>
+                    <input type="text" className="form-control" value={this.state.input} onChange={this.handleInputChange}></input>
+                    <span className="input-group-btn">
+                        <button type="button" className="btn btn-default" onClick={this.handleSendButtonClick}>Send</button>
+                    </span>
+                </div>
+                <div>
+                    <textarea id="taOutput" cols="100" rows="30" value={this.state.output} onChange={this.handleOutputChange} readOnly></textarea>
+                </div>
             </div>
         );
-
     }
 
 }

@@ -43,25 +43,24 @@ type Filerepo struct {
 	Updated      time.Time `orm:"auto_now;type(datetime)"`
 }
 
-func getRemoteFileRepositoryURL() (string, error) {
-	var remoteServer Remoteserver
-	remoteServer = remoteServer.Get()
-	if len(remoteServer.Remoteserver) == 0 {
-		return "", errors.New("invalid remote server URL")
+func getRemoteFileRepositoryURL() (string, string, error) {
+	rs := GetRepoSetting()
+	if len(rs.Remoteserver) == 0 {
+		return "", "", errors.New("invalid remote server URL")
 	}
-	if !remoteServer.Isconnected {
-		err := fmt.Sprintf("conncect to repository failed , %s", remoteServer.Remoteserver)
-		return "", errors.New(err)
+	if !rs.Isconnected {
+		err := fmt.Sprintf("conncect to repository failed , %s", rs.Remoteserver)
+		return "", "", errors.New(err)
 	}
-	repoURL := "http://" + remoteServer.Remoteserver + "/userContent/Release/"
+	repoURL := "http://" + rs.Remoteserver + rs.Remotefolder
 
-	return repoURL, nil
+	return repoURL, rs.Remotefolder, nil
 
 }
 
 func getFileInfoFromRemoteRepo() ([]Filerepo, error) {
 
-	repoURL, err := getRemoteFileRepositoryURL()
+	repoURL, remoteFolder, err := getRemoteFileRepositoryURL()
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +87,7 @@ func getFileInfoFromRemoteRepo() ([]Filerepo, error) {
 		if len(filesize) > 4 {
 			f.Filesize = filesize[:len(filesize)-3]
 		}
-		f.Remotepath = "/userContent/Release/" + f.Filename
+		f.Remotepath = remoteFolder + "/" + f.Filename
 		f.checkFileType()
 		result = append(result, f)
 	})
@@ -132,8 +131,8 @@ func (f *Filerepo) checkFileType() {
 	f.Filetype = FILETYPE_UNKNOWN
 }
 
-func findCRCLine(filename string, address string) string {
-	f, err := os.Open(filename)
+func findCRCLine(filepath string, address string) string {
+	f, err := os.Open(filepath)
 	if err != nil {
 		//		log.Println("checkCRC() : ", err.Error())
 		return ""
@@ -166,7 +165,6 @@ func findCRC(s string, t FileType) string {
 	default:
 		return ""
 	}
-	return ""
 }
 
 func (f *Filerepo) getCRC() {
@@ -212,23 +210,25 @@ func getBuildNumberFromFileName(filename string) (uint64, error) {
 }
 */
 
-func (c *Filerepo) GetFileInfo() error {
+func (c *Filerepo) getFileInfo() error {
 	c.Filepath = strings.Replace(c.Filepath, "\\", "/", -1)
 	filename := filepath.Base(c.Filepath)
 	c.Filename = filename
-	//	c.getBuildNumber()
+	c.getBuildNumber()
 	//	c.Created = fi.ModTime()
 	c.checkFileType()
 	c.getCRC()
-	//	c.getCheckSum()
+	c.getCheckSum()
 
-	c.UpdateCRC()
+	c.checkDownloadStatus()
+
+	//	c.UpdateCRC()
 	//	c.UpdateChecksum()
 	//	c.UpdateFileSize()
 	return nil
 }
 
-func getReleaseFilesInfo(folder string) []Filerepo {
+func getLocalReleaseFilesInfo(folder string) []Filerepo {
 	var result []Filerepo
 	filepath.Walk(folder, func(path string, info os.FileInfo, err error) error {
 		if info == nil {
@@ -238,7 +238,7 @@ func getReleaseFilesInfo(folder string) []Filerepo {
 		if !info.IsDir() {
 			var fr Filerepo
 			fr.Filepath = path
-			fr.GetFileInfo()
+			fr.getFileInfo()
 
 			//		log.Println(fr)
 			result = append(result, fr)
@@ -248,7 +248,8 @@ func getReleaseFilesInfo(folder string) []Filerepo {
 	return result
 }
 
-/*func clearFileRepo() error {
+/*
+func clearFileRepo() error {
 	o := orm.NewOrm()
 	_, err := o.Raw("delete from filerepo").Exec()
 	if err != nil {
@@ -257,45 +258,82 @@ func getReleaseFilesInfo(folder string) []Filerepo {
 	return err
 }
 */
+
 func (c *Filerepo) checkDownloadStatus() {
 	fi, err := os.Stat(c.Filepath)
-	if os.IsNotExist(err) {
-		c.Isdownloaded = false
+	//	fmt.Printf("file path : %s, error : %v\n", c.Filepath, err)
+	if err == nil {
+		c.Filesize = fmt.Sprintf("%.2f", float64(fi.Size())/1024)
+		c.Isdownloaded = true
 		return
 	}
 	/*
-		checkSum := caculateChecksum(localFullPath)
-		if checkSum == c.Checksum {
+			checkSum := caculateChecksum(localFullPath)
+			if checkSum == c.Checksum {
+				c.Isdownloaded = true
+				return
+			}
+
+		localFileSize := fmt.Sprintf("%.2f", float64(fi.Size())/1024)
+		log.Printf("remote size :%f, local size : %f", c.Filesize, localFileSize)
+		if localFileSize == c.Filesize {
 			c.Isdownloaded = true
 			return
 		}
 	*/
-	localFileSize := fmt.Sprintf("%.2f", float64(fi.Size())/1024)
-	if localFileSize == c.Filesize {
-		c.Isdownloaded = true
-		return
-	}
 	c.Isdownloaded = false
 }
 
+/*
 func (c *Filerepo) checkLocalFileStatus() {
-	var setting Rubyconfig
-	setting = setting.Get()
-	c.Filepath = setting.Localrepo + "/" + c.Filename
-	c.GetFileInfo()
+	setting := GetRepoSetting()
+	pwd, _ := os.Getwd()
+	c.Filepath = pwd + setting.Localfolder + "/" + c.Filename
+	c.getFileInfo()
 	c.checkDownloadStatus()
 }
+
+*/
 
 func SyncReleaseFilesInfo() {
 	//	clearFileRepo()
 	//	files := getReleaseFilesInfo("./static/release")
-	files, _ := getFileInfoFromRemoteRepo()
-	for _, file := range files {
-		file.checkLocalFileStatus()
+	// check release files in remote file repository
+	var releaseFiles []Filerepo
+	remoteFiles, _ := getFileInfoFromRemoteRepo()
+	releaseFiles = append(releaseFiles, remoteFiles...)
+
+	//check release files in local file repository
+	pwd, _ := os.Getwd()
+	repoSetting := GetRepoSetting()
+	localRepoFolder := pwd + repoSetting.Localfolder
+
+	localFiles := getLocalReleaseFilesInfo(localRepoFolder)
+	releaseFiles = append(releaseFiles, localFiles...)
+
+	removeObsoleteRecords(releaseFiles)
+
+	for _, file := range releaseFiles {
 		file.CreateOrUpdate()
 	}
+}
 
-	//check local file status
+func (c Filerepo) CheckFileIsExistsInArray(files []Filerepo) bool {
+	for _, file := range files {
+		if strings.Compare(strings.ToLower(c.Filename), strings.ToLower(file.Filename)) == 0 {
+			return true
+		}
+	}
+	return false
+}
+
+func removeObsoleteRecords(files []Filerepo) {
+	recordsInDB := GetALLReleaseFiles()
+	for _, file := range recordsInDB {
+		if !file.CheckFileIsExistsInArray(files) {
+			file.delete()
+		}
+	}
 }
 
 func (c Filerepo) Insert() error {
@@ -414,7 +452,7 @@ func (c *Filerepo) Update() error {
 	c.Updated = time.Now()
 	o := orm.NewOrm()
 	o.Begin()
-	_, err := o.Update(c, "Filename", "Crc", "Buildnumber", "Filepath", "Updated", "Filetype", "Isdownloaded")
+	_, err := o.Update(c, "Filename", "Crc", "Checksum", "Buildnumber", "Filesize", "Filepath", "Filetype", "Isdownloaded", "Updated")
 	if err != nil {
 		log.Println(err.Error())
 		o.Rollback()
@@ -424,12 +462,16 @@ func (c *Filerepo) Update() error {
 	return err
 }
 
-func (c *Filerepo) DeleteByFilename(filename string) error {
+func (c Filerepo) delete() error {
 	o := orm.NewOrm()
-	err := o.QueryTable("Filerepo").Filter("Filename", filename).One(c)
-	if err == orm.ErrNoRows {
+	o.Begin()
+	_, err := o.Delete(&c)
+	if err != nil {
+		log.Println(err.Error())
+		o.Rollback()
 		return err
 	}
-	_, err = o.Delete(c)
+	o.Commit()
 	return err
+
 }

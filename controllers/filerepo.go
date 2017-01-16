@@ -69,18 +69,17 @@ func (c FileRepoController) DownloadFile() {
 	fp := c.GetString("filepath")
 	//	id, _ := c.GetInt64("id")
 
-	var remote models.Remoteserver
-	remote = remote.Get()
-	fullURL := "http://" + remote.Remoteserver + "/" + fp
+	rs := models.GetRepoSetting()
+	fullURL := "http://" + rs.Remoteserver + "/" + fp
 
-	var setting models.Rubyconfig
-	setting = setting.Get()
+	pwd, _ := os.Getwd()
+	localFolderFullPath := pwd + rs.Localfolder
 
-	if _, err := os.Stat(setting.Localrepo); os.IsNotExist(err) {
-		os.Mkdir(setting.Localrepo, os.ModePerm)
+	if _, err := os.Stat(localFolderFullPath); os.IsNotExist(err) {
+		os.Mkdir(localFolderFullPath, os.ModePerm)
 	}
 
-	fullpath := setting.Localrepo + "/" + filepath.Base(fp)
+	fullpath := localFolderFullPath + "/" + filepath.Base(fp)
 
 	downloadFromUrl(fullURL, fullpath)
 	result := filepath.Base(fp) + " is downloaded."
@@ -96,8 +95,8 @@ func (c FileRepoController) DownloadFile() {
 
 func (c FileRepoController) BurnHostImage() {
 	fp := c.GetString("filepath")
-	t, _ := c.GetInt64("filetype")
-	err := mongoose.BurnHostImage(fp, models.FileType(t))
+	ft, _ := c.GetInt64("filetype")
+	err := mongoose.BurnHostImage(fp, models.FileType(ft))
 	result := "ok"
 	if err != nil {
 		result = err.Error()

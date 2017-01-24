@@ -12,11 +12,11 @@ import (
 
 func main() {
 
-	beego.SetStaticPath("/repository", "repository")
+	//	beego.SetStaticPath("/repository", "repository")
 
 	go open()
 	go syncReleaseFileRepository(6000)
-	go reader(100)
+	go reader(300)
 
 	beego.Run()
 
@@ -52,11 +52,11 @@ func open() {
 	var waitTime time.Duration = 1000
 	for {
 
-		models.GConfig = models.GetRubyconfig()
+		cfg := models.GetRubyconfig()
 		//		log.Printf("serial name : %s, serial baud : %d, connection status : %v", models.GConfig.Serialname, models.GConfig.Serialbaud, models.GConfig.Isconnected)
 
 		connected := false
-		err := serial.Open(models.GConfig.Serialname, int(models.GConfig.Serialbaud))
+		err := serial.Open(cfg.Serialname, int(cfg.Serialbaud))
 
 		if err != nil {
 			log.Println(err.Error())
@@ -67,8 +67,8 @@ func open() {
 			waitTime = 1000
 		}
 
-		models.GConfig.Isconnected = connected
-		models.GConfig.UpdateSerialConnectionStatus()
+		cfg.Isconnected = connected
+		cfg.UpdateSerialConnectionStatus()
 		if index > 100 {
 			waitTime = 100000
 		}

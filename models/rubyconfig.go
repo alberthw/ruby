@@ -7,10 +7,6 @@ import (
 	"github.com/astaxie/beego/orm"
 )
 
-var (
-	GConfig Rubyconfig
-)
-
 type Rubyconfig struct {
 	Id          int64  `orm:"pk;auto"`
 	Serialname  string `orm:"unique"`

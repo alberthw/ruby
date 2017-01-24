@@ -1,6 +1,50 @@
+function SendCommand(command, param) {
+    var url = "/command";
+    $.ajax({
+        url: url,
+        dataType: "json",
+        type: "POST",
+        cache: false,
+        async: false,
+        data: {
+            "command": command,
+            "param": param,
+        },
+        success: function (data) {
+            console.log(data);
+        },
+        error: function (xhr, status, err) {
+            console.error(url, status, err.toString());
+        }
+    });
+}
+
+function string2Bin(str) {
+    var result = [];
+    for (var i = 0; i < str.length; i++) {
+        result.push(str.charCodeAt(i));
+    }
+    return result;
+}
 
 
+class CommandButton extends React.Component {
+    constructor(props) {
+        super(props);
 
+        this.handleButtonClick = this.handleButtonClick.bind(this);
+    }
+
+    handleButtonClick(e) {
+        SendCommand(this.props.command, this.props.param);
+    }
+
+    render() {
+        return (
+            <button type="button" value={this.props.command} className="btn btn-default" onClick={this.handleButtonClick}>{this.props.command}</button>
+        );
+    }
+}
 
 class SerialCommand extends React.Component {
     constructor(props) {
@@ -9,6 +53,8 @@ class SerialCommand extends React.Component {
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleSendButtonClick = this.handleSendButtonClick.bind(this);
         this.handleOutputChange = this.handleOutputChange.bind(this);
+
+        this.handleSetSysConfigButtonClick = this.handleSetSysConfigButtonClick.bind(this);
 
         this.state = {
             input: "",
@@ -22,25 +68,44 @@ class SerialCommand extends React.Component {
         });
     }
 
-    handleSendButtonClick(e) {
 
+    handleSendButtonClick(e) {
+        SendCommand(this.state.input);
+    }
+
+
+    handleSetSysConfigButtonClick(e) {
+        var url = "/setsysconfig";
         $.ajax({
-            url: "/command",
+            url: url,
             dataType: "json",
-            type: "POST",
+            type: "GET",
             cache: false,
             async: false,
-            data: {
-                "command": this.state.input
-            },
             success: function (data) {
                 console.log(data);
-            }.bind(this),
+            },
             error: function (xhr, status, err) {
                 console.error(url, status, err.toString());
-            }.bind(this)
+            }
         });
+    }
 
+    handleSetHwConfigButtonClick(e) {
+        var url = "/sethwconfig";
+        $.ajax({
+            url: url,
+            dataType: "json",
+            type: "GET",
+            cache: false,
+            async: false,
+            success: function (data) {
+                console.log(data);
+            },
+            error: function (xhr, status, err) {
+                console.error(url, status, err.toString());
+            }
+        });
     }
 
     componentDidMount() {
@@ -55,9 +120,10 @@ class SerialCommand extends React.Component {
     getSerialOutput() {
 
         document.getElementById("taOutput").scrollTop = document.getElementById("taOutput").scrollHeight;
+        var url = "/getreceivecommands";
         //       $("#taOutput").scrollTop = $("#taOutput").scrollHeight;
         $.ajax({
-            url: "/getreceivecommands",
+            url: url,
             dataType: "json",
             type: "POST",
             cache: false,
@@ -94,11 +160,15 @@ class SerialCommand extends React.Component {
 
         return (
             <div>
-                <div className="input-group  col-md-4">
+                <div className="input-group  col-md-8">
                     <span className="input-group-addon">Command:</span>
                     <input type="text" className="form-control" value={this.state.input} onChange={this.handleInputChange}></input>
                     <span className="input-group-btn">
                         <button type="button" className="btn btn-default" onClick={this.handleSendButtonClick}>Send</button>
+                        <CommandButton command="ver.get" param="" />
+                        <button type="button" className="btn btn-default" onClick={this.handleSetSysConfigButtonClick}>config.set.sys</button>
+                        <button type="button" className="btn btn-default" onClick={this.handleSetHwConfigButtonClick}>config.set.hw</button>
+                        <CommandButton command="commands" />
                     </span>
                 </div>
                 <div>

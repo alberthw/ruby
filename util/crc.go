@@ -1,6 +1,7 @@
 package util
 
 import (
+	"encoding/binary"
 	"fmt"
 	_ "log"
 )
@@ -27,6 +28,18 @@ func InitCrc16() {
 	crc_init = true
 }
 
+func Crc16Uint(data []uint16) uint16 {
+	if crc_init != true {
+		InitCrc16()
+	}
+	var crc uint16
+	for i, _ := range data {
+		crc = crc16Table[((crc>>8)&255)] ^ (crc << 8) ^ (data[i] >> 8)
+		crc = crc16Table[((crc>>8)&255)] ^ (crc << 8) ^ (data[i] & 0x00FF)
+	}
+	return crc
+}
+
 func Crc16(addr []byte) uint16 {
 	if crc_init != true {
 		InitCrc16()
@@ -46,4 +59,16 @@ func Crc16Byte(addr []byte) []byte {
 	//	log.Printf("%X : %04X", addr, crc)
 	s := fmt.Sprintf("%04X", crc)
 	return []byte(s)
+}
+
+// use Crc16Uint
+func Crc16Byte2(addr []byte) uint16 {
+	var buf []uint16
+	for i := 0; i < len(addr)/2; i++ {
+		buf = append(buf, binary.BigEndian.Uint16(addr[2*i:2*i+2]))
+	}
+	//	fmt.Println(buf)
+
+	return Crc16Uint(buf)
+
 }

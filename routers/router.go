@@ -7,6 +7,7 @@ import (
 
 func init() {
 	beego.Router("/", &controllers.MainController{})
+	beego.Router("/device", &controllers.DeviceController{})
 
 	beego.Router("/config", &controllers.RubyConfigController{})
 
@@ -20,6 +21,9 @@ func init() {
 	beego.Router("/openserial", &controllers.SerialController{}, "POST:Open")
 	beego.Router("/closeserial", &controllers.SerialController{}, "GET:Close")
 	beego.Router("/command", &controllers.SerialController{}, "POST:Post")
+
+	beego.Router("/setsysconfig", &controllers.DeviceSystemConfigController{}, "GET:SetSysConfig")
+	beego.Router("/sethwconfig", &controllers.DeviceHardwareConfigController{}, "GET:SetHwConfig")
 
 	beego.Router("/getreceivecommands", &controllers.CommandController{}, "POST:GetReceiveCommands")
 

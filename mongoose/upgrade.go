@@ -6,13 +6,15 @@ import (
 	"os"
 	"time"
 
+	"fmt"
+
 	"github.com/alberthw/ruby/models"
 	"github.com/alberthw/ruby/serial"
 )
 
 func sendMongooseCommand(input string) error {
 
-	command := []byte(input + "\n\n")
+	command := []byte(input + "\r\n")
 	return serial.Writer(command)
 }
 
@@ -26,6 +28,14 @@ func sendImageUpdate() {
 
 func sendEnterSeviceMode() {
 	sendMongooseCommand("service.mode")
+}
+
+func sendSetSystemConfig() {
+	sendMongooseCommand("config.set.sys")
+}
+
+func sendSetHardwareConfig() {
+	sendMongooseCommand("config.set.hw")
 }
 
 func sendSelectHostImage(t models.FileType) {
@@ -94,6 +104,24 @@ func BurnHostImage(filepath string, t models.FileType) error {
 	time.Sleep(time.Millisecond * 1000)
 	sendSelectHostImage(t)
 	return nil
+}
+
+func WriteDeviceSystemConfig(config models.Devicesystemconfig) error {
+	sendSetSystemConfig()
+	time.Sleep(time.Millisecond * 1000)
+	command := config.ToByte()
+	command = append(command, []byte{'\r', '\n'}...)
+	fmt.Printf("Device system config : %x\n", command)
+	return serial.Writer(command)
+}
+
+func WriteDeviceHardwareConfig(config models.Devicehardwareconfig) error {
+	sendSetHardwareConfig()
+	time.Sleep(time.Millisecond * 1000)
+	command := config.ToByte()
+	command = append(command, []byte{'\r', '\n'}...)
+	fmt.Printf("Device hardware config : %x\n", command)
+	return serial.Writer(command)
 }
 
 /*

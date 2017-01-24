@@ -107,7 +107,5 @@ func TestSyncReleaseFilesInfo(t *testing.T) {
 	t.Errorf("TestSyncReleaseFilesInfo 0 ")
 	SyncReleaseFilesInfo()
 
-	t.Errorf("TestSyncReleaseFilesInfo 1 ")
-
 	t.Logf("TestSyncReleaseFilesInfo() ... done\n")
 }

@@ -13,9 +13,9 @@ type SerialController struct {
 }
 
 func (c *SerialController) Open() {
-	models.GConfig.Id, _ = c.GetInt64("Id")
-	models.GConfig.Serialname = c.GetString("Serialname")
-	models.GConfig.Serialbaud, _ = c.GetInt64("Serialbaud")
+	//	models.GConfig.Id, _ = c.GetInt64("Id")
+	//	models.GConfig.Serialname = c.GetString("Serialname")
+	//	models.GConfig.Serialbaud, _ = c.GetInt64("Serialbaud")
 
 	result := "ok"
 
@@ -75,5 +75,4 @@ func (c *SerialController) Send() {
 
 	c.Data["json"] = &s
 	c.ServeJSON()
-
 }

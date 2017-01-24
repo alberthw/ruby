@@ -1,4 +1,4 @@
-function SendCommand(command, param) {
+function SendCommand(command) {
     var url = "/command";
     $.ajax({
         url: url,
@@ -7,8 +7,7 @@ function SendCommand(command, param) {
         cache: false,
         async: false,
         data: {
-            "command": command,
-            "param": param,
+            "command": command
         },
         success: function (data) {
             console.log(data);
@@ -36,7 +35,7 @@ class CommandButton extends React.Component {
     }
 
     handleButtonClick(e) {
-        SendCommand(this.props.command, this.props.param);
+        SendCommand(this.props.command);
     }
 
     render() {
@@ -165,9 +164,7 @@ class SerialCommand extends React.Component {
                     <input type="text" className="form-control" value={this.state.input} onChange={this.handleInputChange}></input>
                     <span className="input-group-btn">
                         <button type="button" className="btn btn-default" onClick={this.handleSendButtonClick}>Send</button>
-                        <CommandButton command="ver.get" param="" />
-                        <button type="button" className="btn btn-default" onClick={this.handleSetSysConfigButtonClick}>config.set.sys</button>
-                        <button type="button" className="btn btn-default" onClick={this.handleSetHwConfigButtonClick}>config.set.hw</button>
+                        <CommandButton command="ver.get"/>
                         <CommandButton command="commands" />
                     </span>
                 </div>

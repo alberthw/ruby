@@ -25,9 +25,6 @@ func (c DeviceSystemConfigController) SetSysConfig() {
 	sysconfig.Partnumber = c.GetString("partNumber")
 	sysconfig.Hardwareversion = c.GetString("hardwareVersion")
 
-	sysconfig.Country, _ = c.GetUint8("country")
-	sysconfig.Region, _ = c.GetUint8("region")
-
 	fmt.Println("system config : ", sysconfig)
 
 	mongoose.WriteDeviceSystemConfig(sysconfig)

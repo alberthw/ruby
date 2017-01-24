@@ -125,6 +125,28 @@ func WriteDeviceHardwareConfig(config models.Devicehardwareconfig) error {
 }
 
 /*
+func WriteDeviceSoftwareConfig(config models.Devicesoftwareconfig) error {
+	switch config.Type {
+	case models.HOSTBOOT:
+		sendSetHostBootConfig()
+		break
+	case models.HOSTAPP:
+		sendSetHostAppConfig()
+		break
+	case models.DSPAPP:
+		sendSetDspAppConfig()
+		break
+	default:
+		return errors.New("unknown software type")
+	}
+	time.Sleep(time.Millisecond * 1000)
+	command := config.ToByte()
+	command = append(command, []byte{'\r', '\n'}...)
+	fmt.Printf("Device software config : %x\n", command)
+	return serial.Writer(command)
+}
+
+
 func BurnHostBootImage(filepath string) error {
 	return BurnHostImage(filepath, models.FILETYPE_BOOT)
 }
@@ -132,4 +154,6 @@ func BurnHostBootImage(filepath string) error {
 func BurnHostAppImage(filepath string) error {
 	return BurnHostImage(filepath, models.FILETYPE_APP)
 }
+
+
 */

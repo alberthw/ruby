@@ -206,8 +206,7 @@ class SystemConfiguration extends React.Component {
                             <ConfigStringItem name="Software Build:" value={this.state.softwareBuild} onChange={this.handleSoftwareBuildChange} />
                             <ConfigStringItem name="Part Number:" value={this.state.partNumber} onChange={this.handlePartNumberChange} />
                             <ConfigStringItem name="Hardware Version:" value={this.state.hardwareVersion} onChange={this.handleHardwareVersionChange} />
-                            <ConfigNumberItem name="Country:" value={this.state.country} onChange={this.handleCountryChange} />
-                            <ConfigNumberItem name="Region:" value={this.state.region} onChange={this.handleRegionChange} />
+
 
                         </div>
                     </div>
@@ -219,8 +218,6 @@ class SystemConfiguration extends React.Component {
         );
     }
 }
-
-
 
 class HardwareConfiguration extends React.Component {
     constructor(props) {
@@ -271,7 +268,7 @@ class HardwareConfiguration extends React.Component {
 
     }
 
-    
+
     handleUpdateButtonClick(e) {
         var url = "/sethwconfig";
         console.log("state:", this.state);
@@ -357,30 +354,148 @@ class SoftwareConfiguration extends React.Component {
     constructor(props) {
         super(props);
     }
+
     render() {
         return (
             <div className="panel panel-default">
                 <div className="panel-heading">Software Configuration</div>
                 <div className="panel-body">
-                    <HostBootConfiguration />
-                    <HostAppConfiguration />
-                    <DspAppConfiguration />
+                    <SoftwareComponent name="Host Boot Loader" type="0" />
+                    <SoftwareComponent name="Host Application" type="1" />
+                    <SoftwareComponent name="DSP Application" type="2" />
                 </div>
             </div>
         );
     }
 }
 
-class HostBootConfiguration extends React.Component {
+class SoftwareComponent extends React.Component {
     constructor(props) {
         super(props);
+
+        this.handleNameChange = this.handleNameChange.bind(this);
+        this.handlePartNumberChange = this.handlePartNumberChange.bind(this);
+        this.handleVersionChange = this.handleVersionChange.bind(this);
+        this.handleImageCRCChange = this.handleImageCRCChange.bind(this);
+
+        //       this.handleUpdateButtonClick = this.handleUpdateButtonClick.bind(this);
+
+        this.state = {
+            id: "",
+            name: "",
+            type: "",
+            partNumber: "",
+            version: "",
+            imageCRC: "",
+        };
+
     }
+
+    handleNameChange(e) {
+        this.setState({
+            name: e.target.value
+        });
+
+    }
+
+    handlePartNumberChange(e) {
+        this.setState({
+            partNumber: e.target.value
+        });
+
+    }
+
+    handleVersionChange(e) {
+        this.setState({
+            version: e.target.value
+        });
+
+    }
+
+    handleImageCRCChange(e) {
+        this.setState({
+            imageCRC: e.target.value
+        });
+
+    }
+    /*
+        handleUpdateButtonClick(e) {
+            var url = "/setswconfig";
+            console.log("state:", this.state);
+            $.ajax({
+                url: url,
+                dataType: "json",
+                type: "POST",
+                cache: false,
+                async: false,
+                data: this.state,
+                success: function (data) {
+                    console.log(data);
+                    //result = data;
+                },
+                error: function (xhr, status, err) {
+                    console.error(url, status, err.toString());
+                }
+            });
+        }
+    */
+    getSoftwareConfig() {
+        var url = "/getswconfig";
+        var result = null;
+
+        $.ajax({
+            url: url,
+            dataType: "json",
+            type: "POST",
+            cache: false,
+            async: false,
+            data: {
+                "type": this.props.type
+            },
+            success: function (data) {
+                //            console.log(data);
+                result = data;
+
+            },
+            error: function (xhr, status, err) {
+                console.error(url, status, err.toString());
+            }
+        });
+        return result;
+    }
+
+    componentDidMount() {
+        var data = this.getSoftwareConfig();
+        console.log(this.props.name, ":", data);
+        this.setState({
+            id: data.Id,
+            name: data.Name,
+            type: this.props.type,
+            partNumber: data.Partnumber,
+            version: data.Version,
+            imageCRC: data.Imagecrc,
+        });
+    }
+
     render() {
         return (
             <div className="panel panel-default">
-                <div className="panel-heading">Host Boot Loader Configuration</div>
-                <div className="panel-body">Boot Loader Configuration</div>
-            </div>
+                <div className="panel-heading">{this.props.name}</div>
+                <div className="panel-body">
+                    <div className="container-fluid">
+                        <div className="row">
+                            <fieldset disabled>
+                                <ConfigStringItem name="Name:" value={this.state.name} onChange={this.handleNameChange} />
+                                <ConfigStringItem name="Part Number:" value={this.state.partNumber} onChange={this.handlePartNumberChange} />
+                                <ConfigStringItem name="Version:" value={this.state.version} onChange={this.handleVersionChange} />
+                                <ConfigStringItem name="Image CRC:" value={this.state.imageCRC} onChange={this.handleImageCRCChange} />
+
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+
+            </div >
         );
     }
 }

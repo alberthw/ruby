@@ -24,8 +24,6 @@ type Devicesystemconfig struct {
 	Softwarebuild   string `orm:"size(10)"`
 	Partnumber      string `orm:"size(10)"`
 	Hardwareversion string `orm:"size(20)"`
-	Country         uint8
-	Region          uint8
 	Crc             uint16
 	Updatetime      time.Time `orm:"type(datetime);null"`
 	Createtime      time.Time `orm:"auto_now_add;type(datetime)"`
@@ -39,8 +37,6 @@ func (c *Devicesystemconfig) init() {
 	c.Softwarebuild = "NA"
 	c.Partnumber = "NA"
 	c.Hardwareversion = "NA"
-	c.Country = 0xFF
-	c.Region = 0xFF
 }
 
 func GetDeviceSystemConfig() Devicesystemconfig {
@@ -77,9 +73,6 @@ func (c Devicesystemconfig) ToByte() []byte {
 	copy(result[100:120], StringToByteArray(c.Hardwareversion, 20))
 
 	fmt.Printf("%X\n", result)
-
-	result[120] = byte(c.Country)
-	result[124] = byte(c.Region)
 	crc := util.Crc16(result[:128])
 	fmt.Printf("%X\n", crc)
 	buf := make([]byte, 2)
@@ -110,7 +103,7 @@ func (c *Devicesystemconfig) Update() error {
 	c.Updatetime = time.Now()
 	o := orm.NewOrm()
 	o.Begin()
-	_, err := o.Update(c, "Devicename", "Systemversion", "Devicesku", "Serialnumber", "Softwarebuild", "Partnumber", "Hardwareversion", "Country", "Region", "Updatetime")
+	_, err := o.Update(c, "Devicename", "Systemversion", "Devicesku", "Serialnumber", "Softwarebuild", "Partnumber", "Hardwareversion", "Updatetime")
 	if err != nil {
 		log.Println(err.Error())
 		o.Rollback()

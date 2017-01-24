@@ -112,14 +112,16 @@ class SerialConfig extends React.Component {
         const serialName = this.state.Serialname;
         const isConnected = this.state.Isconnected;
         return (
-            <div className="input-group">
-                <span className="input-group-addon">Serial Name:</span>
-                <input type="text" className="form-control" placeholder="com1" value={serialName} onChange={this.handleSerialNameChange}></input>
-                <span className="input-group-addon">Status:</span>
-                <input type="text" className="form-control" value={isConnected} onChange={this.handleStatusChange} readOnly></input>
-                <span className="input-group-btn">
-                    <button type="button" className="btn btn-default" onClick={this.handleConnectClick}>Connect</button>
-                </span>
+            <div className="container-fluid">
+                <div className="input-group">
+                    <span className="input-group-addon">Serial Name:</span>
+                    <input type="text" className="form-control" placeholder="com1" value={serialName} onChange={this.handleSerialNameChange}></input>
+                    <span className="input-group-addon">Status:</span>
+                    <input type="text" className="form-control" value={isConnected} onChange={this.handleStatusChange} readOnly></input>
+                    <span className="input-group-btn">
+                        <button type="button" className="btn btn-default" onClick={this.handleConnectClick}>Connect</button>
+                    </span>
+                </div>
             </div>
         );
 

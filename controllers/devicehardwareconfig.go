@@ -29,7 +29,7 @@ func (c DeviceHardwareConfigController) SetHwConfig() {
 	c.ServeJSON()
 }
 
-func (c DeviceHardwareConfigController) GetSysConfig() {
+func (c DeviceHardwareConfigController) GetHwConfig() {
 	row := models.GetDeviceHardwareConfig()
 	c.Data["json"] = &row
 	c.ServeJSON()

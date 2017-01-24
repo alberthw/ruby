@@ -43,9 +43,6 @@ func TestDevicesystemconfigToBytes(t *testing.T) {
 		sysconfig.Partnumber = "NA"
 		sysconfig.Hardwareversion = "NA"
 
-		sysconfig.Country = 32
-		sysconfig.Region = 114
-
 		got := sysconfig.ToByte()
 		if !reflect.DeepEqual(c.want, got) {
 			t.Errorf("DevicesystemconfigToBytes() : \n want\t %X\n got \t %X", c.want, got)

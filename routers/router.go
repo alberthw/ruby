@@ -22,8 +22,11 @@ func init() {
 	beego.Router("/closeserial", &controllers.SerialController{}, "GET:Close")
 	beego.Router("/command", &controllers.SerialController{}, "POST:Post")
 
-	beego.Router("/setsysconfig", &controllers.DeviceSystemConfigController{}, "GET:SetSysConfig")
-	beego.Router("/sethwconfig", &controllers.DeviceHardwareConfigController{}, "GET:SetHwConfig")
+	beego.Router("/setsysconfig", &controllers.DeviceSystemConfigController{}, "POST:SetSysConfig")
+	beego.Router("/getsysconfig", &controllers.DeviceSystemConfigController{}, "GET:GetSysConfig")
+
+	beego.Router("/sethwconfig", &controllers.DeviceHardwareConfigController{}, "POST:SetHwConfig")
+	beego.Router("/gethwconfig", &controllers.DeviceHardwareConfigController{}, "GET:GetSysConfig")
 
 	beego.Router("/getreceivecommands", &controllers.CommandController{}, "POST:GetReceiveCommands")
 

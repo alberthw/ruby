@@ -21,6 +21,25 @@ type Devicehardwareconfig struct {
 	Createtime   time.Time `orm:"auto_now_add;type(datetime)"`
 }
 
+func (c *Devicehardwareconfig) init() {
+	c.Name = "NA"
+	c.Partnumber = "NA"
+	c.Revision = "NA"
+	c.Serialnumber = "NA"
+}
+
+func GetDeviceHardwareConfig() Devicehardwareconfig {
+	o := orm.NewOrm()
+	var result Devicehardwareconfig
+
+	err := o.QueryTable("Devicehardwareconfig").One(&result)
+	if err == orm.ErrNoRows {
+		result.init()
+		o.Insert(&result)
+	}
+	return result
+}
+
 func (c Devicehardwareconfig) ToByte() []byte {
 
 	result := make([]byte, ConfigRecordSize)
@@ -59,4 +78,18 @@ func (c *Devicehardwareconfig) Insert() {
 		c.Id = id
 	}
 	o.Commit()
+}
+
+func (c *Devicehardwareconfig) Update() error {
+	c.Updatetime = time.Now()
+	o := orm.NewOrm()
+	o.Begin()
+	_, err := o.Update(c, "Name", "Partnumber", "Revision", "Serialnumber", "Updatetime")
+	if err != nil {
+		log.Println(err.Error())
+		o.Rollback()
+		return err
+	}
+	o.Commit()
+	return err
 }

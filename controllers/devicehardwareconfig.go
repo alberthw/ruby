@@ -12,14 +12,25 @@ type DeviceHardwareConfigController struct {
 
 func (c DeviceHardwareConfigController) SetHwConfig() {
 	var hwconfig models.Devicehardwareconfig
-	hwconfig.Name = "Hardware"
-	hwconfig.Partnumber = "1.0"
-	hwconfig.Revision = "1.0"
-	hwconfig.Serialnumber = "3234"
+
+	hwconfig.Id, _ = c.GetInt64("id")
+
+	hwconfig.Name = c.GetString("name")
+	hwconfig.Partnumber = c.GetString("partNumber")
+	hwconfig.Revision = c.GetString("revision")
+	hwconfig.Serialnumber = c.GetString("serialNumber")
 
 	mongoose.WriteDeviceHardwareConfig(hwconfig)
 
+	hwconfig.Update()
+
 	result := "ok"
 	c.Data["json"] = &result
+	c.ServeJSON()
+}
+
+func (c DeviceHardwareConfigController) GetSysConfig() {
+	row := models.GetDeviceHardwareConfig()
+	c.Data["json"] = &row
 	c.ServeJSON()
 }

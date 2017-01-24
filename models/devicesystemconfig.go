@@ -31,6 +31,30 @@ type Devicesystemconfig struct {
 	Createtime      time.Time `orm:"auto_now_add;type(datetime)"`
 }
 
+func (c *Devicesystemconfig) init() {
+	c.Devicename = "NA"
+	c.Systemversion = "NA"
+	c.Devicesku = "NA"
+	c.Serialnumber = "NA"
+	c.Softwarebuild = "NA"
+	c.Partnumber = "NA"
+	c.Hardwareversion = "NA"
+	c.Country = 0xFF
+	c.Region = 0xFF
+}
+
+func GetDeviceSystemConfig() Devicesystemconfig {
+	o := orm.NewOrm()
+	var result Devicesystemconfig
+
+	err := o.QueryTable("Devicesystemconfig").One(&result)
+	if err == orm.ErrNoRows {
+		result.init()
+		o.Insert(&result)
+	}
+	return result
+}
+
 func StringToByteArray(s string, l int) []byte {
 	result := make([]byte, l)
 	copy(result, s)
@@ -80,4 +104,18 @@ func (c *Devicesystemconfig) Insert() {
 		c.Id = id
 	}
 	o.Commit()
+}
+
+func (c *Devicesystemconfig) Update() error {
+	c.Updatetime = time.Now()
+	o := orm.NewOrm()
+	o.Begin()
+	_, err := o.Update(c, "Devicename", "Systemversion", "Devicesku", "Serialnumber", "Softwarebuild", "Partnumber", "Hardwareversion", "Country", "Region", "Updatetime")
+	if err != nil {
+		log.Println(err.Error())
+		o.Rollback()
+		return err
+	}
+	o.Commit()
+	return err
 }

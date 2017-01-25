@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/alberthw/ruby/models"
@@ -10,13 +12,20 @@ import (
 	"github.com/astaxie/beego"
 )
 
+var buffer chan []byte
+
 func main() {
+	beego.BConfig.Listen.HTTPPort = 8089
 
 	//	beego.SetStaticPath("/repository", "repository")
+
+	buffer = make(chan []byte)
 
 	go open()
 	go syncReleaseFileRepository(6000)
 	go reader(300)
+
+	go parseMessage()
 
 	beego.Run()
 
@@ -27,9 +36,26 @@ func main() {
 
 func reader(t time.Duration) {
 	for {
+		var tmp []byte
+		bGetMsg := false
 		b, _ := serial.Reader()
 		if len(b) == 0 {
 			continue
+		}
+		for _, v := range b {
+			if bGetMsg {
+				if v != 0x02 && v != 0x03 {
+					tmp = append(tmp, v)
+				}
+			}
+			if v == 0x02 {
+				bGetMsg = true
+			}
+			if v == 0x03 {
+				bGetMsg = false
+				buffer <- tmp
+				tmp = nil
+			}
 		}
 		log.Printf("received : %s\n", b)
 		var c models.Command
@@ -74,6 +100,75 @@ func open() {
 		}
 		time.Sleep(time.Millisecond * waitTime)
 	}
+}
+
+type SysConfig struct {
+	Sysconfig models.Devicesystemconfig
+}
+
+type HwConfig struct {
+	Hwconfig models.Devicehardwareconfig
+}
+
+type SwConfig struct {
+	Swconfig models.Devicesoftwareconfig
+}
+
+func parseMessage() {
+	for {
+		tmp := <-buffer
+
+		if strings.Contains(string(tmp), "{\"sysconfig\"") {
+			var f SysConfig
+			err := json.Unmarshal(tmp, &f)
+			if err != nil {
+				log.Println(err.Error())
+			} else {
+				cfg := models.GetDeviceSystemConfig()
+				f.Sysconfig.ID = cfg.ID
+				f.Sysconfig.Update()
+			}
+			log.Println(f)
+		}
+		if strings.Contains(string(tmp), "{\"hwconfig\"") {
+			var f HwConfig
+			err := json.Unmarshal(tmp, &f)
+			if err != nil {
+				log.Println(err.Error())
+			} else {
+				cfg := models.GetDeviceHardwareConfig()
+				f.Hwconfig.ID = cfg.ID
+				f.Hwconfig.Update()
+			}
+			log.Println(f)
+		}
+
+		if strings.Contains(string(tmp), "{\"swconfig\"") {
+			var f SwConfig
+			err := json.Unmarshal(tmp, &f)
+			if err != nil {
+				log.Println(err.Error())
+			} else {
+				var t models.SoftwareType
+				if strings.Contains(f.Swconfig.Name, "Host Boot") {
+					t = models.HOSTBOOT
+				}
+				if strings.Contains(f.Swconfig.Name, "Host Application") {
+					t = models.HOSTAPP
+				}
+				if strings.Contains(f.Swconfig.Name, "DSP Application") {
+					t = models.DSPAPP
+				}
+				cfg := models.GetDeviceSoftwareConfig(t)
+				f.Swconfig.ID = cfg.ID
+				f.Swconfig.Type = t
+				f.Swconfig.Update()
+			}
+			log.Println(f)
+		}
+		log.Println("\n-----------END------------\n")
+	}
+
 }
 
 /*

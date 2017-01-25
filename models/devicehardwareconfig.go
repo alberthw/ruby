@@ -12,20 +12,20 @@ import (
 )
 
 type Devicehardwareconfig struct {
-	Id           int64
+	ID           int64     `orm:"column(id)"`
 	Name         string    `orm:"size(20)"`
-	Partnumber   string    `orm:"size(20)"`
+	PartNumber   string    `orm:"size(20);column(partnumber)"`
 	Revision     string    `orm:"size(20)"`
-	Serialnumber string    `orm:"size(20)"`
-	Updatetime   time.Time `orm:"type(datetime);null"`
-	Createtime   time.Time `orm:"auto_now_add;type(datetime)"`
+	SerialNumber string    `orm:"size(20);column(serialnumber)"`
+	Updated      time.Time `orm:"type(datetime);null"`
+	Created      time.Time `orm:"auto_now_add;type(datetime)"`
 }
 
 func (c *Devicehardwareconfig) init() {
 	c.Name = "NA"
-	c.Partnumber = "NA"
+	c.PartNumber = "NA"
 	c.Revision = "NA"
-	c.Serialnumber = "NA"
+	c.SerialNumber = "NA"
 }
 
 func GetDeviceHardwareConfig() Devicehardwareconfig {
@@ -48,9 +48,9 @@ func (c Devicehardwareconfig) ToByte() []byte {
 	}
 
 	copy(result[:20], StringToByteArray(c.Name, 20))
-	copy(result[20:40], StringToByteArray(c.Partnumber, 20))
+	copy(result[20:40], StringToByteArray(c.PartNumber, 20))
 	copy(result[40:60], StringToByteArray(c.Revision, 20))
-	copy(result[60:80], StringToByteArray(c.Serialnumber, 20))
+	copy(result[60:80], StringToByteArray(c.SerialNumber, 20))
 
 	fmt.Printf("%X\n", result)
 
@@ -75,16 +75,16 @@ func (c *Devicehardwareconfig) Insert() {
 		o.Rollback()
 	} else {
 		//		log.Println(id)
-		c.Id = id
+		c.ID = id
 	}
 	o.Commit()
 }
 
 func (c *Devicehardwareconfig) Update() error {
-	c.Updatetime = time.Now()
+	c.Updated = time.Now()
 	o := orm.NewOrm()
 	o.Begin()
-	_, err := o.Update(c, "Name", "Partnumber", "Revision", "Serialnumber", "Updatetime")
+	_, err := o.Update(c, "name", "Partnumber", "Revision", "Serialnumber", "Updated")
 	if err != nil {
 		log.Println(err.Error())
 		o.Rollback()

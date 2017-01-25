@@ -54,8 +54,7 @@ class SystemConfiguration extends React.Component {
         this.handleSoftwareBuildChange = this.handleSoftwareBuildChange.bind(this);
         this.handlePartNumberChange = this.handlePartNumberChange.bind(this);
         this.handleHardwareVersionChange = this.handleHardwareVersionChange.bind(this);
-        this.handleCountryChange = this.handleCountryChange.bind(this);
-        this.handleRegionChange = this.handleRegionChange.bind(this);
+
 
         this.handleUpdateButtonClick = this.handleUpdateButtonClick.bind(this);
 
@@ -68,8 +67,6 @@ class SystemConfiguration extends React.Component {
             softwareBuild: "",
             partNumber: "",
             hardwareVersion: "",
-            country: "",
-            region: "",
         };
     }
     handleDeviceNameChange(e) {
@@ -116,18 +113,6 @@ class SystemConfiguration extends React.Component {
 
     }
 
-    handleCountryChange(e) {
-        this.setState({
-            country: e.target.value
-        });
-
-    }
-
-    handleRegionChange(e) {
-        this.setState({
-            region: e.target.value
-        });
-    }
 
     handleUpdateButtonClick(e) {
         var url = "/setsysconfig";
@@ -176,16 +161,14 @@ class SystemConfiguration extends React.Component {
         var data = this.getSysConfig();
         console.log("system : ", data);
         this.setState({
-            id: data.Id,
-            deviceName: data.Devicename,
-            sysVersion: data.Systemversion,
-            deviceSKU: data.Devicesku,
-            serialNumber: data.Serialnumber,
-            softwareBuild: data.Softwarebuild,
-            partNumber: data.Partnumber,
-            hardwareVersion: data.Hardwareversion,
-            country: data.Country,
-            region: data.Region,
+            id: data.ID,
+            deviceName: data.DeviceName,
+            sysVersion: data.SystemVersion,
+            deviceSKU: data.DeviceSKU,
+            serialNumber: data.SerialNumber,
+            softwareBuild: data.SoftwareBuild,
+            partNumber: data.PartNumber,
+            hardwareVersion: data.HardwareVersion,
         });
     }
 
@@ -321,9 +304,9 @@ class HardwareConfiguration extends React.Component {
         this.setState({
             id: data.Id,
             name: data.Name,
-            partNumber: data.Partnumber,
+            partNumber: data.PartNumber,
             revision: data.Revision,
-            serialNumber: data.Serialnumber,
+            serialNumber: data.SerialNumber,
         });
     }
     render() {
@@ -468,12 +451,12 @@ class SoftwareComponent extends React.Component {
         var data = this.getSoftwareConfig();
         console.log(this.props.name, ":", data);
         this.setState({
-            id: data.Id,
+            id: data.ID,
             name: data.Name,
             type: this.props.type,
-            partNumber: data.Partnumber,
+            partNumber: data.PartNumber,
             version: data.Version,
-            imageCRC: data.Imagecrc,
+            imageCRC: data.ImageCRC,
         });
     }
 
@@ -500,36 +483,38 @@ class SoftwareComponent extends React.Component {
     }
 }
 
-class HostAppConfiguration extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-    render() {
-        return (
-            <div className="panel panel-default">
-                <div className="panel-heading">Host Application Configuration</div>
-                <div className="panel-body">Application Configuration</div>
-            </div>
-        );
-    }
-}
-
-class DspAppConfiguration extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-    render() {
-        return (
-            <div className="panel panel-default">
-                <div className="panel-heading">DSP Application Configuration</div>
-                <div className="panel-body">Application Configuration</div>
-            </div>
-        );
-    }
-}
-
-
 class DeviceConfiguration extends React.Component {
+
+    constructor(props) {
+        super(props);
+    }
+
+    GetVersions() {
+        var url = "/getversion";
+        var result = null;
+
+        $.ajax({
+            url: url,
+            dataType: "json",
+            type: "GET",
+            cache: false,
+            async: false,
+            success: function (data) {
+                //            console.log(data);
+                result = data;
+
+            },
+            error: function (xhr, status, err) {
+                console.error(url, status, err.toString());
+            }
+        });
+        return result;
+    }
+
+    componentDidMount() {
+        this.GetVersions();
+    }
+
 
     render() {
         return (

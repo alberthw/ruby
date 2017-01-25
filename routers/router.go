@@ -32,5 +32,6 @@ func init() {
 	beego.Router("/getswconfig", &controllers.DeviceSoftwareConfigController{}, "POST:GetSwConfig")
 
 	beego.Router("/getreceivecommands", &controllers.CommandController{}, "POST:GetReceiveCommands")
+	beego.Router("/getversion", &controllers.CommandController{}, "GET:GetVersions")
 
 }

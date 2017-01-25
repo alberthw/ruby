@@ -6,8 +6,6 @@ import (
 	"os"
 	"time"
 
-	"fmt"
-
 	"github.com/alberthw/ruby/models"
 	"github.com/alberthw/ruby/serial"
 )
@@ -28,14 +26,6 @@ func sendImageUpdate() {
 
 func sendEnterSeviceMode() {
 	sendMongooseCommand("service.mode")
-}
-
-func sendSetSystemConfig() {
-	sendMongooseCommand("config.set.sys")
-}
-
-func sendSetHardwareConfig() {
-	sendMongooseCommand("config.set.hw")
 }
 
 func sendSelectHostImage(t models.FileType) {
@@ -106,46 +96,7 @@ func BurnHostImage(filepath string, t models.FileType) error {
 	return nil
 }
 
-func WriteDeviceSystemConfig(config models.Devicesystemconfig) error {
-	sendSetSystemConfig()
-	time.Sleep(time.Millisecond * 1000)
-	command := config.ToByte()
-	command = append(command, []byte{'\r', '\n'}...)
-	fmt.Printf("Device system config : %x\n", command)
-	return serial.Writer(command)
-}
-
-func WriteDeviceHardwareConfig(config models.Devicehardwareconfig) error {
-	sendSetHardwareConfig()
-	time.Sleep(time.Millisecond * 1000)
-	command := config.ToByte()
-	command = append(command, []byte{'\r', '\n'}...)
-	fmt.Printf("Device hardware config : %x\n", command)
-	return serial.Writer(command)
-}
-
 /*
-func WriteDeviceSoftwareConfig(config models.Devicesoftwareconfig) error {
-	switch config.Type {
-	case models.HOSTBOOT:
-		sendSetHostBootConfig()
-		break
-	case models.HOSTAPP:
-		sendSetHostAppConfig()
-		break
-	case models.DSPAPP:
-		sendSetDspAppConfig()
-		break
-	default:
-		return errors.New("unknown software type")
-	}
-	time.Sleep(time.Millisecond * 1000)
-	command := config.ToByte()
-	command = append(command, []byte{'\r', '\n'}...)
-	fmt.Printf("Device software config : %x\n", command)
-	return serial.Writer(command)
-}
-
 
 func BurnHostBootImage(filepath string) error {
 	return BurnHostImage(filepath, models.FILETYPE_BOOT)

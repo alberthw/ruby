@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"github.com/alberthw/ruby/models"
-	"github.com/alberthw/ruby/mongoose"
 	"github.com/astaxie/beego"
 )
 
@@ -10,6 +9,7 @@ type DeviceSoftwareConfigController struct {
 	beego.Controller
 }
 
+/*
 func (c DeviceSoftwareConfigController) SetSwConfig() {
 	var swconfig models.Devicesoftwareconfig
 
@@ -30,7 +30,7 @@ func (c DeviceSoftwareConfigController) SetSwConfig() {
 	c.Data["json"] = &result
 	c.ServeJSON()
 }
-
+*/
 func (c DeviceSoftwareConfigController) GetSwConfig() {
 	t, _ := c.GetInt64("type")
 	row := models.GetDeviceSoftwareConfig(models.SoftwareType(t))

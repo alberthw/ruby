@@ -15,15 +15,15 @@ type DeviceSystemConfigController struct {
 func (c DeviceSystemConfigController) SetSysConfig() {
 	var sysconfig models.Devicesystemconfig
 
-	sysconfig.Id, _ = c.GetInt64("id")
+	sysconfig.ID, _ = c.GetInt64("id")
 
-	sysconfig.Devicename = c.GetString("deviceName")
-	sysconfig.Systemversion = c.GetString("sysVersion")
-	sysconfig.Devicesku = c.GetString("deviceSKU")
-	sysconfig.Serialnumber = c.GetString("serialNumber")
-	sysconfig.Softwarebuild = c.GetString("softwareBuild")
-	sysconfig.Partnumber = c.GetString("partNumber")
-	sysconfig.Hardwareversion = c.GetString("hardwareVersion")
+	sysconfig.DeviceName = c.GetString("deviceName")
+	sysconfig.SystemVersion = c.GetString("sysVersion")
+	sysconfig.DeviceSKU = c.GetString("deviceSKU")
+	sysconfig.SerialNumber = c.GetString("serialNumber")
+	sysconfig.SoftwareBuild = c.GetString("softwareBuild")
+	sysconfig.PartNumber = c.GetString("partNumber")
+	sysconfig.HardwareVersion = c.GetString("hardwareVersion")
 
 	fmt.Println("system config : ", sysconfig)
 

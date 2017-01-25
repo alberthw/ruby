@@ -35,8 +35,8 @@ func TestDevicesystemconfigToBytes(t *testing.T) {
 	}
 	for _, c := range cases {
 		var sysconfig Devicesystemconfig
-		sysconfig.Devicename = "Ruby"
-		sysconfig.Systemversion = "NA"
+		sysconfig.DeviceName = "Ruby"
+		sysconfig.SystemVersion = "NA"
 		sysconfig.Devicesku = "NA"
 		sysconfig.Serialnumber = "NA"
 		sysconfig.Softwarebuild = "NA"

@@ -19,14 +19,14 @@ const (
 )
 
 type Devicesoftwareconfig struct {
-	Id         int64
+	ID         int64  `orm:"column(id)"`
 	Name       string `orm:"size(20)"`
 	Type       SoftwareType
-	Partnumber string    `orm:"size(20)"`
+	PartNumber string    `orm:"size(20);column(partnumber)"`
 	Version    string    `orm:"size(20)"`
-	Imagecrc   string    `orm:"size(20)"`
-	Updatetime time.Time `orm:"type(datetime);null"`
-	Createtime time.Time `orm:"auto_now_add;type(datetime)"`
+	ImageCRC   string    `orm:"size(20);column(imagecrc)"`
+	Updated    time.Time `orm:"type(datetime);null"`
+	Created    time.Time `orm:"auto_now_add;type(datetime)"`
 }
 
 func (c Devicesoftwareconfig) ToByte() []byte {
@@ -37,9 +37,9 @@ func (c Devicesoftwareconfig) ToByte() []byte {
 	}
 
 	copy(result[:20], StringToByteArray(c.Name, 20))
-	copy(result[20:40], StringToByteArray(c.Partnumber, 20))
+	copy(result[20:40], StringToByteArray(c.PartNumber, 20))
 	copy(result[40:60], StringToByteArray(c.Version, 20))
-	copy(result[60:80], StringToByteArray(c.Imagecrc, 20))
+	copy(result[60:80], StringToByteArray(c.ImageCRC, 20))
 
 	fmt.Printf("%X\n", result)
 
@@ -56,9 +56,9 @@ func (c Devicesoftwareconfig) ToByte() []byte {
 
 func (c *Devicesoftwareconfig) init() {
 	c.Name = "NA"
-	c.Partnumber = "NA"
+	c.PartNumber = "NA"
 	c.Version = "NA"
-	c.Imagecrc = "NA"
+	c.ImageCRC = "NA"
 }
 
 func GetDeviceSoftwareConfig(t SoftwareType) Devicesoftwareconfig {
@@ -83,16 +83,16 @@ func (c *Devicesoftwareconfig) Insert() {
 		o.Rollback()
 	} else {
 		//		log.Println(id)
-		c.Id = id
+		c.ID = id
 	}
 	o.Commit()
 }
 
 func (c *Devicesoftwareconfig) Update() error {
-	c.Updatetime = time.Now()
+	c.Updated = time.Now()
 	o := orm.NewOrm()
 	o.Begin()
-	_, err := o.Update(c, "Name", "Type", "Partnumber", "Version", "Imagecrc", "Updatetime")
+	_, err := o.Update(c, "name", "type", "partnumber", "version", "imagecrc", "updated")
 	if err != nil {
 		log.Println(err.Error())
 		o.Rollback()

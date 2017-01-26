@@ -96,11 +96,8 @@ func (c FileRepoController) DownloadFile() {
 func (c FileRepoController) BurnHostImage() {
 	fp := c.GetString("filepath")
 	ft, _ := c.GetInt64("filetype")
-	err := mongoose.BurnHostImage(fp, models.FileType(ft))
+	go mongoose.BurnHostImage(fp, models.FileType(ft))
 	result := "ok"
-	if err != nil {
-		result = err.Error()
-	}
 	c.Data["json"] = &result
 	c.ServeJSON()
 

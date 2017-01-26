@@ -59,7 +59,7 @@ class BurnImage extends React.Component {
                 filepath: file.Filepath
             },
             success: function (data) {
-                alert(data);
+      //          alert(data);
             },
             error: function (xhr, status, err) {
                 console.error(url, status, err.toString());

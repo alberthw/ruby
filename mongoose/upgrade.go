@@ -79,7 +79,7 @@ func sendUploadImage(filepath string) error {
 }
 
 func BurnHostImage(filepath string, t models.FileType) error {
-	sendEnterSeviceMode()
+	//	sendEnterSeviceMode()
 	time.Sleep(time.Millisecond * 5000)
 	sendImageUpload()
 	time.Sleep(time.Millisecond * 1000)

@@ -23,21 +23,21 @@ class SerialConfig extends React.Component {
         this.handleConnectClick = this.handleConnectClick.bind(this);
 
         this.state = {
-            Serialname: "",
-            Isconnected: false,
-            Id: 0
+            serialName: "",
+            isConnected: false,
+            id: 0
         };
     }
 
     handleSerialNameChange(e) {
         this.setState({
-            Serialname: e.target.value
+            serialName: e.target.value
         });
     }
 
     handleStatusChange(e) {
         this.setState({
-            Isconnected: e.target.value
+            isConnected: e.target.value
         });
     }
 
@@ -78,8 +78,8 @@ class SerialConfig extends React.Component {
             success: function (data) {
                 console.log(data);
                 this.setState({
-                    Serialname: data.Serialname,
-                    Id: data.Id
+                    serialName: data.SerialName,
+                    id: data.ID
                 })
             }.bind(this),
             error: function (xhr, status, err) {
@@ -97,8 +97,8 @@ class SerialConfig extends React.Component {
             success: function (data) {
                 console.log(data);
                 this.setState({
-                    Isconnected: data.Isconnected,
-                    Id: data.Id
+                    isConnected: data.IsConnected,
+                    id: data.ID
                 })
             }.bind(this),
             error: function (xhr, status, err) {
@@ -109,8 +109,8 @@ class SerialConfig extends React.Component {
     }
 
     render() {
-        const serialName = this.state.Serialname;
-        const isConnected = this.state.Isconnected;
+        const serialName = this.state.serialName;
+        const isConnected = this.state.isConnected;
         return (
             <div className="container-fluid">
                 <div className="input-group">

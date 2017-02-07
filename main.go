@@ -59,7 +59,7 @@ func reader(t time.Duration) {
 		}
 		log.Printf("received : %s\n", b)
 		var c models.Command
-		c.Commandtype = models.RECEIVE
+		c.CommandType = models.RECEIVE
 		c.Info = string(b)
 		c.InsertCommand()
 		time.Sleep(time.Millisecond * t)

@@ -29,16 +29,16 @@ const (
 )
 
 type Filerepo struct {
-	Id           int64 `orm:"pk;auto"`
-	Filename     string
-	Crc          string
-	Buildnumber  uint64
-	Checksum     string
-	Filepath     string
-	Remotepath   string
-	Filetype     FileType
-	Filesize     string
-	Isdownloaded bool
+	Id           int64     `orm:"pk;auto;column(id)"`
+	FileName     string    `orm:"column(filename)"`
+	CRC          string    `orm:"column(crc)"`
+	BuildNumber  uint64    `orm:"column(buildnumber)"`
+	CheckSum     string    `orm:"column(checksum)"`
+	LocalPath    string    `orm:"column(localpath)"`
+	RemotePath   string    `orm:"column(remotepath)"`
+	FileType     FileType  `orm:"column(filetype)"`
+	FileSize     string    `orm:"column(filesize)"`
+	IsDownloaded bool      `orm:"column(isdownloaded)"`
 	Created      time.Time `orm:"auto_now_add;type(datetime)"`
 	Updated      time.Time `orm:"auto_now;type(datetime)"`
 }
@@ -78,16 +78,16 @@ func getFileInfoFromRemoteRepo() ([]Filerepo, error) {
 		}
 		filename := node.First().Text()
 		var f Filerepo
-		f.Filename = filename
+		f.FileName = filename
 		f.getBuildNumber()
-		if f.Buildnumber == 0 {
+		if f.BuildNumber == 0 {
 			return
 		}
 		filesize := s.Find("td.fileSize").Text()
 		if len(filesize) > 4 {
-			f.Filesize = filesize[:len(filesize)-3]
+			f.FileSize = filesize[:len(filesize)-3]
 		}
-		f.Remotepath = remoteFolder + "/" + f.Filename
+		f.RemotePath = remoteFolder + "/" + f.FileName
 		f.checkFileType()
 		result = append(result, f)
 	})
@@ -105,30 +105,30 @@ func caculateChecksum(filename string) string {
 }
 
 func (f *Filerepo) getCheckSum() {
-	if len(f.Filename) == 0 {
+	if len(f.FileName) == 0 {
 		return
 	}
-	f.Checksum = caculateChecksum(f.Filepath)
+	f.CheckSum = caculateChecksum(f.LocalPath)
 }
 
 func (f *Filerepo) checkFileType() {
-	filename := strings.ToLower(f.Filename)
+	filename := strings.ToLower(f.FileName)
 	index := strings.Index(filename, "dsp")
 	if index > -1 {
-		f.Filetype = FILETYPE_DSP
+		f.FileType = FILETYPE_DSP
 		return
 	}
 	index = strings.Index(filename, "boot")
 	if index > -1 {
-		f.Filetype = FILETYPE_BOOT
+		f.FileType = FILETYPE_BOOT
 		return
 	}
 	index = strings.Index(filename, "host")
 	if index > -1 {
-		f.Filetype = FILETYPE_APP
+		f.FileType = FILETYPE_APP
 		return
 	}
-	f.Filetype = FILETYPE_UNKNOWN
+	f.FileType = FILETYPE_UNKNOWN
 }
 
 func findCRCLine(filepath string, address string) string {
@@ -168,30 +168,30 @@ func findCRC(s string, t FileType) string {
 }
 
 func (f *Filerepo) getCRC() {
-	switch f.Filetype {
+	switch f.FileType {
 	case FILETYPE_APP:
-		f.Crc = findCRCLine(f.Filepath, "000BFFF0")
+		f.CRC = findCRCLine(f.LocalPath, "000BFFF0")
 	case FILETYPE_BOOT:
-		f.Crc = findCRCLine(f.Filepath, "0003FFF0")
+		f.CRC = findCRCLine(f.LocalPath, "0003FFF0")
 	case FILETYPE_DSP:
-		f.Crc = findCRCLine(f.Filepath, "S003")
+		f.CRC = findCRCLine(f.LocalPath, "S003")
 	case FILETYPE_UNKNOWN:
 		// do nothing
 	default:
 		// do nothing
 	}
-	f.Crc = findCRC(f.Crc, f.Filetype)
+	f.CRC = findCRC(f.CRC, f.FileType)
 	//	log.Println("CRC:", f.Crc)
 }
 
 func (f *Filerepo) getBuildNumber() {
-	if len(f.Filename) < 12 {
+	if len(f.FileName) < 12 {
 		err := errors.New("invalid file name")
 		log.Println("(f *Filerepo)getBuildNumber()", err.Error())
 		return
 	}
-	bnStr := f.Filename[len(f.Filename)-12 : len(f.Filename)-4]
-	f.Buildnumber, _ = strconv.ParseUint(bnStr, 10, 64)
+	bnStr := f.FileName[len(f.FileName)-12 : len(f.FileName)-4]
+	f.BuildNumber, _ = strconv.ParseUint(bnStr, 10, 64)
 }
 
 /*
@@ -211,9 +211,9 @@ func getBuildNumberFromFileName(filename string) (uint64, error) {
 */
 
 func (c *Filerepo) getFileInfo() error {
-	c.Filepath = strings.Replace(c.Filepath, "\\", "/", -1)
-	filename := filepath.Base(c.Filepath)
-	c.Filename = filename
+	c.LocalPath = strings.Replace(c.LocalPath, "\\", "/", -1)
+	filename := filepath.Base(c.LocalPath)
+	c.FileName = filename
 	c.getBuildNumber()
 	//	c.Created = fi.ModTime()
 	c.checkFileType()
@@ -237,7 +237,7 @@ func getLocalReleaseFilesInfo(folder string) []Filerepo {
 		//		log.Println("file infor", info, " , path:", path)
 		if !info.IsDir() {
 			var fr Filerepo
-			fr.Filepath = path
+			fr.LocalPath = path
 			fr.getFileInfo()
 
 			//		log.Println(fr)
@@ -260,11 +260,11 @@ func clearFileRepo() error {
 */
 
 func (c *Filerepo) checkDownloadStatus() {
-	fi, err := os.Stat(c.Filepath)
+	fi, err := os.Stat(c.LocalPath)
 	//	fmt.Printf("file path : %s, error : %v\n", c.Filepath, err)
 	if err == nil {
-		c.Filesize = fmt.Sprintf("%.2f", float64(fi.Size())/1024)
-		c.Isdownloaded = true
+		c.FileSize = fmt.Sprintf("%.2f", float64(fi.Size())/1024)
+		c.IsDownloaded = true
 		return
 	}
 	/*
@@ -281,7 +281,7 @@ func (c *Filerepo) checkDownloadStatus() {
 			return
 		}
 	*/
-	c.Isdownloaded = false
+	c.IsDownloaded = false
 }
 
 /*
@@ -320,7 +320,7 @@ func SyncReleaseFilesInfo() {
 
 func (c Filerepo) CheckFileIsExistsInArray(files []Filerepo) bool {
 	for _, file := range files {
-		if strings.Compare(strings.ToLower(c.Filename), strings.ToLower(file.Filename)) == 0 {
+		if strings.Compare(strings.ToLower(c.FileName), strings.ToLower(file.FileName)) == 0 {
 			return true
 		}
 	}
@@ -344,7 +344,7 @@ func (c Filerepo) Insert() error {
 func GetALLReleaseFiles() []Filerepo {
 	var lists []Filerepo
 	o := orm.NewOrm()
-	o.QueryTable("Filerepo").GroupBy("Filetype", "Id").OrderBy("Filetype", "-id").All(&lists, "Id", "Filename", "Crc", "Buildnumber", "Filepath", "Filetype", "Isdownloaded", "Remotepath", "Filesize")
+	o.QueryTable("Filerepo").GroupBy("Filetype", "Id").OrderBy("FileType", "-id").All(&lists, "ID", "FileName", "CRC", "BuildNumber", "LocalPath", "FileType", "IsDownloaded", "RemotePath", "FileSize")
 	/*
 		host := getReleaseFilesByType(FILETYPE_APP, 5)
 		lists = append(lists, host...)
@@ -368,7 +368,7 @@ func GetReleaseFilesWithFilter(date string) []Filerepo {
 	f := date[:2] + date[3:5]
 	//	fmt.Println("filter : ", f)
 	o := orm.NewOrm()
-	o.QueryTable("Filerepo").Filter("Filename__icontains", f).GroupBy("Filetype", "Id").OrderBy("Filetype", "-id").All(&lists, "Id", "Filename", "Crc", "Buildnumber", "Filepath", "Filetype", "Isdownloaded", "Remotepath", "Filesize")
+	o.QueryTable("Filerepo").Filter("Filename__icontains", f).GroupBy("FileType", "ID").OrderBy("FileType", "-id").All(&lists, "ID", "FileName", "CRC", "BuildNumber", "LocalPath", "FileType", "IsDownloaded", "RemotePath", "FileSize")
 
 	return lists
 }
@@ -376,14 +376,14 @@ func GetReleaseFilesWithFilter(date string) []Filerepo {
 func getReleaseFilesByType(t FileType, limit int64) []Filerepo {
 	o := orm.NewOrm()
 	var result []Filerepo
-	o.QueryTable("Filerepo").Filter("Filetype", t).OrderBy("-id").Limit(limit).All(&result, "Id", "Filename", "Crc", "Buildnumber", "Filepath", "Filetype", "Isdownloaded", "Remotepath", "Filesize")
+	o.QueryTable("Filerepo").Filter("FileType", t).OrderBy("-ID").Limit(limit).All(&result, "ID", "FileName", "CRC", "BuildNumber", "LocalPath", "FileType", "IsDownloaded", "RemotePath", "FileSize")
 	return result
 }
 
 func (c *Filerepo) CreateOrUpdate() error {
 	o := orm.NewOrm()
 	var tmp Filerepo
-	err := o.QueryTable("Filerepo").Filter("Filename", c.Filename).One(&tmp)
+	err := o.QueryTable("Filerepo").Filter("FileName", c.FileName).One(&tmp)
 	if err == orm.ErrNoRows {
 		return c.Insert()
 	}
@@ -396,7 +396,7 @@ func (c *Filerepo) UpdateDownloadStatus() error {
 	c.Updated = time.Now()
 	o := orm.NewOrm()
 	o.Begin()
-	_, err := o.Update(c, "Isdownloaded")
+	_, err := o.Update(c, "IsDownloaded")
 	if err != nil {
 		log.Println(err.Error())
 		o.Rollback()
@@ -410,7 +410,7 @@ func (c *Filerepo) UpdateCRC() error {
 	c.Updated = time.Now()
 	o := orm.NewOrm()
 	o.Begin()
-	_, err := o.Update(c, "Crc")
+	_, err := o.Update(c, "CRC")
 	if err != nil {
 		log.Println(err.Error())
 		o.Rollback()
@@ -424,7 +424,7 @@ func (c *Filerepo) UpdateChecksum() error {
 	c.Updated = time.Now()
 	o := orm.NewOrm()
 	o.Begin()
-	_, err := o.Update(c, "Checksum")
+	_, err := o.Update(c, "CheckSum")
 	if err != nil {
 		log.Println(err.Error())
 		o.Rollback()
@@ -438,7 +438,7 @@ func (c *Filerepo) UpdateFileSize() error {
 	c.Updated = time.Now()
 	o := orm.NewOrm()
 	o.Begin()
-	_, err := o.Update(c, "Filesize")
+	_, err := o.Update(c, "FileSize")
 	if err != nil {
 		log.Println(err.Error())
 		o.Rollback()
@@ -452,7 +452,7 @@ func (c *Filerepo) Update() error {
 	c.Updated = time.Now()
 	o := orm.NewOrm()
 	o.Begin()
-	_, err := o.Update(c, "Filename", "Crc", "Checksum", "Buildnumber", "Filesize", "Filepath", "Filetype", "Isdownloaded", "Updated")
+	_, err := o.Update(c, "FileName", "CRC", "CheckSum", "BuildNumber", "FileSize", "LocalPath", "FileType", "IsDownloaded", "Updated")
 	if err != nil {
 		log.Println(err.Error())
 		o.Rollback()

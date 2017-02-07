@@ -15,11 +15,11 @@ const (
 )
 
 type Command struct {
-	Id          int64
-	Commandtype CommandType
+	ID          int64       `orm:"pk;auto;column(id)"`
+	CommandType CommandType `orm:"column(commandtype)"`
 	Info        string
-	Updatetime  time.Time `orm:"type(datetime);null"`
-	Createtime  time.Time `orm:"auto_now_add;type(datetime)"`
+	Updated     time.Time `orm:"type(datetime);null"`
+	Created     time.Time `orm:"auto_now_add;type(datetime)"`
 }
 
 func (c *Command) InsertCommand() {
@@ -32,7 +32,7 @@ func (c *Command) InsertCommand() {
 		o.Rollback()
 	} else {
 		//		log.Println(id)
-		c.Id = id
+		c.ID = id
 	}
 
 	o.Commit()

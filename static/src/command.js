@@ -132,9 +132,11 @@ class SerialCommand extends React.Component {
             },
             success: function (data) {
                 let result = "";
-                data.forEach(function (row) {
-                    result += row.Info;
-                });
+                if (data != null) {
+                    data.forEach(function (row) {
+                        result += row.Info;
+                    });
+                }
                 this.setState({
                     output: result
                 })
@@ -164,7 +166,7 @@ class SerialCommand extends React.Component {
                     <input type="text" className="form-control" value={this.state.input} onChange={this.handleInputChange}></input>
                     <span className="input-group-btn">
                         <button type="button" className="btn btn-default" onClick={this.handleSendButtonClick}>Send</button>
-                        <CommandButton command="ver.get"/>
+                        <CommandButton command="ver.get" />
                         <CommandButton command="commands" />
                     </span>
                 </div>

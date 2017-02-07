@@ -16,7 +16,7 @@ const (
 )
 
 type Devicesystemconfig struct {
-	ID              int64     `orm:"column(id)"`
+	ID              int64     `orm:"pk;auto;column(id)"`
 	DeviceName      string    `orm:"size(20);column(devicename)"`
 	SystemVersion   string    `orm:"size(20);column(systemversion)"`
 	DeviceSKU       string    `orm:"size(20);column(devicesku)"`

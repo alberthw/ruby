@@ -12,7 +12,7 @@ import (
 )
 
 type Devicehardwareconfig struct {
-	ID           int64     `orm:"column(id)"`
+	ID           int64     `orm:"pk;auto;column(id)"`
 	Name         string    `orm:"size(20)"`
 	PartNumber   string    `orm:"size(20);column(partnumber)"`
 	Revision     string    `orm:"size(20)"`
@@ -84,7 +84,7 @@ func (c *Devicehardwareconfig) Update() error {
 	c.Updated = time.Now()
 	o := orm.NewOrm()
 	o.Begin()
-	_, err := o.Update(c, "name", "Partnumber", "Revision", "Serialnumber", "Updated")
+	_, err := o.Update(c, "name", "PartNumber", "Revision", "SerialNumber", "Updated")
 	if err != nil {
 		log.Println(err.Error())
 		o.Rollback()

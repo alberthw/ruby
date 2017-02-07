@@ -20,10 +20,10 @@ func (c RubyConfigController) Get() {
 
 func (c RubyConfigController) Post() {
 	var config models.Rubyconfig
-	config.Id, _ = c.GetInt64("Id")
-	config.Serialname = c.GetString("Serialname")
-	config.Serialbaud, _ = c.GetInt64("Serialbaud")
+	config.ID, _ = c.GetInt64("id")
+	config.SerialName = c.GetString("serialName")
+	config.SerialBaud, _ = c.GetInt64("serialBaud")
 	//	config.Isconnected, _ = c.GetBool("connect")
 	config.UpdateSerialName()
-	c.Ctx.WriteString(strconv.FormatInt(config.Id, 10))
+	c.Ctx.WriteString(strconv.FormatInt(config.ID, 10))
 }

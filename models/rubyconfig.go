@@ -8,17 +8,17 @@ import (
 )
 
 type Rubyconfig struct {
-	Id          int64  `orm:"pk;auto"`
-	Serialname  string `orm:"unique"`
-	Serialbaud  int64  `orm:"default(115200)"`
-	Isconnected bool
-	Devicename  string
+	ID          int64     `orm:"pk;auto;column(id)"`
+	SerialName  string    `orm:"unique;column(serialname)"`
+	SerialBaud  int64     `orm:"default(115200);column(serialbaud)"`
+	IsConnected bool      `orm:"column(isconnected)"`
+	DeviceName  string    `orm:"column(devicename)"`
 	Created     time.Time `orm:"auto_now_add;type(datetime)"`
 	Updated     time.Time `orm:"auto_now;type(datetime)"`
 }
 
 func (c *Rubyconfig) init() {
-	c.Serialbaud = 115200
+	c.SerialBaud = 115200
 }
 
 func GetRubyconfig() Rubyconfig {
@@ -37,7 +37,7 @@ func (c *Rubyconfig) UpdateSerialName() error {
 	c.Updated = time.Now()
 	o := orm.NewOrm()
 	o.Begin()
-	_, err := o.Update(c, "Serialname", "Updated")
+	_, err := o.Update(c, "SerialName", "Updated")
 	if err != nil {
 		log.Println(err.Error())
 		o.Rollback()
@@ -51,7 +51,7 @@ func (c *Rubyconfig) UpdateSerialConnectionStatus() error {
 	c.Updated = time.Now()
 	o := orm.NewOrm()
 	o.Begin()
-	_, err := o.Update(c, "Isconnected", "Updated")
+	_, err := o.Update(c, "IsConnected", "Updated")
 	if err != nil {
 		log.Println(err.Error())
 		o.Rollback()

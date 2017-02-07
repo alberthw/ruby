@@ -47,7 +47,7 @@ func (c *SerialController) Post() {
 		result = "ok"
 	}
 	var com models.Command
-	com.Commandtype = models.SEND
+	com.CommandType = models.SEND
 	com.Info = command
 	com.InsertCommand()
 	c.Data["json"] = &result

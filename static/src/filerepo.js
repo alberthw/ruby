@@ -10,7 +10,7 @@ class DownloadFile extends React.Component {
     }
 
     downloadReleaseFile(fileinfo) {
-        console.log("file id :", fileinfo.Id, ", download file : ", fileinfo.Remotepath);
+        console.log("file id :", fileinfo.ID, ", download file : ", fileinfo.RemotePath);
         var url = "/downloadfile";
         var result = null;
         $.ajax({
@@ -20,8 +20,8 @@ class DownloadFile extends React.Component {
             async: false,
             type: "POST",
             data: {
-                id: fileinfo.Id,
-                filepath: fileinfo.Remotepath
+                id: fileinfo.ID,
+                filepath: fileinfo.RemotePath
             },
             success: function (data) {
                 result = data;
@@ -55,8 +55,8 @@ class BurnImage extends React.Component {
             async: false,
             type: "POST",
             data: {
-                filetype: file.Filetype,
-                filepath: file.Filepath
+                filetype: file.FileType,
+                filepath: file.LocalPath
             },
             success: function (data) {
       //          alert(data);
@@ -69,7 +69,7 @@ class BurnImage extends React.Component {
 
     handleBurnImageButtonClick(e) {
         var f = this.props.file;
-        if (f.Isdownloaded != true) {
+        if (f.IsDownloaded != true) {
             alert("download the hex image first.")
             return;
         }
@@ -109,28 +109,28 @@ class FileTable extends React.Component {
                 {...this.props}>
                 <Column
                     header={<Cell>File Name</Cell>}
-                    cell={<TextCell col="Filename" />}
+                    cell={<TextCell col="FileName" />}
 
                     width={300}
                     />
                 <Column
                     header={<Cell>CRC</Cell>}
-                    cell={<TextCell col="Crc" />}
+                    cell={<TextCell col="CRC" />}
                     width={100}
                     />
                 <Column
                     header={<Cell>File Size(KB)</Cell>}
-                    cell={<TextCell col="Filesize" />}
+                    cell={<TextCell col="FileSize" />}
                     width={100}
                     />
                 <Column
                     header={<Cell>Build Number</Cell>}
-                    cell={<TextCell col="Buildnumber" />}
+                    cell={<TextCell col="BuildNumber" />}
                     width={150}
                     />
                 <Column
                     header={<Cell>Download Status</Cell>}
-                    cell={<TextCell col="Isdownloaded" />}
+                    cell={<TextCell col="IsDownloaded" />}
                     width={150}
                     />
                 <Column

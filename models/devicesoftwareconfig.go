@@ -19,7 +19,7 @@ const (
 )
 
 type Devicesoftwareconfig struct {
-	ID         int64  `orm:"column(id)"`
+	ID         int64  `orm:"pk;auto;column(id)"`
 	Name       string `orm:"size(20)"`
 	Type       SoftwareType
 	PartNumber string    `orm:"size(20);column(partnumber)"`

@@ -8,13 +8,14 @@ import (
 )
 
 type Rubyconfig struct {
-	ID          int64     `orm:"pk;auto;column(id)"`
-	SerialName  string    `orm:"unique;column(serialname)"`
-	SerialBaud  int64     `orm:"default(115200);column(serialbaud)"`
-	IsConnected bool      `orm:"column(isconnected)"`
-	DeviceName  string    `orm:"column(devicename)"`
-	Created     time.Time `orm:"auto_now_add;type(datetime)"`
-	Updated     time.Time `orm:"auto_now;type(datetime)"`
+	ID                int64     `orm:"pk;auto;column(id)"`
+	SerialName        string    `orm:"unique;column(serialname)"`
+	SerialBaud        int64     `orm:"default(115200);column(serialbaud)"`
+	IsConnected       bool      `orm:"column(isconnected)"`
+	DeviceName        string    `orm:"column(devicename)"`
+	IsConfigValidated bool      `orm:"column(isconfigvalidated)"`
+	Created           time.Time `orm:"auto_now_add;type(datetime)"`
+	Updated           time.Time `orm:"auto_now;type(datetime)"`
 }
 
 func (c *Rubyconfig) init() {
@@ -52,6 +53,20 @@ func (c *Rubyconfig) UpdateSerialConnectionStatus() error {
 	o := orm.NewOrm()
 	o.Begin()
 	_, err := o.Update(c, "IsConnected", "Updated")
+	if err != nil {
+		log.Println(err.Error())
+		o.Rollback()
+		return err
+	}
+	o.Commit()
+	return err
+}
+
+func (c *Rubyconfig) UpdateConfigValidateStatus() error {
+	c.Updated = time.Now()
+	o := orm.NewOrm()
+	o.Begin()
+	_, err := o.Update(c, "IsConfigValidated", "Updated")
 	if err != nil {
 		log.Println(err.Error())
 		o.Rollback()

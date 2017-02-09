@@ -15,8 +15,18 @@ const (
 	ConfigRecordSize = 132
 )
 
+type ConfigBlock int64
+
+const (
+	CURRENT       ConfigBlock = 0
+	CURRENTBACK   ConfigBlock = 1
+	LASTKNOWN     ConfigBlock = 2
+	LASTKNOWNBACK ConfigBlock = 3
+)
+
 type Devicesystemconfig struct {
-	ID              int64     `orm:"pk;auto;column(id)"`
+	ID              int64 `orm:"pk;auto;column(id)"`
+	Block           ConfigBlock
 	DeviceName      string    `orm:"size(20);column(devicename)"`
 	SystemVersion   string    `orm:"size(20);column(systemversion)"`
 	DeviceSKU       string    `orm:"size(20);column(devicesku)"`
@@ -39,13 +49,14 @@ func (c *Devicesystemconfig) init() {
 	c.HardwareVersion = "NA"
 }
 
-func GetDeviceSystemConfig() Devicesystemconfig {
+func GetDeviceSystemConfig(block ConfigBlock) Devicesystemconfig {
 	o := orm.NewOrm()
 	var result Devicesystemconfig
 
-	err := o.QueryTable("Devicesystemconfig").One(&result)
+	err := o.QueryTable("Devicesystemconfig").Filter("Block", block).One(&result)
 	if err == orm.ErrNoRows {
 		result.init()
+		result.Block = block
 		o.Insert(&result)
 	}
 	return result

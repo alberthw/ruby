@@ -37,11 +37,11 @@ func TestDevicesystemconfigToBytes(t *testing.T) {
 		var sysconfig Devicesystemconfig
 		sysconfig.DeviceName = "Ruby"
 		sysconfig.SystemVersion = "NA"
-		sysconfig.Devicesku = "NA"
-		sysconfig.Serialnumber = "NA"
-		sysconfig.Softwarebuild = "NA"
-		sysconfig.Partnumber = "NA"
-		sysconfig.Hardwareversion = "NA"
+		sysconfig.DeviceSKU = "NA"
+		sysconfig.SerialNumber = "NA"
+		sysconfig.SoftwareBuild = "NA"
+		sysconfig.PartNumber = "NA"
+		sysconfig.HardwareVersion = "NA"
 
 		got := sysconfig.ToByte()
 		if !reflect.DeepEqual(c.want, got) {

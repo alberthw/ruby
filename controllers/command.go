@@ -30,3 +30,11 @@ func (c CommandController) GetVersions() {
 	c.Data["json"] = &result
 	c.ServeJSON()
 }
+
+func (c CommandController) GetLastKnownVersions() {
+	mongoose.SendGetLastKnownVersions()
+	result := "ok"
+	c.Data["json"] = &result
+	c.ServeJSON()
+
+}

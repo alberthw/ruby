@@ -19,7 +19,8 @@ const (
 )
 
 type Devicesoftwareconfig struct {
-	ID         int64  `orm:"pk;auto;column(id)"`
+	ID         int64 `orm:"pk;auto;column(id)"`
+	Block      ConfigBlock
 	Name       string `orm:"size(20)"`
 	Type       SoftwareType
 	PartNumber string    `orm:"size(20);column(partnumber)"`
@@ -61,13 +62,15 @@ func (c *Devicesoftwareconfig) init() {
 	c.ImageCRC = "NA"
 }
 
-func GetDeviceSoftwareConfig(t SoftwareType) Devicesoftwareconfig {
+func GetDeviceSoftwareConfig(t SoftwareType, b ConfigBlock) Devicesoftwareconfig {
 	o := orm.NewOrm()
 	var result Devicesoftwareconfig
 
-	err := o.QueryTable("Devicesoftwareconfig").Filter("Type", t).One(&result)
+	err := o.QueryTable("Devicesoftwareconfig").Filter("Type", t).Filter("Block", b).One(&result)
 	if err == orm.ErrNoRows {
 		result.init()
+		result.Type = t
+		result.Block = b
 		o.Insert(&result)
 	}
 	return result
@@ -92,7 +95,7 @@ func (c *Devicesoftwareconfig) Update() error {
 	c.Updated = time.Now()
 	o := orm.NewOrm()
 	o.Begin()
-	_, err := o.Update(c, "name", "type", "partnumber", "version", "imagecrc", "updated")
+	_, err := o.Update(c, "name", "partnumber", "version", "imagecrc", "updated")
 	if err != nil {
 		log.Println(err.Error())
 		o.Rollback()

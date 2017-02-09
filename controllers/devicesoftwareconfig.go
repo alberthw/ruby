@@ -33,7 +33,9 @@ func (c DeviceSoftwareConfigController) SetSwConfig() {
 */
 func (c DeviceSoftwareConfigController) GetSwConfig() {
 	t, _ := c.GetInt64("type")
-	row := models.GetDeviceSoftwareConfig(models.SoftwareType(t))
+	b, _ := c.GetInt64("block")
+
+	row := models.GetDeviceSoftwareConfig(models.SoftwareType(t), models.ConfigBlock(b))
 	c.Data["json"] = &row
 	c.ServeJSON()
 }

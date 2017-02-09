@@ -18,7 +18,7 @@ func (c DeviceSystemConfigController) SetSysConfig() {
 	sysconfig.ID, _ = c.GetInt64("id")
 
 	sysconfig.DeviceName = c.GetString("deviceName")
-	sysconfig.SystemVersion = c.GetString("sysVersion")
+	sysconfig.SystemVersion = c.GetString("systemVersion")
 	sysconfig.DeviceSKU = c.GetString("deviceSKU")
 	sysconfig.SerialNumber = c.GetString("serialNumber")
 	sysconfig.SoftwareBuild = c.GetString("softwareBuild")
@@ -37,7 +37,9 @@ func (c DeviceSystemConfigController) SetSysConfig() {
 }
 
 func (c DeviceSystemConfigController) GetSysConfig() {
-	row := models.GetDeviceSystemConfig()
+	tmp, _ := c.GetInt64("block")
+	block := models.ConfigBlock(tmp)
+	row := models.GetDeviceSystemConfig(block)
 	c.Data["json"] = &row
 	c.ServeJSON()
 }

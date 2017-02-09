@@ -12,7 +12,8 @@ import (
 )
 
 type Devicehardwareconfig struct {
-	ID           int64     `orm:"pk;auto;column(id)"`
+	ID           int64 `orm:"pk;auto;column(id)"`
+	Block        ConfigBlock
 	Name         string    `orm:"size(20)"`
 	PartNumber   string    `orm:"size(20);column(partnumber)"`
 	Revision     string    `orm:"size(20)"`
@@ -28,13 +29,14 @@ func (c *Devicehardwareconfig) init() {
 	c.SerialNumber = "NA"
 }
 
-func GetDeviceHardwareConfig() Devicehardwareconfig {
+func GetDeviceHardwareConfig(block ConfigBlock) Devicehardwareconfig {
 	o := orm.NewOrm()
 	var result Devicehardwareconfig
 
-	err := o.QueryTable("Devicehardwareconfig").One(&result)
+	err := o.QueryTable("Devicehardwareconfig").Filter("Block", block).One(&result)
 	if err == orm.ErrNoRows {
 		result.init()
+		result.Block = block
 		o.Insert(&result)
 	}
 	return result

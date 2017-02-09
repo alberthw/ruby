@@ -30,7 +30,9 @@ func (c DeviceHardwareConfigController) SetHwConfig() {
 }
 
 func (c DeviceHardwareConfigController) GetHwConfig() {
-	row := models.GetDeviceHardwareConfig()
+	tmp, _ := c.GetInt64("block")
+	block := models.ConfigBlock(tmp)
+	row := models.GetDeviceHardwareConfig(block)
 	c.Data["json"] = &row
 	c.ServeJSON()
 }

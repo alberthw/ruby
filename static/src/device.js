@@ -1,48 +1,3 @@
-
-class ConfigStringItem extends React.Component {
-    constructor(props) {
-        super(props);
-        this.handleTextChange = this.handleTextChange.bind(this);
-    }
-
-    handleTextChange(e) {
-        this.props.onChange(e);
-    }
-    render() {
-        return (
-            <div className="col-md-4">
-                <div className="input-group">
-                    <span className="input-group-addon">{this.props.name}</span>
-                    <input type="text" className="form-control" value={this.props.value} onChange={this.handleTextChange}></input>
-                </div>
-            </div>
-
-        );
-    }
-}
-
-class ConfigNumberItem extends React.Component {
-    constructor(props) {
-        super(props);
-        this.handleNumberChange = this.handleNumberChange.bind(this);
-    }
-
-    handleNumberChange(e) {
-        this.props.onChange(e);
-    }
-    render() {
-        return (
-            <div className="col-md-4">
-                <div className="input-group">
-                    <span className="input-group-addon">{this.props.name}</span>
-                    <input type="number" className="form-control" value={this.props.value} onChange={this.handleNumberChange}></input>
-                </div>
-            </div>
-
-        );
-    }
-}
-
 class SystemConfiguration extends React.Component {
     constructor(props) {
         super(props);
@@ -59,71 +14,95 @@ class SystemConfiguration extends React.Component {
         this.handleUpdateButtonClick = this.handleUpdateButtonClick.bind(this);
 
         this.state = {
-            id: "",
-            deviceName: "",
-            sysVersion: "",
-            deviceSKU: "",
-            serialNumber: "",
-            softwareBuild: "",
-            partNumber: "",
-            hardwareVersion: "",
+            current: {
+                id: "",
+                deviceName: "",
+                systemVersion: "",
+                deviceSKU: "",
+                serialNumber: "",
+                softwareBuild: "",
+                partNumber: "",
+                hardwareVersion: "",
+            },
+            lastKnown: {
+                id: "",
+                deviceName: "",
+                systemVersion: "",
+                deviceSKU: "",
+                serialNumber: "",
+                softwareBuild: "",
+                partNumber: "",
+                hardwareVersion: "",
+            },
         };
     }
     handleDeviceNameChange(e) {
+        var c = this.state.current;
+        c.deviceName = e.target.value;
         this.setState({
-            deviceName: e.target.value
+            current: c,
         });
     }
     handleSystemVersionChange(e) {
+        var c = this.state.current;
+        c.systemVersion = e.target.value;
         this.setState({
-            sysVersion: e.target.value
+            current: c,
         });
     }
 
     handleDeviceSKUChange(e) {
+        var c = this.state.current;
+        c.deviceSKU = e.target.value;
         this.setState({
-            deviceSKU: e.target.value
+            current: c,
         });
     }
 
     handleSerialNumberChange(e) {
+        var c = this.state.current;
+        c.serialNumber = e.target.value;
         this.setState({
-            serialNumber: e.target.value
+            current: c,
         });
     }
 
     handleSoftwareBuildChange(e) {
+        var c = this.state.current;
+        c.softwareBuild = e.target.value;
         this.setState({
-            softwareBuild: e.target.value
+            current: c,
         });
-
     }
 
     handlePartNumberChange(e) {
+        var c = this.state.current;
+        c.partNumber = e.target.value;
         this.setState({
-            partNumber: e.target.value
+            current: c,
         });
 
     }
 
     handleHardwareVersionChange(e) {
+        var c = this.state.current;
+        c.hardwareVersion = e.target.value;
         this.setState({
-            hardwareVersion: e.target.value
+            current: c,
         });
-
     }
 
 
     handleUpdateButtonClick(e) {
         var url = "/setsysconfig";
-        console.log("state:", this.state);
+        console.log("state:", this.state.current);
         $.ajax({
             url: url,
             dataType: "json",
             type: "POST",
             cache: false,
             async: false,
-            data: this.state,
+            data: this.state.current,
             success: function (data) {
                 console.log(data);
                 //result = data;
@@ -135,16 +114,19 @@ class SystemConfiguration extends React.Component {
 
     }
 
-    getSysConfig() {
+    getSysConfig(block) {
         var url = "/getsysconfig";
         var result = null;
 
         $.ajax({
             url: url,
             dataType: "json",
-            type: "GET",
+            type: "POST",
             cache: false,
             async: false,
+            data: {
+                block: block
+            },
             success: function (data) {
                 //            console.log(data);
                 result = data;
@@ -158,44 +140,91 @@ class SystemConfiguration extends React.Component {
     }
 
     componentDidMount() {
-        var data = this.getSysConfig();
-        console.log("system : ", data);
+        var currentData = this.getSysConfig(0);
+        var lastKnownData = this.getSysConfig(2);
+        console.log("system current: ", currentData);
+        console.log("system last known: ", lastKnownData);
         this.setState({
-            id: data.ID,
-            deviceName: data.DeviceName,
-            sysVersion: data.SystemVersion,
-            deviceSKU: data.DeviceSKU,
-            serialNumber: data.SerialNumber,
-            softwareBuild: data.SoftwareBuild,
-            partNumber: data.PartNumber,
-            hardwareVersion: data.HardwareVersion,
+            current: {
+                id: currentData.ID,
+                deviceName: currentData.DeviceName,
+                systemVersion: currentData.SystemVersion,
+                deviceSKU: currentData.DeviceSKU,
+                serialNumber: currentData.SerialNumber,
+                softwareBuild: currentData.SoftwareBuild,
+                partNumber: currentData.PartNumber,
+                hardwareVersion: currentData.HardwareVersion,
+            },
+            lastKnown: {
+                id: lastKnownData.ID,
+                deviceName: lastKnownData.DeviceName,
+                systemVersion: lastKnownData.SystemVersion,
+                deviceSKU: lastKnownData.DeviceSKU,
+                serialNumber: lastKnownData.SerialNumber,
+                softwareBuild: lastKnownData.SoftwareBuild,
+                partNumber: lastKnownData.PartNumber,
+                hardwareVersion: lastKnownData.HardwareVersion,
+            },
+
         });
     }
 
 
     render() {
-
         return (
             <div className="panel panel-default">
                 <div className="panel-heading">System Configuration</div>
                 <div className="panel-body">
-                    <div className="container-fluid">
-                        <div className="row">
+                    <table className="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Current</th>
+                                <th>Last Known</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">Device Name</th>
+                                <td><input type="text" value={this.state.current.deviceName} className="form-control" onChange={this.handleDeviceNameChange}></input></td>
+                                <td>{this.state.lastKnown.deviceName}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Serial Number</th>
+                                <td><input type="text" value={this.state.current.serialNumber} className="form-control" onChange={this.handleSerialNumberChange}></input></td>
+                                <td>{this.state.lastKnown.serialNumber}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">System Version</th>
+                                <td><input type="text" value={this.state.current.systemVersion} className="form-control" onChange={this.handleSystemVersionChange}></input></td>
+                                <td>{this.state.lastKnown.systemVersion}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Device SKU</th>
+                                <td><input type="text" value={this.state.current.deviceSKU} className="form-control" onChange={this.handleDeviceSKUChange}></input></td>
+                                <td>{this.state.lastKnown.deviceSKU}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Software Build</th>
+                                <td><input type="text" value={this.state.current.softwareBuild} className="form-control" onChange={this.handleSoftwareBuildChange}></input></td>
+                                <td>{this.state.lastKnown.softwareBuild}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Part Number</th>
+                                <td><input type="text" value={this.state.current.partNumber} className="form-control" onChange={this.handlePartNumberChange}></input></td>
+                                <td>{this.state.lastKnown.partNumber}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Hardware Version</th>
+                                <td><input type="text" value={this.state.current.hardwareVersion} className="form-control" onChange={this.handleHardwareVersionChange}></input></td>
+                                <td>{this.state.lastKnown.hardwareVersion}</td>
+                            </tr>
 
-                            <ConfigStringItem name="Device Name:" value={this.state.deviceName} onChange={this.handleDeviceNameChange} />
-                            <ConfigStringItem name="System Version:" value={this.state.sysVersion} onChange={this.handleSystemVersionChange} />
-                            <ConfigStringItem name="Device SKU:" value={this.state.deviceSKU} onChange={this.handleDeviceSKUChange} />
-                            <ConfigStringItem name="Serial Number:" value={this.state.serialNumber} onChange={this.handleSerialNumberChange} />
-                            <ConfigStringItem name="Software Build:" value={this.state.softwareBuild} onChange={this.handleSoftwareBuildChange} />
-                            <ConfigStringItem name="Part Number:" value={this.state.partNumber} onChange={this.handlePartNumberChange} />
-                            <ConfigStringItem name="Hardware Version:" value={this.state.hardwareVersion} onChange={this.handleHardwareVersionChange} />
-
-
-                        </div>
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
                 <div className="panel-footer">
-                    <input type="button" value="Update" onClick={this.handleUpdateButtonClick}></input>
+                    <input type="button" value="Edit" onClick={this.handleUpdateButtonClick}></input>
                 </div>
             </div>
         );
@@ -206,7 +235,6 @@ class HardwareConfiguration extends React.Component {
     constructor(props) {
         super(props);
 
-        this.handleNameChange = this.handleNameChange.bind(this);
         this.handlePartNumberChange = this.handlePartNumberChange.bind(this);
         this.handleRevisionChange = this.handleRevisionChange.bind(this);
         this.handleSerialNumberChange = this.handleSerialNumberChange.bind(this);
@@ -214,54 +242,60 @@ class HardwareConfiguration extends React.Component {
         this.handleUpdateButtonClick = this.handleUpdateButtonClick.bind(this);
 
         this.state = {
-            id: "",
-            name: "",
-            partNumber: "",
-            revision: "",
-            serialNumber: "",
+            current: {
+                id: "",
+                name: "",
+                partNumber: "",
+                revision: "",
+                serialNumber: "",
+            },
+            lastKnown: {
+                id: "",
+                name: "",
+                partNumber: "",
+                revision: "",
+                serialNumber: "",
+            },
+
+
         };
     }
 
-    handleNameChange(e) {
-        this.setState({
-            name: e.target.value
-        });
-
-    }
-
-
     handlePartNumberChange(e) {
+        var c = this.state.current;
+        c.partNumber = e.target.value;
         this.setState({
-            partNumber: e.target.value
+            current: c,
         });
-
     }
 
     handleRevisionChange(e) {
+        var c = this.state.current;
+        c.revision = e.target.value;
         this.setState({
-            revision: e.target.value
+            current: c,
         });
-
     }
 
     handleSerialNumberChange(e) {
+        var c = this.state.current;
+        c.serialNumber = e.target.value;
         this.setState({
-            serialNumber: e.target.value
+            current: c,
         });
-
     }
 
 
     handleUpdateButtonClick(e) {
         var url = "/sethwconfig";
-        console.log("state:", this.state);
+        console.log("state:", this.state.current);
         $.ajax({
             url: url,
             dataType: "json",
             type: "POST",
             cache: false,
             async: false,
-            data: this.state,
+            data: this.state.current,
             success: function (data) {
                 console.log(data);
                 //result = data;
@@ -273,20 +307,19 @@ class HardwareConfiguration extends React.Component {
 
     }
 
-
-
-
-
-    getHwConfig() {
+    getHwConfig(block) {
         var url = "/gethwconfig";
         var result = null;
 
         $.ajax({
             url: url,
             dataType: "json",
-            type: "GET",
+            type: "POST",
             cache: false,
             async: false,
+            data: {
+                block: block
+            },
             success: function (data) {
                 //            console.log(data);
                 result = data;
@@ -299,14 +332,26 @@ class HardwareConfiguration extends React.Component {
         return result;
     }
     componentDidMount() {
-        var data = this.getHwConfig();
-        console.log("hardware : ", data);
+        var currentData = this.getHwConfig(0);
+        var lastKnownData = this.getHwConfig(2);
+        console.log("hardware current: ", currentData);
+        console.log("hardware last known: ", lastKnownData);
         this.setState({
-            id: data.Id,
-            name: data.Name,
-            partNumber: data.PartNumber,
-            revision: data.Revision,
-            serialNumber: data.SerialNumber,
+            current: {
+                id: currentData.Id,
+                name: currentData.Name,
+                partNumber: currentData.PartNumber,
+                revision: currentData.Revision,
+                serialNumber: currentData.SerialNumber,
+            },
+            lastKnown: {
+                id: lastKnownData.Id,
+                name: lastKnownData.Name,
+                partNumber: lastKnownData.PartNumber,
+                revision: lastKnownData.Revision,
+                serialNumber: lastKnownData.SerialNumber,
+            },
+
         });
     }
     render() {
@@ -314,19 +359,35 @@ class HardwareConfiguration extends React.Component {
             <div className="panel panel-default">
                 <div className="panel-heading">Hardware Configuration</div>
                 <div className="panel-body">
-                    <div className="container-fluid">
-                        <div className="row">
-
-                            <ConfigStringItem name="Name:" value={this.state.name} onChange={this.handleNameChange} />
-                            <ConfigStringItem name="Part Number:" value={this.state.partNumber} onChange={this.handlePartNumberChange} />
-                            <ConfigStringItem name="Revision:" value={this.state.revision} onChange={this.handleRevisionChange} />
-                            <ConfigStringItem name="Serial Number:" value={this.state.serialNumber} onChange={this.handleSerialNumberChange} />
-
-                        </div>
-                    </div>
+                    <table className="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Current</th>
+                                <th>Last Known</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">Part Number</th>
+                                <td><input type="text" value={this.state.current.partNumber} className="form-control" onChange={this.handlePartNumberChange}></input></td>
+                                <td>{this.state.lastKnown.partNumber}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Revision</th>
+                                <td><input type="text" value={this.state.current.revision} className="form-control" onChange={this.handleRevisionChange}></input></td>
+                                <td>{this.state.lastKnown.revision}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Serial Number</th>
+                                <td><input type="text" value={this.state.current.serialNumber} className="form-control" onChange={this.handleSerialNumberChange}></input></td>
+                                <td>{this.state.lastKnown.serialNumber}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
                 <div className="panel-footer">
-                    <input type="button" value="Update" onClick={this.handleUpdateButtonClick}></input>
+                    <input type="button" value="Edit" onClick={this.handleUpdateButtonClick}></input>
                 </div>
             </div>
         );
@@ -343,9 +404,17 @@ class SoftwareConfiguration extends React.Component {
             <div className="panel panel-default">
                 <div className="panel-heading">Software Configuration</div>
                 <div className="panel-body">
-                    <SoftwareComponent name="Host Boot Loader" type="0" />
-                    <SoftwareComponent name="Host Application" type="1" />
-                    <SoftwareComponent name="DSP Application" type="2" />
+                    <div className="rows container-fluid">
+                        <div className="col-xs-4">
+                            <SoftwareComponent name="Host Boot Loader" type="0" />
+                        </div>
+                        <div className="col-xs-4">
+                            <SoftwareComponent name="Host Application" type="1" />
+                        </div>
+                        <div className="col-xs-4">
+                            <SoftwareComponent name="DSP Application" type="2" />
+                        </div>
+                    </div>
                 </div>
             </div>
         );
@@ -356,73 +425,28 @@ class SoftwareComponent extends React.Component {
     constructor(props) {
         super(props);
 
-        this.handleNameChange = this.handleNameChange.bind(this);
-        this.handlePartNumberChange = this.handlePartNumberChange.bind(this);
-        this.handleVersionChange = this.handleVersionChange.bind(this);
-        this.handleImageCRCChange = this.handleImageCRCChange.bind(this);
-
-        //       this.handleUpdateButtonClick = this.handleUpdateButtonClick.bind(this);
-
         this.state = {
-            id: "",
-            name: "",
-            type: "",
-            partNumber: "",
-            version: "",
-            imageCRC: "",
+            current: {
+                id: "",
+                name: "",
+                type: "",
+                partNumber: "",
+                version: "",
+                imageCRC: "",
+            },
+            lastKnown: {
+                id: "",
+                name: "",
+                type: "",
+                partNumber: "",
+                version: "",
+                imageCRC: "",
+            },
         };
 
     }
 
-    handleNameChange(e) {
-        this.setState({
-            name: e.target.value
-        });
-
-    }
-
-    handlePartNumberChange(e) {
-        this.setState({
-            partNumber: e.target.value
-        });
-
-    }
-
-    handleVersionChange(e) {
-        this.setState({
-            version: e.target.value
-        });
-
-    }
-
-    handleImageCRCChange(e) {
-        this.setState({
-            imageCRC: e.target.value
-        });
-
-    }
-    /*
-        handleUpdateButtonClick(e) {
-            var url = "/setswconfig";
-            console.log("state:", this.state);
-            $.ajax({
-                url: url,
-                dataType: "json",
-                type: "POST",
-                cache: false,
-                async: false,
-                data: this.state,
-                success: function (data) {
-                    console.log(data);
-                    //result = data;
-                },
-                error: function (xhr, status, err) {
-                    console.error(url, status, err.toString());
-                }
-            });
-        }
-    */
-    getSoftwareConfig() {
+    getSoftwareConfig(block) {
         var url = "/getswconfig";
         var result = null;
 
@@ -433,7 +457,8 @@ class SoftwareComponent extends React.Component {
             cache: false,
             async: false,
             data: {
-                "type": this.props.type
+                "type": this.props.type,
+                "block": block,
             },
             success: function (data) {
                 //            console.log(data);
@@ -448,15 +473,28 @@ class SoftwareComponent extends React.Component {
     }
 
     componentDidMount() {
-        var data = this.getSoftwareConfig();
-        console.log(this.props.name, ":", data);
+        var currentdata = this.getSoftwareConfig(0);
+        var lastKnowndata = this.getSoftwareConfig(2);
+        console.log(this.props.name, " current:", currentdata);
+        console.log(this.props.name, " last known:", lastKnowndata);
         this.setState({
-            id: data.ID,
-            name: data.Name,
-            type: this.props.type,
-            partNumber: data.PartNumber,
-            version: data.Version,
-            imageCRC: data.ImageCRC,
+            current: {
+                id: currentdata.ID,
+                name: currentdata.Name,
+                type: this.props.type,
+                partNumber: currentdata.PartNumber,
+                version: currentdata.Version,
+                imageCRC: currentdata.ImageCRC,
+            },
+            lastKnown: {
+                id: lastKnowndata.ID,
+                name: lastKnowndata.Name,
+                type: this.props.type,
+                partNumber: lastKnowndata.PartNumber,
+                version: lastKnowndata.Version,
+                imageCRC: lastKnowndata.ImageCRC,
+            },
+
         });
     }
 
@@ -465,17 +503,33 @@ class SoftwareComponent extends React.Component {
             <div className="panel panel-default">
                 <div className="panel-heading">{this.props.name}</div>
                 <div className="panel-body">
-                    <div className="container-fluid">
-                        <div className="row">
-                            <fieldset disabled>
-                                <ConfigStringItem name="Name:" value={this.state.name} onChange={this.handleNameChange} />
-                                <ConfigStringItem name="Part Number:" value={this.state.partNumber} onChange={this.handlePartNumberChange} />
-                                <ConfigStringItem name="Version:" value={this.state.version} onChange={this.handleVersionChange} />
-                                <ConfigStringItem name="Image CRC:" value={this.state.imageCRC} onChange={this.handleImageCRCChange} />
+                    <table className="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Current</th>
+                                <th>Last Known</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">Part Number</th>
+                                <td>{this.state.current.partNumber}</td>
+                                <td>{this.state.lastKnown.partNumber}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Version</th>
+                                <td>{this.state.current.version}</td>
+                                <td>{this.state.lastKnown.version}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">CRC</th>
+                                <td>{this.state.current.imageCRC}</td>
+                                <td>{this.state.lastKnown.imageCRC}</td>
+                            </tr>
+                        </tbody>
+                    </table>
 
-                            </fieldset>
-                        </div>
-                    </div>
                 </div>
 
             </div >
@@ -487,9 +541,58 @@ class DeviceConfiguration extends React.Component {
 
     constructor(props) {
         super(props);
+
+        this.handleValidateButtonClick = this.handleValidateButtonClick.bind(this);
+
+        this.getVersions();
+
+        this.getLastKnownVersions();
+
+        this.state = {
+            isConfigValidated: false
+        }
+
     }
 
-    GetVersions() {
+    handleValidateButtonClick(e) {
+        var url = "/validateconfig";
+        $.ajax({
+            url: url,
+            dataType: "json",
+            type: "GET",
+            cache: false,
+            async: false,
+            success: function (data) {
+                console.log(data);
+                //result = data;
+            },
+            error: function (xhr, status, err) {
+                console.error(url, status, err.toString());
+            }
+        });
+    }
+
+    getConfigValidateStatus() {
+        var url = "/config";
+        $.ajax({
+            url: url,
+            dataType: "json",
+            cache: false,
+            async: false,
+            success: function (data) {
+                console.log("config:", data);
+                this.setState({
+                    isConfigValidated: data.IsConfigValidated,
+                })
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(url, status, err.toString());
+            }.bind(this)
+        });
+
+    }
+
+    getVersions() {
         var url = "/getversion";
         var result = null;
 
@@ -511,21 +614,63 @@ class DeviceConfiguration extends React.Component {
         return result;
     }
 
-    componentDidMount() {
-        this.GetVersions();
+    getLastKnownVersions() {
+        var url = "/getlastknownversion";
+        var result = null;
+
+        $.ajax({
+            url: url,
+            dataType: "json",
+            type: "GET",
+            cache: false,
+            async: false,
+            success: function (data) {
+                //            console.log(data);
+                result = data;
+
+            },
+            error: function (xhr, status, err) {
+                console.error(url, status, err.toString());
+            }
+        });
+        return result;
+    }
+
+    componentWillMount() {
+        this.getConfigValidateStatus();
+
     }
 
 
     render() {
+        var validateStatus = this.state.isConfigValidated.toString();
         return (
             <div className="panel panel-default panel-primary">
                 <div className="panel-heading">Device Configuration</div>
                 <div className="panel-body">
-                    <SystemConfiguration />
-                    <HardwareConfiguration />
-                    <SoftwareConfiguration />
+                    <div className="container-fluid">
+                        <div className="panel panel-default">
+                            <div className="panel-body">
+                                <p className="navbar-text">Configuration Validation Status:</p>
+                                <p className="navbar-text">{validateStatus}</p>
+                                 <input type="button" className="btn btn-default" value="Validate" onClick={this.handleValidateButtonClick}></input>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="clearfix"></div>
+                    <div className="rows container-fluid">
+                        <div className="col-xs-6">
+                            <SystemConfiguration />
+                        </div>
+                        <div className="col-xs-6">
+                            <HardwareConfiguration />
+                        </div>
+                    </div>
+                    <div>
+                        <SoftwareConfiguration />
+                    </div>
                 </div>
-            </div>
+            </div >
         );
     }
 

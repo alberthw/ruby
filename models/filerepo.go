@@ -29,7 +29,7 @@ const (
 )
 
 type Filerepo struct {
-	Id           int64     `orm:"pk;auto;column(id)"`
+	ID           int64     `orm:"pk;auto;column(id)"`
 	FileName     string    `orm:"column(filename)"`
 	CRC          string    `orm:"column(crc)"`
 	BuildNumber  uint64    `orm:"column(buildnumber)"`
@@ -186,7 +186,8 @@ func (f *Filerepo) getCRC() {
 
 func (f *Filerepo) getBuildNumber() {
 	if len(f.FileName) < 12 {
-		err := errors.New("invalid file name")
+		e := fmt.Sprintf("invalid file name : %s", f.FileName)
+		err := errors.New(e)
 		log.Println("(f *Filerepo)getBuildNumber()", err.Error())
 		return
 	}
@@ -344,7 +345,7 @@ func (c Filerepo) Insert() error {
 func GetALLReleaseFiles() []Filerepo {
 	var lists []Filerepo
 	o := orm.NewOrm()
-	o.QueryTable("Filerepo").GroupBy("Filetype", "Id").OrderBy("FileType", "-id").All(&lists, "ID", "FileName", "CRC", "BuildNumber", "LocalPath", "FileType", "IsDownloaded", "RemotePath", "FileSize")
+	o.QueryTable("Filerepo").GroupBy("FileType", "Id").OrderBy("FileType", "-id").All(&lists, "ID", "FileName", "CRC", "BuildNumber", "LocalPath", "FileType", "IsDownloaded", "RemotePath", "FileSize")
 	/*
 		host := getReleaseFilesByType(FILETYPE_APP, 5)
 		lists = append(lists, host...)
@@ -368,7 +369,7 @@ func GetReleaseFilesWithFilter(date string) []Filerepo {
 	f := date[:2] + date[3:5]
 	//	fmt.Println("filter : ", f)
 	o := orm.NewOrm()
-	o.QueryTable("Filerepo").Filter("Filename__icontains", f).GroupBy("FileType", "ID").OrderBy("FileType", "-id").All(&lists, "ID", "FileName", "CRC", "BuildNumber", "LocalPath", "FileType", "IsDownloaded", "RemotePath", "FileSize")
+	o.QueryTable("Filerepo").Filter("Filename__icontains", f).GroupBy("FileType", "ID").OrderBy("FileType", "-ID").All(&lists, "ID", "FileName", "CRC", "BuildNumber", "LocalPath", "FileType", "IsDownloaded", "RemotePath", "FileSize")
 
 	return lists
 }
@@ -387,7 +388,7 @@ func (c *Filerepo) CreateOrUpdate() error {
 	if err == orm.ErrNoRows {
 		return c.Insert()
 	}
-	c.Id = tmp.Id
+	c.ID = tmp.ID
 	return c.Update()
 
 }

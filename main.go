@@ -23,7 +23,7 @@ func main() {
 
 	go open()
 	go syncReleaseFileRepository(6000)
-	go reader(300)
+	go reader(10)
 
 	go parseMessage()
 
@@ -82,7 +82,7 @@ func open() {
 		//		log.Printf("serial name : %s, serial baud : %d, connection status : %v", models.GConfig.Serialname, models.GConfig.Serialbaud, models.GConfig.Isconnected)
 
 		connected := false
-		err := serial.Open(cfg.Serialname, int(cfg.Serialbaud))
+		err := serial.Open(cfg.SerialName, int(cfg.SerialBaud))
 
 		if err != nil {
 			log.Println(err.Error())
@@ -93,7 +93,7 @@ func open() {
 			waitTime = 1000
 		}
 
-		cfg.Isconnected = connected
+		cfg.IsConnected = connected
 		cfg.UpdateSerialConnectionStatus()
 		if index > 100 {
 			waitTime = 100000
@@ -114,17 +114,22 @@ type SwConfig struct {
 	Swconfig models.Devicesoftwareconfig
 }
 
+type ConfigValidate struct {
+	ConfigValidate models.Rubyconfig
+}
+
 func parseMessage() {
 	for {
-		tmp := <-buffer
 
+		tmp := <-buffer
+		log.Println("\n-----------START------------")
 		if strings.Contains(string(tmp), "{\"sysconfig\"") {
 			var f SysConfig
 			err := json.Unmarshal(tmp, &f)
 			if err != nil {
 				log.Println(err.Error())
 			} else {
-				cfg := models.GetDeviceSystemConfig()
+				cfg := models.GetDeviceSystemConfig(f.Sysconfig.Block)
 				f.Sysconfig.ID = cfg.ID
 				f.Sysconfig.Update()
 			}
@@ -136,7 +141,7 @@ func parseMessage() {
 			if err != nil {
 				log.Println(err.Error())
 			} else {
-				cfg := models.GetDeviceHardwareConfig()
+				cfg := models.GetDeviceHardwareConfig(f.Hwconfig.Block)
 				f.Hwconfig.ID = cfg.ID
 				f.Hwconfig.Update()
 			}
@@ -159,93 +164,29 @@ func parseMessage() {
 				if strings.Contains(f.Swconfig.Name, "DSP Application") {
 					t = models.DSPAPP
 				}
-				cfg := models.GetDeviceSoftwareConfig(t)
+				cfg := models.GetDeviceSoftwareConfig(t, f.Swconfig.Block)
 				f.Swconfig.ID = cfg.ID
 				f.Swconfig.Type = t
 				f.Swconfig.Update()
 			}
 			log.Println(f)
 		}
-		log.Println("\n-----------END------------\n")
-	}
 
-}
-
-/*
-func copyFile(src, dst string) error {
-	log.Printf("copy from %s to %s\n", src, dst)
-	in, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer in.Close()
-	out, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		cerr := out.Close()
-		if err == nil {
-			err = cerr
-		}
-	}()
-	if _, err = io.Copy(out, in); err != nil {
-		return err
-	}
-	err = out.Sync()
-	return err
-}
-
-const remoteFileRepoFolder = "C:/tools/Jenkins/userContent/Release"
-
-func getFilesInFolder(folder string) []string {
-	var result []string
-	//	log.Println(folder)
-	filepath.Walk(folder, func(path string, info os.FileInfo, err error) error {
-		//	log.Println("path:", path, ",info:", info)
-		if info == nil {
-			return nil
-		}
-		if !info.IsDir() {
-			result = append(result, path)
-		}
-		return nil
-	})
-	return result
-}
-
-func searchStrFromArray(s string, arr []string) bool {
-	c := strings.Join(arr, ",")
-	return strings.Contains(c, s)
-}
-
-func syncReleaseFolder(source, dst string) {
-	if _, err := os.Stat(source); os.IsNotExist(err) {
-		return
-	}
-	for {
-		srcfiles := getFilesInFolder(source)
-		dstfiles := getFilesInFolder(dst)
-		for _, f := range dstfiles {
-			filename := filepath.Base(f)
-			if !searchStrFromArray(filename, srcfiles) {
-				os.Remove(f)
-				var fr models.Filerepo
-				fr.DeleteByFilename(filename)
+		if strings.Contains(string(tmp), "{\"configvalidate\"") {
+			var f ConfigValidate
+			err := json.Unmarshal(tmp, &f)
+			if err != nil {
+				log.Println(err.Error())
+			} else {
+				log.Println("result:", f.ConfigValidate)
+				setting := models.GetRubyconfig()
+				setting.IsConfigValidated = f.ConfigValidate.IsConfigValidated
+				setting.UpdateConfigValidateStatus()
 			}
+			log.Println(f)
 		}
-		for _, f := range srcfiles {
-			filename := filepath.Base(f)
-			localfile := dst + "/" + filename
-			if _, err := os.Stat(localfile); os.IsNotExist(err) {
-				copyFile(f, localfile)
-				var fr models.Filerepo
-				fr.Filepath = localfile
-				fr.GetFileInfo()
-				fr.CreateOrUpdate()
-			}
-		}
-		runtime.Gosched()
+
+		log.Println("\n-----------END------------")
 	}
+
 }
-*/

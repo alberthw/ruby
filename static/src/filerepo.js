@@ -59,7 +59,7 @@ class BurnImage extends React.Component {
                 filepath: file.LocalPath
             },
             success: function (data) {
-      //          alert(data);
+                //          alert(data);
             },
             error: function (xhr, status, err) {
                 console.error(url, status, err.toString());
@@ -87,7 +87,9 @@ class BurnImage extends React.Component {
 class FileTable extends React.Component {
     constructor(props) {
         super(props);
+
     }
+
     render() {
         const rows = this.props.files;
 
@@ -112,27 +114,27 @@ class FileTable extends React.Component {
                     cell={<TextCell col="FileName" />}
 
                     width={300}
-                    />
+                />
                 <Column
                     header={<Cell>CRC</Cell>}
                     cell={<TextCell col="CRC" />}
                     width={100}
-                    />
+                />
                 <Column
                     header={<Cell>File Size(KB)</Cell>}
                     cell={<TextCell col="FileSize" />}
-                    width={100}
-                    />
+                     width={100}
+                />
                 <Column
                     header={<Cell>Build Number</Cell>}
                     cell={<TextCell col="BuildNumber" />}
                     width={150}
-                    />
+                />
                 <Column
                     header={<Cell>Download Status</Cell>}
                     cell={<TextCell col="IsDownloaded" />}
-                    width={150}
-                    />
+                     width={150}
+                />
                 <Column
                     header={<Cell></Cell>}
                     cell={props => (
@@ -140,8 +142,8 @@ class FileTable extends React.Component {
                             <DownloadFile file={rows[props.rowIndex]} />
                         </Cell>
                     )}
-                    width={100}
-                    />
+                     width={100}
+                />
                 <Column
                     header={<Cell></Cell>}
                     cell={props => (
@@ -150,7 +152,7 @@ class FileTable extends React.Component {
                         </Cell>
                     )}
                     width={100}
-                    />
+                />
             </Table>
         );
     }
@@ -194,8 +196,8 @@ class TableFilter extends React.Component {
     }
 }
 
-class FileUpload extends React.Component{
-    
+class FileUpload extends React.Component {
+
 }
 
 
@@ -208,7 +210,8 @@ class FileRepo extends React.Component {
 
         this.state = {
             filter: {
-                date: ""
+                date: "",
+
             },
             data: this.getReleaseFiles(null),
 

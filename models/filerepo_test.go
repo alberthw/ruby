@@ -21,9 +21,9 @@ func TestCaculateChecksum(t *testing.T) {
 func TestGetReleaseFilesInfo(t *testing.T) {
 	folder := "../static/release"
 	for _, f := range getLocalReleaseFilesInfo(folder) {
-		t.Logf("file path:\t%s\n", f.Filepath)
-		t.Logf("file name:\t%s\n", f.Filename)
-		t.Logf("checksum:\t%s\n", f.Checksum)
+		t.Logf("file path:\t%s\n", f.LocalPath)
+		t.Logf("file name:\t%s\n", f.FileName)
+		t.Logf("checksum:\t%s\n", f.CheckSum)
 		t.Logf("create time:\t%v\n", f.Created)
 	}
 }
@@ -64,9 +64,9 @@ func TestCheckFileType(t *testing.T) {
 	}
 	for _, c := range cases {
 		var f Filerepo
-		f.Filename = c.in
+		f.FileName = c.in
 		f.checkFileType()
-		got := f.Filetype
+		got := f.FileType
 		if got != c.want {
 			t.Errorf("checkFileType() : \n want\t %d\n got \t %d", c.want, got)
 		}

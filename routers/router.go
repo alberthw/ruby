@@ -8,6 +8,7 @@ import (
 func init() {
 	beego.Router("/", &controllers.MainController{})
 	beego.Router("/device", &controllers.DeviceController{})
+	beego.Router("/log", &controllers.LogController{})
 
 	beego.Router("/config", &controllers.RubyConfigController{})
 

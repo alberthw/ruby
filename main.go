@@ -118,6 +118,10 @@ type ConfigValidate struct {
 	ConfigValidate models.Rubyconfig
 }
 
+type DeviceLog struct {
+	DeviceLog models.DeviceLog
+}
+
 func parseMessage() {
 	for {
 
@@ -182,6 +186,21 @@ func parseMessage() {
 				setting := models.GetRubyconfig()
 				setting.IsConfigValidated = f.ConfigValidate.IsConfigValidated
 				setting.UpdateConfigValidateStatus()
+			}
+			log.Println(f)
+		}
+
+		if strings.Contains(string(tmp), "{\"devicelog\"") {
+			var f DeviceLog
+			err := json.Unmarshal(tmp, &f)
+			if err != nil {
+				log.Println(err.Error())
+			} else {
+				log.Println("result:", f.DeviceLog)
+				err := f.DeviceLog.ParseContent()
+				if err == nil {
+					f.DeviceLog.Insert()
+				}
 			}
 			log.Println(f)
 		}

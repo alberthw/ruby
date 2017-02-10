@@ -165,7 +165,6 @@ class SystemConfiguration extends React.Component {
                 partNumber: lastKnownData.PartNumber,
                 hardwareVersion: lastKnownData.HardwareVersion,
             },
-
         });
     }
 
@@ -543,14 +542,11 @@ class DeviceConfiguration extends React.Component {
         super(props);
 
         this.handleValidateButtonClick = this.handleValidateButtonClick.bind(this);
-
-        this.getVersions();
-
-        this.getLastKnownVersions();
+        this.handleUpdateButtonClick = this.handleUpdateButtonClick.bind(this);
 
         this.state = {
-            isConfigValidated: false
-        }
+            isConfigValidated: false,
+        };
 
     }
 
@@ -570,6 +566,12 @@ class DeviceConfiguration extends React.Component {
                 console.error(url, status, err.toString());
             }
         });
+    }
+
+    handleUpdateButtonClick(e){
+        this.getVersions();
+        this.getLastKnownVersions();
+        window.location.reload();
     }
 
     getConfigValidateStatus() {
@@ -638,12 +640,10 @@ class DeviceConfiguration extends React.Component {
 
     componentWillMount() {
         this.getConfigValidateStatus();
-
     }
 
 
     render() {
-        var validateStatus = this.state.isConfigValidated.toString();
         return (
             <div className="panel panel-default panel-primary">
                 <div className="panel-heading">Device Configuration</div>
@@ -652,8 +652,9 @@ class DeviceConfiguration extends React.Component {
                         <div className="panel panel-default">
                             <div className="panel-body">
                                 <p className="navbar-text">Configuration Validation Status:</p>
-                                <p className="navbar-text">{validateStatus}</p>
-                                 <input type="button" className="btn btn-default" value="Validate" onClick={this.handleValidateButtonClick}></input>
+                                <p className="navbar-text">{this.state.isConfigValidated.toString()}</p>
+                                <input type="button" className="btn btn-default" value="Validate" onClick={this.handleValidateButtonClick}></input>
+                                <input type="button" className="btn btn-default" value="Update" onClick={this.handleUpdateButtonClick}></input>
                             </div>
                         </div>
                     </div>

@@ -16,32 +16,9 @@ func TestInitCrc16(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		InitCrc16()
 		got := crc16Table
 		if !reflect.DeepEqual(got, c.want) {
-			t.Errorf("InitCrc16(),\nwant %v\ngot %v", c.want, got)
-		}
-	}
-
-}
-
-func TestCrc16(t *testing.T) {
-	cases := []struct {
-		in   string
-		want uint16
-	}{
-		{"024646313131303020202020203020203d3320202020202020202020202020202020202020202020202020202020", 0xC69F},
-		{"0246463231313030202020202030202029523c202020202020202020202020202020202020202020202020202020", 0xB13C},
-		{"4E410000000000000000000000000000000000004E410000000000000000000000000000000000004E410000000000000000000000000000000000004E410000000000000000000000000000000000004E4100000000000000004E4100000000000000004E4100000000000000000000000000000000000020FFFFFF72FFFFFF", 0xDC81},
-	}
-
-	for _, c := range cases {
-		input, _ := hex.DecodeString(c.in)
-		fmt.Printf("%d:%X\n", len(input), input)
-		got := Crc16(input)
-		got2 := Crc16Byte2(input)
-		if got != c.want {
-			t.Errorf("Crc16(),want 0x%x,got 0x%x, got2 : 0x%x", c.want, got, got2)
+			t.Errorf("initCrc16(),\nwant %v\ngot %v", c.want, got)
 		}
 	}
 
@@ -50,24 +27,36 @@ func TestCrc16(t *testing.T) {
 func TestCrc16Byte(t *testing.T) {
 	cases := []struct {
 		in   string
-		want string
+		want uint16
 	}{
-		{"024646313131303020202020203020203d3320202020202020202020202020202020202020202020202020202020", "43363946"},
-		{"0246463231313030202020202030202029523c202020202020202020202020202020202020202020202020202020", "42313343"},
-		{"0246463631443030", "36373739"},
-		{"0246463335413030", "31304538"},
-		{"0246463930303030", "34363641"},
-		{"0246463030303030", "44384642"},
-		{"0246463430303030", "30343342"},
+		{"024646313131303020202020203020203d3320202020202020202020202020202020202020202020202020202020", 0xC69F},
+		{"0246463231313030202020202030202029523c202020202020202020202020202020202020202020202020202020", 0xB13C}}
+
+	for _, c := range cases {
+		input, _ := hex.DecodeString(c.in)
+		fmt.Printf("%d:%X\n", len(input), input)
+		got := Crc16Byte(input)
+		if got != c.want {
+			t.Errorf("Crc16(),want 0x%X,got 0x%X", c.want, got)
+		}
+	}
+
+}
+
+func TestCrc16Uint(t *testing.T) {
+	cases := []struct {
+		in   string
+		want uint16
+	}{
+		{"527562792041646170746572000000000000000031302E302E300000000000000000000000000000736B7533343233340000000000000000000000005365723233323334000000000000000000000000322E312E33000000000032312E30326600000000322E300000000000000000000000000000000000FFFFFFFFFFFFFFFF", 0x89E9},
 	}
 
 	for _, c := range cases {
 		input, _ := hex.DecodeString(c.in)
-
-		output := Crc16Byte(input)
-		got := hex.EncodeToString(output)
+		fmt.Printf("%d:%X\n", len(input), input)
+		got := Crc16Uint(input)
 		if got != c.want {
-			t.Errorf("Crc16Byte()\ngiven\t%s\nwant\t%s\ngot\t%s\n", c.in, c.want, got)
+			t.Errorf("Crc16(),want 0x%X,got 0x%X, ", c.want, got)
 		}
 	}
 

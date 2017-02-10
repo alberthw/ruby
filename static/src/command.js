@@ -108,7 +108,7 @@ class SerialCommand extends React.Component {
     }
 
     componentDidMount() {
-        this.timer = setInterval(() => { this.getSerialOutput() }, 500);
+        this.timer = setInterval(() => { this.getSerialOutput() }, 3000);
     }
 
     componentWillUnmount() {
@@ -118,7 +118,7 @@ class SerialCommand extends React.Component {
 
     getSerialOutput() {
 
-        document.getElementById("taOutput").scrollTop = document.getElementById("taOutput").scrollHeight;
+  //      document.getElementById("taOutput").scrollTop = document.getElementById("taOutput").scrollHeight;
         var url = "/getreceivecommands";
         //       $("#taOutput").scrollTop = $("#taOutput").scrollHeight;
         $.ajax({
@@ -150,7 +150,7 @@ class SerialCommand extends React.Component {
     }
 
     handleOutputChange(e) {
-        document.getElementById("taOutput").scrollTop = document.getElementById("taOutput").scrollHeight;
+ //       document.getElementById("taOutput").scrollTop = document.getElementById("taOutput").scrollHeight;
         this.setState({
             output: e.target.value
         });

@@ -84,10 +84,10 @@ func (c Devicesystemconfig) ToByte() []byte {
 	copy(result[100:120], StringToByteArray(c.HardwareVersion, 20))
 
 	fmt.Printf("%X\n", result)
-	crc := util.Crc16(result[:128])
+	crc := util.Crc16Uint(result[:128])
 	fmt.Printf("%X\n", crc)
 	buf := make([]byte, 2)
-	binary.BigEndian.PutUint16(buf, crc)
+	binary.LittleEndian.PutUint16(buf, crc)
 
 	fmt.Printf("%X\n", buf)
 

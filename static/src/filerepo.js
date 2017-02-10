@@ -123,7 +123,7 @@ class FileTable extends React.Component {
                 <Column
                     header={<Cell>File Size(KB)</Cell>}
                     cell={<TextCell col="FileSize" />}
-                     width={100}
+                    width={100}
                 />
                 <Column
                     header={<Cell>Build Number</Cell>}
@@ -133,7 +133,7 @@ class FileTable extends React.Component {
                 <Column
                     header={<Cell>Download Status</Cell>}
                     cell={<TextCell col="IsDownloaded" />}
-                     width={150}
+                    width={150}
                 />
                 <Column
                     header={<Cell></Cell>}
@@ -142,7 +142,7 @@ class FileTable extends React.Component {
                             <DownloadFile file={rows[props.rowIndex]} />
                         </Cell>
                     )}
-                     width={100}
+                    width={100}
                 />
                 <Column
                     header={<Cell></Cell>}
@@ -221,7 +221,7 @@ class FileRepo extends React.Component {
     componentDidMount() {
         this.timerID = setInterval(
             () => this.syncData(this.state.filter),
-            5000
+            3000
         );
     }
 

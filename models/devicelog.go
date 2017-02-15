@@ -24,6 +24,11 @@ type DeviceLog struct {
 	Created  time.Time `orm:"unique;type(datetime)"`
 }
 
+type DeviceLogResult struct {
+	Total int64
+	Data  []DeviceLog
+}
+
 func (c DeviceLog) TableName() string {
 	return "devicelog"
 }
@@ -44,11 +49,32 @@ func (c *DeviceLog) Insert() {
 	o.Commit()
 }
 
-func GetDeviceLog(t DeviceLogType, limit int64) ([]DeviceLog, error) {
+func GetDeviceLog(filter []int64, limit int64, offset int64, order string) (DeviceLogResult, error) {
 	o := orm.NewOrm()
-	var result []DeviceLog
-	_, err := o.Raw("select id,content,created from (select id,content,created from devicelog where logtype = ? order by id DESC limit ?) t order by id ASC", t, limit).QueryRows(&result)
-	return result, err
+	var result DeviceLogResult
+	qs := o.QueryTable("Devicelog")
+
+	if len(filter) == 1 {
+		qs = qs.Filter("Logtype", DeviceLogType(filter[0]))
+	}
+	result.Total, _ = qs.Count()
+	if result.Total == 0 {
+		return result, nil
+	}
+
+	qs = qs.Limit(limit)
+	qs = qs.Offset(offset)
+
+	orderStr := "Created"
+	if order != "descend" {
+		orderStr = "-Created"
+	}
+	qs = qs.OrderBy(orderStr)
+
+	//	o.QueryTable("Devicelog").Filter("Logtype", t).Limit(limit).Offset(offset).OrderBy("-Created").All(&result)
+
+	qs.All(&result.Data)
+	return result, nil
 }
 
 func (c *DeviceLog) ParseContent() error {

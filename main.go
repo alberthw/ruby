@@ -23,7 +23,7 @@ func main() {
 
 	go open()
 	go syncReleaseFileRepository(6000)
-	go reader(10)
+	go reader(5)
 
 	go parseMessage()
 
@@ -35,42 +35,55 @@ func main() {
 }
 
 func reader(t time.Duration) {
-	for {
-		var tmp []byte
-		bGetMsg := false
-		b, _ := serial.Reader()
-		if len(b) == 0 {
-			continue
-		}
-		for _, v := range b {
-			if bGetMsg {
-				if v != 0x02 && v != 0x03 {
-					tmp = append(tmp, v)
+	go func(t time.Duration) {
+		for {
+			var tmp []byte
+			bGetMsg := false
+			b, _ := serial.Reader()
+			if len(b) == 0 {
+				continue
+			}
+			for _, v := range b {
+				if bGetMsg {
+					if v != 0x02 && v != 0x03 {
+						tmp = append(tmp, v)
+					}
+				}
+				if v == 0x02 {
+					bGetMsg = true
+				}
+				if v == 0x03 {
+					bGetMsg = false
+					buffer <- tmp
+					tmp = nil
 				}
 			}
-			if v == 0x02 {
-				bGetMsg = true
-			}
-			if v == 0x03 {
-				bGetMsg = false
-				buffer <- tmp
-				tmp = nil
-			}
+
+			/*
+				go func(b []byte) {
+					log.Printf("received : %s\n", b)
+					var c models.Command
+					c.CommandType = models.RECEIVE
+					c.Info = string(b)
+					c.InsertCommand()
+				}(b)
+			*/
+			time.Sleep(time.Millisecond * t)
 		}
-		log.Printf("received : %s\n", b)
-		var c models.Command
-		c.CommandType = models.RECEIVE
-		c.Info = string(b)
-		c.InsertCommand()
-		time.Sleep(time.Millisecond * t)
-	}
+
+	}(t)
+
 }
 
 func syncReleaseFileRepository(t time.Duration) {
-	for {
-		models.SyncReleaseFilesInfo()
-		time.Sleep(time.Millisecond * t)
-	}
+	go func() {
+		for {
+			models.SyncReleaseFilesInfo()
+			time.Sleep(time.Millisecond * t)
+		}
+
+	}()
+
 }
 
 func open() {
@@ -123,89 +136,95 @@ type DeviceLog struct {
 }
 
 func parseMessage() {
-	for {
+	go func() {
+		for {
 
-		tmp := <-buffer
-		log.Println("\n-----------START------------")
-		if strings.Contains(string(tmp), "{\"sysconfig\"") {
-			var f SysConfig
-			err := json.Unmarshal(tmp, &f)
-			if err != nil {
-				log.Println(err.Error())
-			} else {
-				cfg := models.GetDeviceSystemConfig(f.Sysconfig.Block)
-				f.Sysconfig.ID = cfg.ID
-				f.Sysconfig.Update()
-			}
-			log.Println(f)
-		}
-		if strings.Contains(string(tmp), "{\"hwconfig\"") {
-			var f HwConfig
-			err := json.Unmarshal(tmp, &f)
-			if err != nil {
-				log.Println(err.Error())
-			} else {
-				cfg := models.GetDeviceHardwareConfig(f.Hwconfig.Block)
-				f.Hwconfig.ID = cfg.ID
-				f.Hwconfig.Update()
-			}
-			log.Println(f)
-		}
-
-		if strings.Contains(string(tmp), "{\"swconfig\"") {
-			var f SwConfig
-			err := json.Unmarshal(tmp, &f)
-			if err != nil {
-				log.Println(err.Error())
-			} else {
-				var t models.SoftwareType
-				if strings.Contains(f.Swconfig.Name, "Host Boot") {
-					t = models.HOSTBOOT
+			tmp := <-buffer
+			log.Println("\n-----------START------------")
+			if strings.Contains(string(tmp), "{\"sysconfig\"") {
+				var f SysConfig
+				err := json.Unmarshal(tmp, &f)
+				if err != nil {
+					log.Println(err.Error())
+				} else {
+					cfg := models.GetDeviceSystemConfig(f.Sysconfig.Block)
+					f.Sysconfig.ID = cfg.ID
+					f.Sysconfig.Update()
 				}
-				if strings.Contains(f.Swconfig.Name, "Host Application") {
-					t = models.HOSTAPP
-				}
-				if strings.Contains(f.Swconfig.Name, "DSP Application") {
-					t = models.DSPAPP
-				}
-				cfg := models.GetDeviceSoftwareConfig(t, f.Swconfig.Block)
-				f.Swconfig.ID = cfg.ID
-				f.Swconfig.Type = t
-				f.Swconfig.Update()
+				log.Println(f)
 			}
-			log.Println(f)
+			if strings.Contains(string(tmp), "{\"hwconfig\"") {
+				var f HwConfig
+				err := json.Unmarshal(tmp, &f)
+				if err != nil {
+					log.Println(err.Error())
+				} else {
+					cfg := models.GetDeviceHardwareConfig(f.Hwconfig.Block)
+					f.Hwconfig.ID = cfg.ID
+					f.Hwconfig.Update()
+				}
+				log.Println(f)
+			}
+
+			if strings.Contains(string(tmp), "{\"swconfig\"") {
+				var f SwConfig
+				err := json.Unmarshal(tmp, &f)
+				if err != nil {
+					log.Println(err.Error())
+				} else {
+					var t models.SoftwareType
+					if strings.Contains(f.Swconfig.Name, "Host Boot") {
+						t = models.HOSTBOOT
+					}
+					if strings.Contains(f.Swconfig.Name, "Host Application") {
+						t = models.HOSTAPP
+					}
+					if strings.Contains(f.Swconfig.Name, "DSP Application") {
+						t = models.DSPAPP
+					}
+					cfg := models.GetDeviceSoftwareConfig(t, f.Swconfig.Block)
+					f.Swconfig.ID = cfg.ID
+					f.Swconfig.Type = t
+					f.Swconfig.Update()
+				}
+				log.Println(f)
+			}
+
+			if strings.Contains(string(tmp), "{\"configvalidate\"") {
+				var f ConfigValidate
+				err := json.Unmarshal(tmp, &f)
+				if err != nil {
+					log.Println(err.Error())
+				} else {
+					log.Println("result:", f.ConfigValidate)
+					setting := models.GetRubyconfig()
+					setting.IsConfigValidated = f.ConfigValidate.IsConfigValidated
+					setting.UpdateConfigValidateStatus()
+				}
+				log.Println(f)
+			}
+
+			if strings.Contains(string(tmp), "{\"devicelog\"") {
+				go func() {
+					var f DeviceLog
+					err := json.Unmarshal(tmp, &f)
+					if err != nil {
+						log.Println(err.Error())
+					} else {
+						//			log.Println("result:", f.DeviceLog)
+						err := f.DeviceLog.ParseContent()
+						if err == nil {
+							f.DeviceLog.Insert()
+						}
+					}
+					//			log.Println(f)
+				}()
+
+			}
+
+			log.Println("\n-----------END------------")
 		}
 
-		if strings.Contains(string(tmp), "{\"configvalidate\"") {
-			var f ConfigValidate
-			err := json.Unmarshal(tmp, &f)
-			if err != nil {
-				log.Println(err.Error())
-			} else {
-				log.Println("result:", f.ConfigValidate)
-				setting := models.GetRubyconfig()
-				setting.IsConfigValidated = f.ConfigValidate.IsConfigValidated
-				setting.UpdateConfigValidateStatus()
-			}
-			log.Println(f)
-		}
-
-		if strings.Contains(string(tmp), "{\"devicelog\"") {
-			var f DeviceLog
-			err := json.Unmarshal(tmp, &f)
-			if err != nil {
-				log.Println(err.Error())
-			} else {
-				log.Println("result:", f.DeviceLog)
-				err := f.DeviceLog.ParseContent()
-				if err == nil {
-					f.DeviceLog.Insert()
-				}
-			}
-			log.Println(f)
-		}
-
-		log.Println("\n-----------END------------")
-	}
+	}()
 
 }

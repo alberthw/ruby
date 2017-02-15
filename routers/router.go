@@ -38,4 +38,6 @@ func init() {
 	beego.Router("/getversion", &controllers.CommandController{}, "GET:GetVersions")
 	beego.Router("/getlastknownversion", &controllers.CommandController{}, "GET:GetLastKnownVersions")
 
+	beego.Router("/getdevicelog", &controllers.LogController{}, "POST:GetDeviceLog")
+
 }

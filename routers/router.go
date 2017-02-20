@@ -15,7 +15,7 @@ func init() {
 	beego.Router("/reposetting", &controllers.RepoSettingController{})
 	beego.Router("/testremoteserver", &controllers.RepoSettingController{}, "GET:Test")
 
-	beego.Router("/getfilerepo", &controllers.FileRepoController{}, "GET:GetFiles")
+	beego.Router("/getfilerepo", &controllers.FileRepoController{}, "POST:GetFiles")
 	beego.Router("/downloadfile", &controllers.FileRepoController{}, "POST:DownloadFile")
 	beego.Router("/burnhostimage", &controllers.FileRepoController{}, "POST:BurnHostImage")
 

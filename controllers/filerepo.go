@@ -19,17 +19,24 @@ type FileRepoController struct {
 }
 
 func (c FileRepoController) GetFiles() {
-	dt := c.GetString("date")
+	var filters []int64
+	c.Ctx.Input.Bind(&filters, "FileType")
 
-	//	fmt.Printf("f : |%s|\n", dt)
+	pageNumber, _ := c.GetInt64("page")
+	pageSize, _ := c.GetInt64("pageSize")
+	//	sortField := c.GetString("sortField")
+	sortOrder := c.GetString("sortOrder")
+	searchDate := c.GetString("searchDate")
 
-	var rows []models.Filerepo
-	if len(dt) == 0 {
-		rows = models.GetALLReleaseFiles()
-	} else {
-		rows = models.GetReleaseFilesWithFilter(dt)
-	}
-	c.Data["json"] = &rows
+	fmt.Println("filter :", filters)
+	fmt.Println("searchDate :", searchDate)
+	fmt.Println("page number : ", pageNumber)
+	fmt.Println("page size : ", pageSize)
+	fmt.Println("sort order : ", sortOrder)
+
+	result, _ := models.GetReleaseFiles(searchDate, filters, pageSize, pageNumber, sortOrder)
+
+	c.Data["json"] = &result
 	c.ServeJSON()
 }
 

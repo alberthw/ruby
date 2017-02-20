@@ -59,15 +59,14 @@ func reader(t time.Duration) {
 				}
 			}
 
-			/*
-				go func(b []byte) {
-					log.Printf("received : %s\n", b)
-					var c models.Command
-					c.CommandType = models.RECEIVE
-					c.Info = string(b)
-					c.InsertCommand()
-				}(b)
-			*/
+			go func(b []byte) {
+				log.Printf("received : %s\n", b)
+				var c models.Command
+				c.CommandType = models.RECEIVE
+				c.Info = string(b)
+				c.InsertCommand()
+			}(b)
+
 			time.Sleep(time.Millisecond * t)
 		}
 

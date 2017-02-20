@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"fmt"
-
 	"github.com/alberthw/ruby/models"
 	"github.com/astaxie/beego"
 )
@@ -33,7 +31,7 @@ func (c LogController) GetDeviceLog() {
 	*/
 	result, _ := models.GetDeviceLog(filters, pageSize, pageNumber, sortOrder)
 
-	fmt.Println(result)
+	//	fmt.Println(result)
 	c.Data["json"] = &result
 	c.ServeJSON()
 }

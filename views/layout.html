@@ -10,62 +10,13 @@
 
   <title>Ruby Client</title>
 
-  <link rel="stylesheet" type="text/css" href="../static/js/jqueryui/jquery-ui.min.css">
-  <link rel="stylesheet" type="text/css" href="../static/js/bootstrap/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" type="text/css" href="../static/js/fixed-data-table/dist/fixed-data-table.min.css">
-  <link rel="stylesheet" type="text/css" href="../static/js/antd/dist/antd.min.css">
-
-  <!-- 3.1.1 -->
-  <script type="text/javascript" src="../static/js/jquery/dist/jquery.min.js"></script>
-
-  <!-- 1.11.1 -->
-  <script src="../static/js/jqueryui/jquery-ui.min.js"></script>
-
-  <!-- 15.4.2 -->
-  <script type="text/javascript" src="../static/js/react/dist/react.js"></script>
-  <script type="text/javascript" src="../static/js/react-dom/dist/react-dom.js"></script>
-
-  <!-- 5.8.38 -->
-  <script src="../static/js/babel-core/browser.min.js"></script>
-
-  <!-- 3.3.7 -->
-  <script src="../static/js/bootstrap/dist/js/bootstrap.min.js"></script>
-
-  <!-- 0.6.3 -->
-  <script src="../static/js/fixed-data-table/dist/fixed-data-table.min.js"></script>
-
-  <!-- 2.7.1 -->
-  <script src="../static/js/antd/dist/antd.js"></script>
-
-
-  <nav class="navbar navbar-default navbar-static-top">
-    <div class="container-fluid">
-      <!-- Brand and toggle get grouped for better mobile display -->
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
-          aria-expanded="false">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#">Ruby Client</a>
-      </div>
-      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-        <ul class="nav navbar-nav">
-          <li><a href="/">Repository <span class="sr-only">(current)</span></a></li>
-          <li><a href="/device">Device</a></li>
-          <li><a href="/log">Log</a></li>
-        </ul>
-      </div>
-      <!-- /.navbar-collapse -->
-    </div>
-  </nav>
-
 </head>
 
 <body>
+  <div id="rubyMenu"></div>
   {{.LayoutContent}}
+  <script src="../static/dist/bundle.js"></script>
 </body>
 
 </html>
+

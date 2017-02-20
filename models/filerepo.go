@@ -43,6 +43,11 @@ type Filerepo struct {
 	Updated      time.Time `orm:"auto_now;type(datetime)"`
 }
 
+type ReleaseFileResult struct {
+	Total int64
+	Data  []Filerepo
+}
+
 func getRemoteFileRepositoryURL() (string, string, error) {
 	rs := GetRepoSetting()
 	if len(rs.Remoteserver) == 0 {
@@ -346,39 +351,42 @@ func GetALLReleaseFiles() []Filerepo {
 	var lists []Filerepo
 	o := orm.NewOrm()
 	o.QueryTable("Filerepo").GroupBy("FileType", "Id").OrderBy("FileType", "-id").All(&lists, "ID", "FileName", "CRC", "BuildNumber", "LocalPath", "FileType", "IsDownloaded", "RemotePath", "FileSize")
-	/*
-		host := getReleaseFilesByType(FILETYPE_APP, 5)
-		lists = append(lists, host...)
-
-		boot := getReleaseFilesByType(FILETYPE_BOOT, 5)
-		lists = append(lists, boot...)
-
-		dsp := getReleaseFilesByType(FILETYPE_DSP, 5)
-		lists = append(lists, dsp...)
-	*/
 	return lists
 }
 
-func GetReleaseFilesWithFilter(date string) []Filerepo {
-	var lists []Filerepo
+func GetReleaseFiles(searchDate string, filter []int64, limit int64, offset int64, order string) (ReleaseFileResult, error) {
+	var result ReleaseFileResult
+	o := orm.NewOrm()
+	qs := o.QueryTable("Filerepo")
 
-	//	fmt.Println("filter : ", date)
-	if len(date) != 10 { //   dd/mm/yyyy
-		return lists
+	cond := orm.NewCondition()
+	for _, v := range filter {
+		cond = cond.Or("FileType", FileType(v))
 	}
-	f := date[:2] + date[3:5]
-	//	fmt.Println("filter : ", f)
-	o := orm.NewOrm()
-	o.QueryTable("Filerepo").Filter("Filename__icontains", f).GroupBy("FileType", "ID").OrderBy("FileType", "-ID").All(&lists, "ID", "FileName", "CRC", "BuildNumber", "LocalPath", "FileType", "IsDownloaded", "RemotePath", "FileSize")
+	if len(searchDate) == 10 {
+		f := searchDate[:2] + searchDate[3:5]
+		cond = cond.And("Filename__icontains", f)
+	}
 
-	return lists
-}
+	qs = qs.SetCond(cond)
 
-func getReleaseFilesByType(t FileType, limit int64) []Filerepo {
-	o := orm.NewOrm()
-	var result []Filerepo
-	o.QueryTable("Filerepo").Filter("FileType", t).OrderBy("-ID").Limit(limit).All(&result, "ID", "FileName", "CRC", "BuildNumber", "LocalPath", "FileType", "IsDownloaded", "RemotePath", "FileSize")
-	return result
+	result.Total, _ = qs.Count()
+	if result.Total == 0 {
+		return result, nil
+	}
+
+	qs = qs.Limit(limit)
+	qs = qs.Offset(offset)
+
+	orderStr := "BuildNumber"
+	if order != "descend" {
+		orderStr = "-BuildNumber"
+	}
+	qs = qs.OrderBy(orderStr)
+	qs = qs.OrderBy("-ID")
+
+	qs.All(&result.Data)
+	return result, nil
 }
 
 func (c *Filerepo) CreateOrUpdate() error {

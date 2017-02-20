@@ -1,156 +1,85 @@
 import React from 'react';
-import {Card, Table} from 'antd';
+import {Card, Table, Button} from 'antd';
 import $ from "jquery";
+import EditableCell from "./editablecell.jsx";
 
 class SysConfigTable extends React.Component {
     constructor(props) {
         super(props);
+
         this.state = {
-            data: [],
-            loading: false
+            loading: false,
+            currentID: 0,
+            lastKnownID: 0,
+            dataSource: [
+                {
+                    key: 0,
+                    ItemName: "Device Name",
+                    Current: "",
+                    LastKnown: ""
+                }, {
+                    key: 1,
+                    ItemName: "System Version",
+                    Current: "",
+                    LastKnown: ""
+                }, {
+                    key: 2,
+                    ItemName: "Device SKU",
+                    Current: "",
+                    LastKnown: ""
+                }, {
+                    key: 3,
+                    ItemName: "Serial Number",
+                    Current: "",
+                    LastKnown: ""
+                }, {
+                    key: 4,
+                    ItemName: "Software Build",
+                    Current: "",
+                    LastKnown: ""
+                }, {
+                    key: 5,
+                    ItemName: "Part Number",
+                    Current: "",
+                    LastKnown: ""
+                }, {
+                    key: 6,
+                    ItemName: "Hardware Version",
+                    Current: "",
+                    LastKnown: ""
+                }
+            ]
         };
+
         this.handleTableChange = this
             .handleTableChange
-            .bind(this);
-    }
-
-    handleTableChange(pagination, filters, sorter) {
-        console.log("pagination : ", pagination);
-        console.log("filters :", filters);
-        console.log("sorter : ", sorter);
-    }
-
-    render() {
-                const columns = [
-            {
-                title: '#',
-                key: "Items",
-                dataIndex: 'Items',
-            }, {
-                title: 'Current',
-                key: "Current",
-                dataIndex: 'Current'
-            }, {
-                title: 'Last Known',
-                key: "LastKnown",
-                dataIndex: 'LastKnown'
-            }
-        ];
-        return (
-            <Table
-                dataSource={this.state.data}
-                columns={columns}
-                loading={this.state.loading}
-                onChange={this.handleTableChange}></Table>
-        );
-    }
-}
-
-export default class SystemConfiguration extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.handleDeviceNameChange = this
-            .handleDeviceNameChange
-            .bind(this);
-        this.handleSystemVersionChange = this
-            .handleSystemVersionChange
-            .bind(this);
-        this.handleDeviceSKUChange = this
-            .handleDeviceSKUChange
-            .bind(this);
-        this.handleSerialNumberChange = this
-            .handleSerialNumberChange
-            .bind(this);
-        this.handleSoftwareBuildChange = this
-            .handleSoftwareBuildChange
-            .bind(this);
-        this.handlePartNumberChange = this
-            .handlePartNumberChange
-            .bind(this);
-        this.handleHardwareVersionChange = this
-            .handleHardwareVersionChange
             .bind(this);
 
         this.handleUpdateButtonClick = this
             .handleUpdateButtonClick
             .bind(this);
 
-        this.state = {
-            current: {
-                id: "",
-                deviceName: "",
-                systemVersion: "",
-                deviceSKU: "",
-                serialNumber: "",
-                softwareBuild: "",
-                partNumber: "",
-                hardwareVersion: ""
-            },
-            lastKnown: {
-                id: "",
-                deviceName: "",
-                systemVersion: "",
-                deviceSKU: "",
-                serialNumber: "",
-                softwareBuild: "",
-                partNumber: "",
-                hardwareVersion: ""
-            }
-        };
-    }
-    handleDeviceNameChange(e) {
-        var c = this.state.current;
-        c.deviceName = e.target.value;
-        this.setState({current: c});
-    }
-    handleSystemVersionChange(e) {
-        var c = this.state.current;
-        c.systemVersion = e.target.value;
-        this.setState({current: c});
-    }
-
-    handleDeviceSKUChange(e) {
-        var c = this.state.current;
-        c.deviceSKU = e.target.value;
-        this.setState({current: c});
-    }
-
-    handleSerialNumberChange(e) {
-        var c = this.state.current;
-        c.serialNumber = e.target.value;
-        this.setState({current: c});
-    }
-
-    handleSoftwareBuildChange(e) {
-        var c = this.state.current;
-        c.softwareBuild = e.target.value;
-        this.setState({current: c});
-    }
-
-    handlePartNumberChange(e) {
-        var c = this.state.current;
-        c.partNumber = e.target.value;
-        this.setState({current: c});
-
-    }
-
-    handleHardwareVersionChange(e) {
-        var c = this.state.current;
-        c.hardwareVersion = e.target.value;
-        this.setState({current: c});
     }
 
     handleUpdateButtonClick(e) {
-        var url = "/setsysconfig";
-        console.log("state:", this.state.current);
+        let url = "/setsysconfig";
+        var data = {
+            id: this.state.currentID,
+            deviceName: this.state.dataSource[0].Current,
+            systemVersion: this.state.dataSource[1].Current,
+            deviceSKU: this.state.dataSource[2].Current,
+            serialNumber: this.state.dataSource[3].Current,
+            softwareBuild: this.state.dataSource[4].Current,
+            partNumber: this.state.dataSource[5].Current,
+            hardwareVersion: this.state.dataSource[6].Current
+        };
         $.ajax({
             url: url,
             dataType: "json",
             type: "POST",
             cache: false,
             async: false,
-            data: this.state.current,
+            data: data,
             success: function (data) {
                 console.log(data);
                 //result = data;
@@ -187,35 +116,90 @@ export default class SystemConfiguration extends React.Component {
         return result;
     }
 
-    componentDidMount() {
-        var currentData = this.getSysConfig(0);
-        var lastKnownData = this.getSysConfig(2);
-        console.log("system current: ", currentData);
-        console.log("system last known: ", lastKnownData);
-        this.setState({
-            current: {
-                id: currentData.ID,
-                deviceName: currentData.DeviceName,
-                systemVersion: currentData.SystemVersion,
-                deviceSKU: currentData.DeviceSKU,
-                serialNumber: currentData.SerialNumber,
-                softwareBuild: currentData.SoftwareBuild,
-                partNumber: currentData.PartNumber,
-                hardwareVersion: currentData.HardwareVersion
-            },
-            lastKnown: {
-                id: lastKnownData.ID,
-                deviceName: lastKnownData.DeviceName,
-                systemVersion: lastKnownData.SystemVersion,
-                deviceSKU: lastKnownData.DeviceSKU,
-                serialNumber: lastKnownData.SerialNumber,
-                softwareBuild: lastKnownData.SoftwareBuild,
-                partNumber: lastKnownData.PartNumber,
-                hardwareVersion: lastKnownData.HardwareVersion
-            }
-        });
+    handleTableChange(pagination, filters, sorter) {
+        console.log("pagination : ", pagination);
+        console.log("filters :", filters);
+        console.log("sorter : ", sorter);
     }
 
+    componentWillMount() {
+        var currentData = this.getSysConfig(0);
+        console.log("system current: ", currentData);
+
+        if (currentData != null) {
+            const dataSource = this.state.dataSource;
+            this.setState({currentID: currentData.ID});
+            dataSource[0].Current = currentData.DeviceName;
+            dataSource[1].Current = currentData.SystemVersion;
+            dataSource[2].Current = currentData.DeviceSKU;
+            dataSource[3].Current = currentData.SerialNumber;
+            dataSource[4].Current = currentData.SoftwareBuild;
+            dataSource[5].Current = currentData.PartNumber;
+            dataSource[6].Current = currentData.HardwareVersion;
+            this.setState({dataSource});
+        }
+        var lastKnownData = this.getSysConfig(2);
+        console.log("system last known: ", lastKnownData);
+        if (lastKnownData != null) {
+            const dataSource = this.state.dataSource;
+            this.setState({lastKnownID: lastKnownData.ID});
+            dataSource[0].LastKnown = lastKnownData.DeviceName;
+            dataSource[1].LastKnown = lastKnownData.SystemVersion;
+            dataSource[2].LastKnown = lastKnownData.DeviceSKU;
+            dataSource[3].LastKnown = lastKnownData.SerialNumber;
+            dataSource[4].LastKnown = lastKnownData.SoftwareBuild;
+            dataSource[5].LastKnown = lastKnownData.PartNumber;
+            dataSource[6].LastKnown = lastKnownData.HardwareVersion;
+            this.setState({dataSource});
+        }
+    }
+
+    onCellChange = (index, key) => {
+        return (value) => {
+            const dataSource = this.state.dataSource;
+            //           console.log("dataSource:", dataSource);
+            dataSource[index][key] = value;
+            this.setState({dataSource});
+        }
+    }
+
+    render() {
+        const pagination = false;
+
+        const columns = [
+            {
+                title: '#',
+                key: "ItemName",
+                dataIndex: 'ItemName',
+                render: text => <b>{text}</b>
+            }, {
+                title: 'Current',
+                key: "Current",
+                dataIndex: 'Current',
+                render: (text, record, index) => (<EditableCell value={text} onChange={this.onCellChange(index, 'Current')}/>)
+            }, {
+                title: 'Last Known',
+                key: "LastKnown",
+                dataIndex: 'LastKnown'
+            }
+        ];
+        return (
+            <div>
+                <Table
+                    pagination={pagination}
+                    dataSource={this.state.dataSource}
+                    columns={columns}
+                    loading={this.state.loading}
+                    onChange={this.handleTableChange}
+                    bordered></Table >
+                <Button onClick={this.handleUpdateButtonClick}>Update</Button>
+            </div>
+
+        );
+    }
+}
+
+export default class SystemConfiguration extends React.Component {
     render() {
         return (
             <Card title="System Configuration">
@@ -223,66 +207,4 @@ export default class SystemConfiguration extends React.Component {
             </Card>
         );
     }
-
-    /*
-    render() {
-        return (
-            <div className="panel panel-default">
-                <div className="panel-heading">System Configuration</div>
-                <div className="panel-body">
-                    <table className="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Current</th>
-                                <th>Last Known</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th scope="row">Device Name</th>
-                                <td><input type="text" value={this.state.current.deviceName} className="form-control" onChange={this.handleDeviceNameChange}></input></td>
-                                <td>{this.state.lastKnown.deviceName}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Serial Number</th>
-                                <td><input type="text" value={this.state.current.serialNumber} className="form-control" onChange={this.handleSerialNumberChange}></input></td>
-                                <td>{this.state.lastKnown.serialNumber}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">System Version</th>
-                                <td><input type="text" value={this.state.current.systemVersion} className="form-control" onChange={this.handleSystemVersionChange}></input></td>
-                                <td>{this.state.lastKnown.systemVersion}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Device SKU</th>
-                                <td><input type="text" value={this.state.current.deviceSKU} className="form-control" onChange={this.handleDeviceSKUChange}></input></td>
-                                <td>{this.state.lastKnown.deviceSKU}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Software Build</th>
-                                <td><input type="text" value={this.state.current.softwareBuild} className="form-control" onChange={this.handleSoftwareBuildChange}></input></td>
-                                <td>{this.state.lastKnown.softwareBuild}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Part Number</th>
-                                <td><input type="text" value={this.state.current.partNumber} className="form-control" onChange={this.handlePartNumberChange}></input></td>
-                                <td>{this.state.lastKnown.partNumber}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Hardware Version</th>
-                                <td><input type="text" value={this.state.current.hardwareVersion} className="form-control" onChange={this.handleHardwareVersionChange}></input></td>
-                                <td>{this.state.lastKnown.hardwareVersion}</td>
-                            </tr>
-
-                        </tbody>
-                    </table>
-                </div>
-                <div className="panel-footer">
-                    <input type="button" value="Edit" onClick={this.handleUpdateButtonClick}></input>
-                </div>
-            </div>
-        );
-    }
-    */
 }

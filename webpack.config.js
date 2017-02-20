@@ -4,8 +4,7 @@ var deps = ['react/dist/react.min.js', 'antd/dist/antd.min.js'];
 
 var config = {
   entry: {
-    app: path.resolve(__dirname, 'static/src/main.jsx'),
-    vendor: ['react', 'react-dom']
+    app: path.resolve(__dirname, 'static/src/main.jsx')
   },
   output: {
     filename: 'bundle.js',

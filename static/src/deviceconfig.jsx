@@ -2,6 +2,7 @@ import React from 'react';
 import {Row, Col, Card} from 'antd';
 import SystemConfiguration from './sysconfig';
 import HardwareConfiguration from "./hwconfig";
+import SoftwareConfiguration from "./swconfig";
 
 export default class DeviceConfig extends React.Component {
     render() {
@@ -14,6 +15,9 @@ export default class DeviceConfig extends React.Component {
                     <Col span="12">
                         <HardwareConfiguration/>
                     </Col>
+                </Row>
+                <Row> 
+                    <SoftwareConfiguration />
                 </Row>
             </Card>
 

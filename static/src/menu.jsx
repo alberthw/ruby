@@ -19,8 +19,10 @@ export default class RubyMenu extends React.Component {
                 <Menu.Item key="log">
                     <a href="/log">Log</a>
                 </Menu.Item>
+                <Menu.Item key="calibration">
+                    <a href="/calibration">Calibration</a>
+                </Menu.Item>
             </Menu>
-
         );
     }
 }

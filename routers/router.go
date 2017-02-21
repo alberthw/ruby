@@ -9,6 +9,7 @@ func init() {
 	beego.Router("/", &controllers.MainController{})
 	beego.Router("/device", &controllers.DeviceController{})
 	beego.Router("/log", &controllers.LogController{})
+	beego.Router("/calibration", &controllers.CalibrationController{})
 
 	beego.Router("/config", &controllers.RubyConfigController{})
 
@@ -39,5 +40,9 @@ func init() {
 	beego.Router("/getlastknownversion", &controllers.CommandController{}, "GET:GetLastKnownVersions")
 
 	beego.Router("/getdevicelog", &controllers.LogController{}, "POST:GetDeviceLog")
+
+	beego.Router("/startcalibration", &controllers.CalibrationController{}, "GET:StartCalibration")
+	beego.Router("/printcalibration", &controllers.CalibrationController{}, "GET:PrintCalibrationData")
+	beego.Router("/setcalibration", &controllers.CalibrationController{}, "POST:SetCalibrationRMS")
 
 }

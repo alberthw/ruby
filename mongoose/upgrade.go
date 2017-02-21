@@ -7,14 +7,7 @@ import (
 	"time"
 
 	"github.com/alberthw/ruby/models"
-	"github.com/alberthw/ruby/serial"
 )
-
-func sendMongooseCommand(input string) error {
-
-	command := []byte(input + "\r\n")
-	return serial.Writer(command)
-}
 
 func sendImageUpload() {
 	sendMongooseCommand("image.upload")
@@ -22,10 +15,6 @@ func sendImageUpload() {
 
 func sendImageUpdate() {
 	sendMongooseCommand("image.update")
-}
-
-func sendEnterSeviceMode() {
-	sendMongooseCommand("service.mode")
 }
 
 func sendSelectHostImage(t models.FileType) {
@@ -79,7 +68,7 @@ func sendUploadImage(filepath string) error {
 }
 
 func BurnHostImage(filepath string, t models.FileType) error {
-	//	sendEnterSeviceMode()
+	//	SendEnterSeviceMode()
 	time.Sleep(time.Millisecond * 5000)
 	sendImageUpload()
 	time.Sleep(time.Millisecond * 1000)

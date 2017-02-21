@@ -1,9 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import RubyMenu from "./menu.jsx";
-import DeviceConfig from "./deviceconfig.jsx"
-import DeviceLog from "./log.jsx";
-import UpgradePage from "./upgradepage.jsx";
+import RubyMenu from "./menu";
+import DeviceConfig from "./deviceconfig";
+import DeviceLog from "./log";
+import UpgradePage from "./upgradepage";
+import Calibration from "./calibration";
 
 // ReactDOM.render(<DeviceConfiguration />,
 // document.getElementById("configuration"));
@@ -33,5 +34,12 @@ var configDIV = document.getElementById("configuration");
 console.log("config DIV : ", configDIV);
 if (configDIV != null) {
     ReactDOM.render(
-        <DeviceConfig />, configDIV);
+        <DeviceConfig/>, configDIV);
+}
+
+var calibrationDIV = document.getElementById("calibration");
+console.log("calibration DIV : ", calibrationDIV);
+if (calibrationDIV != null) {
+    ReactDOM.render(
+        <Calibration/>, calibrationDIV);
 }

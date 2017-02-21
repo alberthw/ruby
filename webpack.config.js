@@ -1,6 +1,5 @@
 const path = require('path');
 var node_modules_dir = path.join(__dirname, 'node_modules');
-var deps = ['react/dist/react.min.js', 'antd/dist/antd.min.js'];
 
 var config = {
   entry: {

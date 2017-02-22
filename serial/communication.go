@@ -10,6 +10,7 @@ import (
 
 var (
 	GSerial *serial.Port
+	GBuffer []byte
 )
 
 func Open(name string, baud int) error {

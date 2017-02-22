@@ -1,18 +1,108 @@
 import React from 'react';
 import {
     Card,
+    Input,
     Row,
     Col,
     Button,
-    InputNumber,
-    message
+    InputNumber
 } from 'antd';
 import $ from "jquery";
 
-class CalibrationTable extends React.Component {
+
+class SetCalibration extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            rmsValue: 0
+        };
+
+        this.handleSetCalibration = this
+            .handleSetCalibration
+            .bind(this);
+
+        this.handleRMSInputChange = this
+            .handleRMSInputChange
+            .bind(this);
+    }
+    handleRMSInputChange(e) {
+        console.log(e);
+        const number = parseInt(e || 0, 10);
+        if (isNaN(number)) {
+            return;
+        }
+        this.setState({rmsValue: e});
+    }
+
+    handleSetCalibration(e) {
+        var url = "/setcalibration";
+        $.ajax({
+            url: url,
+            dataType: "json",
+            type: "POST",
+            cache: false,
+            async: false,
+            data: {
+                "rms": this.state.rmsValue
+            },
+            success: function (data) {
+                console.log("handleSetCalibration:", data);
+                this
+                    .props
+                    .onResponse(data);
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(url, status, err.toString());
+            }.bind(this)
+        });
+    }
     render() {
         return (
-            <Table title={() => "Calibration Data"}></Table>
+            <Card title="Set the calibration data">
+                <b>Enter RMS value :</b>
+                <InputNumber onChange={this.handleRMSInputChange} value={this.state.rmsValue}></InputNumber>
+                <Button onClick={this.handleSetCalibration}>SetRMS</Button>
+            </Card>
+        );
+    }
+}
+
+
+class CommandCard extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.handleButtonClick = this
+            .handleButtonClick
+            .bind(this);
+    }
+
+    handleButtonClick(e) {
+        let url = this.props.URL;
+        $.ajax({
+            url: url,
+            dataType: "json",
+            type: "GET",
+            cache: false,
+            async: false,
+            success: function (data) {
+                console.log(this.props.Title + ":" + data);
+                this
+                    .props
+                    .onResponse(data);
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(url, status, err.toString());
+            }.bind(this)
+        });
+    }
+
+    render() {
+        return (
+            <Card title={this.props.Title}>
+                <Button onClick={this.handleButtonClick}>{this.props.ButtonText}</Button>
+            </Card>
         );
     }
 }
@@ -22,119 +112,69 @@ export default class Calibration extends React.Component {
         super(props);
 
         this.state = {
-            rmsValue: 0
+            result: ""
         }
 
-        this.handleRMSInputChange = this
-            .handleRMSInputChange
-            .bind(this);
-
-        this.handleStartCalibration = this
-            .handleStartCalibration
-            .bind(this);
-
-        this.handlePrintCalibration = this
-            .handlePrintCalibration
-            .bind(this);
-
-        this.handleSetCalibration = this
-            .handleSetCalibration
+        this.handleResponse = this
+            .handleResponse
             .bind(this);
     }
 
-    handleStartCalibration(e) {
-        var url = "/startcalibration";
-        var result = null;
-
-        $.ajax({
-            url: url,
-            dataType: "json",
-            type: "GET",
-            cache: false,
-            async: false,
-            success: function (data) {
-                console.log("handleStartCalibration:", data);
-                result = data;
-            },
-            error: function (xhr, status, err) {
-                console.error(url, status, err.toString());
-            }
-        });
-        return result;
-    }
-
-    handlePrintCalibration(e) {
-        var url = "/printcalibration";
-        var result = null;
-
-        $.ajax({
-            url: url,
-            dataType: "json",
-            type: "GET",
-            cache: false,
-            async: false,
-            success: function (data) {
-                console.log("handlePrintCalibration:", data);
-                result = data;
-            },
-            error: function (xhr, status, err) {
-                console.error(url, status, err.toString());
-            }
-        });
-        return result;
-    }
-
-    handleSetCalibration(e) {
-        var url = "/setcalibration";
-        var result = null;
-
-        $.ajax({
-            url: url,
-            dataType: "json",
-            type: "POST",
-            cache: false,
-            async: false,
-            data : {
-                "rms" : this.state.rmsValue
-            },
-            success: function (data) {
-                console.log("handleSetCalibration:", data);
-                result = data;
-            },
-            error: function (xhr, status, err) {
-                console.error(url, status, err.toString());
-            }
-        });
-        return result;
-    }
-
-    handleRMSInputChange(e) {
-        console.log(e);
-        const number = parseInt(e || 0, 10);
-        if (isNaN(number)) {
-            return;
-        }
-        this.setState({rmsValue: e});
+    handleResponse(e) {
+        console.log("handleResponse:" + e);
+        this.setState({result: e});
     }
     render() {
 
         return (
             <Card title="Calibration Data">
-                <Row>
-                    <b>Start to calibrate the data :
-                    </b>
-                    <Button onClick={this.handleStartCalibration}>Start</Button>
-                </Row>
-                <Row>
-                    <b>Print the calibration data :
-                    </b>
-                    <Button onClick={this.handlePrintCalibration}>Print</Button>
-                </Row>
-                <Row>
-                    <b>Enter RMS value :
-                    </b>
-                    <InputNumber onChange={this.handleRMSInputChange} value={this.state.rmsValue}></InputNumber>
-                    <Button onClick={this.handleSetCalibration}>SetRMS</Button>
+                <Row gutter={4}>
+                    <Col span={4}>
+                        <Row>
+                            <Col>
+                                <CommandCard
+                                    URL="/enterservicemode"
+                                    Title="Enter the service mode"
+                                    ButtonText="Enter"
+                                    onResponse={this.handleResponse}/>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <CommandCard
+                                    URL="/exitservicemode"
+                                    Title="Exit the service mode"
+                                    ButtonText="Exit"
+                                    onResponse={this.handleResponse}/>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <CommandCard
+                                    URL="/startcalibration"
+                                    Title="Start to calibrate the data"
+                                    ButtonText="Start"
+                                    onResponse={this.handleResponse}/>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <SetCalibration onResponse={this.handleResponse}/>
+                            </Col>
+                        </Row>
+                    </Col>
+                    <Col span={20}>
+                        <Card title="Response">
+                            <Input
+                                type="textarea"
+                                value={this.state.result}
+                                autosize={{
+                                minRows: 20,
+                                maxRows: 200
+                            }}
+                                readOnly/>
+                        </Card>
+                    </Col>
                 </Row>
 
             </Card>

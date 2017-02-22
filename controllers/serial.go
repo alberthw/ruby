@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"log"
+	"time"
 
 	"github.com/alberthw/ruby/models"
 	"github.com/alberthw/ruby/serial"
@@ -50,6 +51,10 @@ func (c *SerialController) Post() {
 	com.CommandType = models.SEND
 	com.Info = command
 	com.InsertCommand()
+
+	time.Sleep(time.Second * 2)
+	result = string(serial.GBuffer)
+	//	serial.GBuffer = nil
 	c.Data["json"] = &result
 	c.ServeJSON()
 }

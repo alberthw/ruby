@@ -11,3 +11,7 @@ func sendMongooseCommand(input string) error {
 func SendEnterSeviceMode() {
 	sendMongooseCommand("service.mode")
 }
+
+func SendExitServiceMode() {
+	sendMongooseCommand("submode.exit")
+}

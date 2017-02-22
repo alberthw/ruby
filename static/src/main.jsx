@@ -5,9 +5,7 @@ import DeviceConfig from "./deviceconfig";
 import DeviceLog from "./log";
 import UpgradePage from "./upgradepage";
 import Calibration from "./calibration";
-
-// ReactDOM.render(<DeviceConfiguration />,
-// document.getElementById("configuration"));
+import Command from "./command";
 
 var menuDIV = document.getElementById("rubyMenu");
 console.log("menu DIV : ", menuDIV);
@@ -42,4 +40,11 @@ console.log("calibration DIV : ", calibrationDIV);
 if (calibrationDIV != null) {
     ReactDOM.render(
         <Calibration/>, calibrationDIV);
+}
+
+var commandDIV = document.getElementById("command");
+console.log("command DIV : ", commandDIV);
+if (commandDIV != null) {
+    ReactDOM.render(
+        <Command/>, commandDIV);
 }

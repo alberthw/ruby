@@ -10,6 +10,7 @@ func init() {
 	beego.Router("/device", &controllers.DeviceController{})
 	beego.Router("/log", &controllers.LogController{})
 	beego.Router("/calibration", &controllers.CalibrationController{})
+	beego.Router("/command", &controllers.CommandController{})
 
 	beego.Router("/config", &controllers.RubyConfigController{})
 
@@ -22,7 +23,7 @@ func init() {
 
 	beego.Router("/openserial", &controllers.SerialController{}, "POST:Open")
 	beego.Router("/closeserial", &controllers.SerialController{}, "GET:Close")
-	beego.Router("/command", &controllers.SerialController{}, "POST:Post")
+	beego.Router("/sendcommand", &controllers.SerialController{}, "POST:Post")
 
 	beego.Router("/validateconfig", &controllers.DeviceController{}, "GET:ValidateConfig")
 
@@ -38,6 +39,8 @@ func init() {
 	beego.Router("/getreceivecommands", &controllers.CommandController{}, "POST:GetReceiveCommands")
 	beego.Router("/getversion", &controllers.CommandController{}, "GET:GetVersions")
 	beego.Router("/getlastknownversion", &controllers.CommandController{}, "GET:GetLastKnownVersions")
+	beego.Router("/enterservicemode", &controllers.CommandController{}, "GET:EnterServiceMode")
+	beego.Router("/exitservicemode", &controllers.CommandController{}, "GET:ExitServiceMode")
 
 	beego.Router("/getdevicelog", &controllers.LogController{}, "POST:GetDeviceLog")
 

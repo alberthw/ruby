@@ -59,7 +59,10 @@ func sendUploadImage(filepath string) error {
 		if curPos != pervPos {
 			log.Printf(" |%d| ", curPos)
 		}
-		sendMongooseCommand(v)
+		err := sendMongooseCommand(v)
+		if err != nil {
+			log.Printf("failed to upload the image line : %d, %s, error : %s\n", i, v, err.Error())
+		}
 		pervPos = curPos
 		time.Sleep(time.Millisecond * 1)
 
@@ -69,15 +72,12 @@ func sendUploadImage(filepath string) error {
 
 func BurnHostImage(filepath string, t models.FileType) error {
 	//	SendEnterSeviceMode()
-	time.Sleep(time.Millisecond * 5000)
+	//	time.Sleep(time.Millisecond * 5000)
 	sendImageUpload()
 	time.Sleep(time.Millisecond * 1000)
 	sendSelectHostImage(t)
 	time.Sleep(time.Millisecond * 1000)
-	err := sendUploadImage(filepath)
-	if err != nil {
-		return err
-	}
+	sendUploadImage(filepath)
 	time.Sleep(time.Millisecond * 5000)
 	sendImageUpdate()
 	time.Sleep(time.Millisecond * 1000)

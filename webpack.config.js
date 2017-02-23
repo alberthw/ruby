@@ -3,10 +3,10 @@ var node_modules_dir = path.join(__dirname, 'node_modules');
 
 var config = {
   entry: {
-    app: path.resolve(__dirname, 'static/src/main.jsx')
+    app: path.resolve(__dirname, 'js/main.jsx')
   },
   output: {
-    filename: 'bundle.js',
+    filename: 'ruby.js',
     path: path.resolve(__dirname, 'static/dist')
   },
   resolve: {
@@ -18,15 +18,11 @@ var config = {
   module: {
     rules: [
       {
-        test: /\.js|jsx$/,
-        include: path.resolve(__dirname, 'static/src'),
+        test: /\.jsx?$/,
         exclude: /node_modules/,
         use: [
           {
-            loader: "babel-loader",
-            options: {
-              compact: false
-            }
+            loader: "babel-loader"
           }
         ]
       }, {

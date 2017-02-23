@@ -378,12 +378,11 @@ func GetReleaseFiles(searchDate string, filter []int64, limit int64, offset int6
 	qs = qs.Limit(limit)
 	qs = qs.Offset(offset)
 
-	orderStr := "BuildNumber"
+	orderStr := "IsDownloaded"
 	if order != "descend" {
-		orderStr = "-BuildNumber"
+		orderStr = "-IsDownloaded"
 	}
-	qs = qs.OrderBy(orderStr)
-	qs = qs.OrderBy("-ID")
+	qs = qs.OrderBy(orderStr, "FileType")
 
 	qs.All(&result.Data)
 	return result, nil

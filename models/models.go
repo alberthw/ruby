@@ -9,8 +9,8 @@ import (
 )
 
 func init() {
-	//	initSqlite()
-	initPostgresql()
+	initSqlite()
+	//initPostgresql()
 	orm.RegisterModel(new(Rubyconfig), new(Command), new(Reposetting), new(Filerepo), new(Devicesystemconfig), new(Devicehardwareconfig), new(Devicesoftwareconfig), new(DeviceLog))
 	createTables()
 }

@@ -157,6 +157,15 @@ export default class Calibration extends React.Component {
                         </Row>
                         <Row>
                             <Col>
+                                <CommandCard
+                                    URL="/printcalibration"
+                                    Title="Print the  calibration data"
+                                    ButtonText="Print"
+                                    onResponse={this.handleResponse}/>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
                                 <SetCalibration onResponse={this.handleResponse}/>
                             </Col>
                         </Row>
@@ -167,7 +176,7 @@ export default class Calibration extends React.Component {
                                 type="textarea"
                                 value={this.state.result}
                                 autosize={{
-                                minRows: 20,
+                                minRows: 30,
                                 maxRows: 200
                             }}
                                 readOnly/>
